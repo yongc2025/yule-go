@@ -6,7 +6,9 @@ import (
 	"net/http"
 
 	"yule-go/config"
+	"yule-go/db"
 	"yule-go/middleware"
+	"yule-go/router"
 
 	"github.com/gin-gonic/gin"
 )
@@ -14,6 +16,9 @@ import (
 func main() {
 	// 加载配置
 	config.Load()
+
+	// 初始化数据库
+	db.Init()
 
 	// 设置 Gin 模式
 	gin.SetMode(config.C.Server.Mode)
@@ -44,6 +49,9 @@ func main() {
 			c.JSON(http.StatusOK, gin.H{"code": 0, "message": "pong"})
 		})
 
+		// 注册团期路由
+		router.RegisterScheduleRoutes(v1)
+
 		// 小程序端路由（需要 JWT 认证）
 		auth := v1.Group("")
 		auth.Use(middleware.JWTAuth())
@@ -56,7 +64,7 @@ func main() {
 		admin := v1.Group("/admin")
 		admin.Use(middleware.AdminAuth())
 		{
-			// 后续注册: /schedules, /orders, /customers, /routes 等
+			// 后续注册: /orders, /customers, /routes 等
 			_ = admin
 		}
 	}

@@ -130,6 +130,13 @@ HTTP Request
 | src/server/middleware/auth.go | JWT 认证中间件 + 管理员认证占位 |
 | src/server/middleware/logger.go | 请求日志中间件（IP、方法、路径、状态码、耗时） |
 | src/server/pkg/response/response.go | 统一响应格式：Success/Error/Page/Unauthorized 等 |
+| src/server/db/db.go | 数据库初始化：GORM 连接 MySQL，连接池配置 |
+| src/server/model/schedule.go | 团期 Model：Schedule 结构体、状态机常量、请求/响应结构体 |
+| src/server/model/route.go | 线路 Model：Route 结构体 |
+| src/server/repository/schedule.go | 团期 Repository：GORM CRUD、按周查询、去重校验 |
+| src/server/service/schedule.go | 团期 Service：创建/编辑/取消、日期校验（周六/周日）、去重校验、状态自动计算 |
+| src/server/handler/schedule.go | 团期 Handler：6 个 API 接口（CRUD + 按周查询） |
+| src/server/router/schedule.go | 团期路由注册：admin 路由 + 小程序端路由 |
 | migrations/001_init.sql | 数据库初始化：9 张表 + 初始数据 |
 
 <!-- 每创建一个新文件，在此追加记录 -->
