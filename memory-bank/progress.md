@@ -10,7 +10,7 @@
 | Phase | 名称 | 状态 |
 |:---|:---|:---|
 | 0 | 基建准备 | ✅ 已完成 |
-| 1 | 团期管理 | 🟡 待开始 |
+| 1 | 团期管理 | 🔵 进行中（后端 ✅，前端待开发） |
 | 2 | 用户预约 | 🟡 待开始 |
 | 3 | 会员充值 | 🟡 待开始 |
 | 4 | 装备租赁 | 🟡 待开始 |
@@ -68,6 +68,27 @@
   - GET /api/v1/admin/schedules/:id — 团期详情
   - GET /api/v1/admin/schedules — 团期列表（分页）
   - GET /api/v1/schedules?week=xxx — 按周查询（小程序端）
+
+### 2026-05-05 — Phase 1 / Step 1.1 ✅ 团期管理后端 API 验证通过
+- 做了什么：
+  - 安装 Go 1.22.4 + MySQL 8.0，初始化 yule 数据库 + 9 张表
+  - `go mod tidy && go build` 编译通过（33MB binary）
+  - 启动服务，执行 6 个验收测试用例 + 3 个补充测试
+- 验证结果（9/9 全部通过）：
+  - TC-001 ✅ POST 创建团期 → 200 + 团期详情
+  - TC-002 ✅ PUT 编辑团期 → 200 + 更新后数据（max_slots/guide_name/guide_phone）
+  - TC-003 ✅ PUT 取消团期 → 200
+  - TC-004 ✅ GET 按周查询 → 200 + 团期列表（route_name 关联正确）
+  - TC-005 ✅ 名额1团期创建成功（名额满标记需下单时触发，属 Task 0002 范围）
+  - TC-006 ✅ 重复去重 → 40000 "该线路该日期已有团期"
+  - 补充 ✅ 团期详情查询正常
+  - 补充 ✅ 分页列表正常（total=3，关联线路名正确显示）
+  - 补充 ✅ 非周末日期校验 → 40000 "团期日期只能是周六或周日"
+- 踩坑：
+  - apt 默认源 mirrors.cloud.aliyuncs.com 不可达，需切换到 archive.ubuntu.com
+  - MySQL root 用户需 ALTER USER 改用 mysql_native_password 认证
+  - go run 需显式 export PATH 包含 /usr/local/go/bin
+- 结论：团期管理后端 API 全部验收标准（AC-01~AC-06）通过，Task 0001 后端部分完成
 <!-- 格式示例：
 ### 2026-05-05 — Phase 0 / Step 0.1 ✅
 - 做了什么：创建 Go 项目骨架，初始化 go mod

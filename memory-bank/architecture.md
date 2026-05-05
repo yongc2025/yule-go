@@ -138,5 +138,6 @@ HTTP Request
 | src/server/handler/schedule.go | 团期 Handler：6 个 API 接口（CRUD + 按周查询） |
 | src/server/router/schedule.go | 团期路由注册：admin 路由 + 小程序端路由 |
 | migrations/001_init.sql | 数据库初始化：9 张表 + 初始数据 |
+| assets/logos/ | 品牌 Logo 资源（App/小程序/管理端/宣传用，SVG 源 + 多尺寸 PNG） |
 
 <!-- 每创建一个新文件，在此追加记录 -->
