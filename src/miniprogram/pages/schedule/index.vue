@@ -123,10 +123,20 @@ function goCurrentWeek() {
 }
 
 function handleBook(schedule) {
-  // TODO: 跳转到预约页面（Task 0002 实现）
-  uni.showToast({
-    title: `报名: ${schedule.route_name}`,
-    icon: 'none'
+  // 缓存团期数据供预约页使用
+  uni.setStorageSync('bookingSchedule', {
+    id: schedule.id,
+    route_name: schedule.route_name,
+    route_price: schedule.route_price || 128,
+    child_price: schedule.child_price || 0,
+    route_type: schedule.route_type || 'fishing',
+    trip_date: schedule.trip_date,
+    remaining_slots: schedule.remaining_slots,
+    guide_name: schedule.guide_name,
+    guide_phone: schedule.guide_phone
+  })
+  uni.navigateTo({
+    url: `/pages/booking/index?id=${schedule.id}`
   })
 }
 

@@ -11,7 +11,7 @@
 |:---|:---|:---|
 | 0 | 基建准备 | ✅ 已完成 |
 | 1 | 团期管理 | ✅ 已完成（后端 + 管理端 + 小程序端） |
-| 2 | 用户预约 | 🟡 待开始 |
+| 2 | 用户预约 | 🔵 进行中（后端 + 前端完成，待微信支付接入） |
 | 3 | 会员充值 | 🟡 待开始 |
 | 4 | 装备租赁 | 🟡 待开始 |
 | 5 | 老带新裂变 | 🟡 待开始 |
@@ -157,4 +157,37 @@
   - `components/ScheduleCard.vue` — 团期卡片组件
   - `utils/date.js` — 日期工具
 - 验证：代码结构完整，待本地 `npm install && npm run dev:mp-weixin` 编译验证
+- 踩坑：无
+
+### 2026-05-06 — Phase 2 / Step 2.1~2.4 ✅ 用户预约 — 后端 + 小程序前端
+- 做了什么：
+  - **后端 Model**：
+    - `model/order.go` — Order 模型 + 状态机（待支付/已确认/已出行/已完成/已取消/已退款）+ 请求/响应结构体
+    - `model/order_rental.go` — OrderRental 租赁明细模型
+    - `model/rental_item.go` — RentalItem 装备租赁项模型
+    - `model/user.go` — User 用户模型 + 会员折扣率（普通/银卡95折/金卡9折/钻石85折）
+  - **后端 Repository**：
+    - `repository/order.go` — 订单 CRUD + 事务创建（含租赁明细）+ 超时取消
+    - `repository/user.go` — 用户 CRUD
+  - **后端 Service**：
+    - `service/order.go` — 核心业务逻辑：
+      - 价格计算（团费×人数 + 租赁费 - 会员折扣 - 余额抵扣）
+      - 名额锁定（校验团期状态、剩余名额、重复下单）
+      - 支付回调（幂等处理）
+      - 超时自动取消（15 分钟）
+  - **后端 Handler + Router**：
+    - `handler/order.go` — 订单接口（创建/详情/列表/取消/支付回调/管理后台）
+    - `handler/rental.go` — 租赁项列表
+    - `handler/route.go` — 线路列表/详情
+    - `router/order.go` — 订单路由（小程序端 + 管理后台 + 支付回调）
+    - `router/route.go` — 线路路由
+    - `main.go` 更新 — 集成全部新路由
+  - **小程序前端**：
+    - `pages/booking/index.vue` — 预约页面（人数选择、租赁勾选、联系信息、余额抵扣、实时费用计算）
+    - `pages/order/list.vue` — 订单列表（状态筛选、分页加载、下拉刷新）
+    - `pages/order/detail.vue` — 订单详情（状态展示、费用明细、取消/支付）
+    - `api/order.js` — 订单 + 租赁项 + 线路 API
+  - **团期响应增强**：ScheduleResponse 新增 route_price/child_price/route_type 字段
+- 新增文件：11 个后端文件 + 4 个前端文件
+- 验证：代码结构完整，待本地编译验证
 - 踩坑：无

@@ -158,5 +158,21 @@ HTTP Request
 | src/miniprogram/utils/date.js | 日期工具：ISO 周计算、偏移、中文格式化 |
 | src/miniprogram/uni.scss | 全局 SCSS 变量 |
 | src/miniprogram/vite.config.js | Vite 构建配置（uni 插件） |
+| src/server/model/order.go | 订单 Model：Order 结构体、状态机、请求/响应结构体 |
+| src/server/model/order_rental.go | 订单租赁明细 Model：OrderRental 结构体 |
+| src/server/model/rental_item.go | 装备租赁项 Model：RentalItem 结构体 |
+| src/server/model/user.go | 用户 Model：User 结构体、会员折扣率 |
+| src/server/repository/order.go | 订单 Repository：事务创建、查询、超时取消 |
+| src/server/repository/user.go | 用户 Repository：CRUD |
+| src/server/service/order.go | 订单 Service：价格计算、名额锁定、支付回调、超时取消 |
+| src/server/handler/order.go | 订单 Handler：创建/详情/列表/取消/支付回调/管理后台 |
+| src/server/handler/rental.go | 租赁项 Handler：列表 |
+| src/server/handler/route.go | 线路 Handler：列表/详情 |
+| src/server/router/order.go | 订单路由：小程序端 + 管理后台 + 支付回调 |
+| src/server/router/route.go | 线路路由 |
+| src/miniprogram/api/order.js | 订单 + 租赁项 + 线路 API |
+| src/miniprogram/pages/booking/index.vue | 预约页面：人数选择、租赁勾选、联系信息、余额抵扣 |
+| src/miniprogram/pages/order/list.vue | 订单列表：状态筛选、分页加载、下拉刷新 |
+| src/miniprogram/pages/order/detail.vue | 订单详情：状态展示、费用明细、取消/支付 |
 
 <!-- 每创建一个新文件，在此追加记录 -->

@@ -49,23 +49,24 @@ func main() {
 			c.JSON(http.StatusOK, gin.H{"code": 0, "message": "pong"})
 		})
 
-		// 注册团期路由
+		// 公开路由（不需要认证）
 		router.RegisterScheduleRoutes(v1)
+		router.RegisterRentalRoutes(v1)
+		router.RegisterPaymentRoutes(v1)
+		router.RegisterRouteRoutes(v1)
 
 		// 小程序端路由（需要 JWT 认证）
 		auth := v1.Group("")
 		auth.Use(middleware.JWTAuth())
 		{
-			// 后续注册: /user, /orders, /member, /referral 等
-			_ = auth
+			router.RegisterOrderRoutes(auth)
 		}
 
 		// 管理后台路由（需要管理员认证）
 		admin := v1.Group("/admin")
 		admin.Use(middleware.AdminAuth())
 		{
-			// 后续注册: /orders, /customers, /routes 等
-			_ = admin
+			router.RegisterAdminOrderRoutes(admin)
 		}
 	}
 

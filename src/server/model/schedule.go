@@ -83,6 +83,9 @@ type ScheduleResponse struct {
 	ID             uint64         `json:"id"`
 	RouteID        uint64         `json:"route_id"`
 	RouteName      string         `json:"route_name"`
+	RoutePrice     float64        `json:"route_price"`
+	ChildPrice     float64        `json:"child_price"`
+	RouteType      string         `json:"route_type"`
 	TripDate       string         `json:"trip_date"`
 	MaxSlots       uint           `json:"max_slots"`
 	BookedSlots    uint           `json:"booked_slots"`
@@ -113,6 +116,9 @@ func (s *Schedule) ToResponse() ScheduleResponse {
 	}
 	if s.Route.ID > 0 {
 		resp.RouteName = s.Route.Name
+		resp.RoutePrice = s.Route.Price
+		resp.ChildPrice = s.Route.ChildPrice
+		resp.RouteType = s.Route.Type
 	}
 	return resp
 }
