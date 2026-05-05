@@ -15,6 +15,10 @@
         active-text-color="#409eff"
         class="sidebar-menu"
       >
+        <el-menu-item index="/dashboard">
+          <el-icon><HomeFilled /></el-icon>
+          <template #title>首页</template>
+        </el-menu-item>
         <el-menu-item index="/schedules">
           <el-icon><Calendar /></el-icon>
           <template #title>团期管理</template>
@@ -53,6 +57,7 @@
         </div>
         <div class="header-right">
           <span class="admin-name">管理员</span>
+          <el-button type="text" @click="handleLogout" style="margin-left: 16px">退出</el-button>
         </div>
       </el-header>
       <el-main class="main-content">
@@ -64,8 +69,16 @@
 
 <script setup>
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
 const isCollapse = ref(false)
+
+function handleLogout() {
+  localStorage.removeItem('admin_token')
+  localStorage.removeItem('admin_info')
+  router.push('/login')
+}
 </script>
 
 <style scoped>

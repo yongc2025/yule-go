@@ -67,10 +67,19 @@ func main() {
 
 		// 管理后台路由（需要管理员认证）
 		admin := v1.Group("/admin")
-		admin.Use(middleware.AdminAuth())
 		{
-			router.RegisterAdminOrderRoutes(admin)
-			router.RegisterAdminRentalRoutes(admin)
+			// 管理员认证（不需要认证）
+			router.RegisterAdminAuthRoutes(admin)
+		}
+		adminAuth := v1.Group("/admin")
+		adminAuth.Use(middleware.AdminAuth())
+		{
+			router.RegisterAdminOrderRoutes(adminAuth)
+			router.RegisterAdminRentalRoutes(adminAuth)
+			router.RegisterAdminDashboardRoutes(adminAuth)
+			router.RegisterAdminCustomerRoutes(adminAuth)
+			router.RegisterAdminRouteRoutes(adminAuth)
+			router.RegisterAdminFinanceRoutes(adminAuth)
 		}
 	}
 
