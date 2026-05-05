@@ -1,0 +1,13 @@
+{
+  "run_id": "2026-05-05T21-29-00+0800",
+  "step": "step0",
+  "status": "pending",
+  "phase": "phase-0-基建准备",
+  "current_task": "0001-团期管理",
+  "payload_path": null,
+  "next_hint": "先完成阶段 0 基建准备（Go 项目骨架 + 数据库迁移 + 配置管理 + 中间件），然后进入 Phase 1 团期管理",
+  "verify": null,
+  "target_step": null,
+  "retry_count": 0,
+  "history": []
+}

@@ -1,137 +1,195 @@
-# AGENTS.md — yule-go 项目 Agent 行为准则
+# AGENTS.md — yule-go Agent 行为准则
 
-## 1. 项目概述
+本文件为 AI Agent 提供项目操作手册与约束清单，确保 Agent 行为可控、可复现。
 
-**yule-go** 是"渔乐"项目的数字化运营系统，服务于以渔具店为载体的周末短途旅行业务。
+---
 
-- **业务模式：** 渔具零售 + 周末组团短途旅行（双盈利模式）
-- **目标客群：** 垂钓爱好者（25-60 岁）、亲子家庭（28-45 岁）、退休中老年（55+）
-- **核心产品：** 成人垂钓团 / 垂钓露营团 / 亲子出游团 / 退休慢游团
-- **增值服务：** 会员充值锁客、装备租赁、老带新裂变
+## 0. 会话恢复入口（Session Startup）
 
-## 2. 技术栈
+**每次新会话，必须按以下顺序读取文件，恢复上下文后才能执行任何任务：**
 
-| 层级 | 技术选型 | 说明 |
+```
+1. AGENTS.md              ← 你正在读的这个文件（行为准则）
+2. memory-bank/progress.md ← 当前进度：哪些步骤已完成、哪些进行中
+3. memory-bank/architecture.md ← 架构全貌：每个文件的职责
+4. tasks/INDEX.md          ← 任务看板：6 大模块的全局状态
+5. 定位到当前任务目录 tasks/000X/ → 读取 STATUS.md + TODO.md
+```
+
+**Always 规则（写任何代码前必须执行）：**
+```
+# 写任何代码前必须完整阅读 memory-bank/architecture.md（包含完整数据库结构和文件职责）
+# 写任何代码前必须完整阅读 memory-bank/requirements.md（包含完整需求规格）
+# 每完成一个重大功能或里程碑后，必须更新 memory-bank/architecture.md 和 memory-bank/progress.md
+```
+
+---
+
+## 1. Mission & Scope（目标与边界）
+
+### 项目定位
+渔具店周末短途旅行数字化运营系统（Go + Vue3 + uni-app + MySQL + Redis）
+
+### 允许的操作
+- 读取、修改 `src/` 下的所有源代码
+- 读取、修改 `docs/`、`tasks/`、`memory-bank/` 下的文档
+- 执行 `make build`、`make test`、`make run`
+- 创建/修改 `migrations/` 下的数据库迁移脚本
+- 创建/修改 `scripts/` 下的工具脚本
+- 提交符合规范的 commit
+
+### 禁止的操作
+- 修改 `AGENTS.md` 的核心规则（除非人工明确要求）
+- 删除或覆盖已归档的 task 目录
+- 在代码中硬编码密钥、Token 或敏感凭证
+- 未经确认的大范围重构
+- 修改 `.env` 文件中的生产环境配置
+
+### 敏感区域（禁止自动修改）
+- `.env*` — 环境变量
+- `docker/` 中的生产配置
+- 已完成并归档的 `tasks/` 目录
+
+---
+
+## 2. Memory Bank 规范（记忆银行）
+
+### 目录结构
+```
+memory-bank/
+├── requirements.md        # 需求规格书（= game-design-document.md）
+├── tech-stack.md          # 技术栈说明
+├── implementation-plan.md # 实施计划（从 tasks/ 汇总的全局路线图）
+├── progress.md            # 进度日志（每完成一步必须更新）
+└── architecture.md        # 架构说明（每个文件的职责，里程碑后必须更新）
+```
+
+### 更新规则
+| 触发时机 | 必须更新的文件 |
+|:---|:---|
+| 完成一个实施步骤 | `progress.md`（记录做了什么） |
+| 完成一个里程碑 | `architecture.md`（记录新文件的职责） |
+| 需求变更 | `requirements.md` + 对应 `tasks/000X/CONTEXT.md` |
+| 技术决策变更 | `tech-stack.md` + `architecture.md` |
+| 任务状态变更 | `tasks/000X/STATUS.md` + `tasks/INDEX.md` |
+
+---
+
+## 3. Golden Path（推荐执行路径）
+
+```bash
+# 1. 恢复上下文（读 memory-bank + tasks/INDEX.md）
+
+# 2. 定位当前任务
+cat tasks/INDEX.md          # 找到第一个"进行中"或"待开始"的任务
+cat tasks/000X/STATUS.md    # 确认当前步骤
+
+# 3. 执行实施计划的下一步
+
+# 4. 验证
+make test
+
+# 5. 更新进度
+# 更新 tasks/000X/STATUS.md
+# 更新 memory-bank/progress.md
+
+# 6. 提交
+git add -A
+git commit -m "feat|fix|docs|chore: scope - summary"
+```
+
+---
+
+## 4. 分层架构约束
+
+```
+Handler（入参校验 + 响应封装）
+    ↓ 调用
+Service（业务逻辑 + 事务管理）
+    ↓ 调用
+Repository（数据库 CRUD + SQL 构建）
+    ↓ 依赖
+Model（数据结构定义 + GORM 标签）
+```
+
+**规则：**
+- 上层可以调用下层，下层不能反向依赖上层
+- Handler 不允许直接操作数据库
+- Service 不允许直接操作 HTTP 请求/响应
+- Repository 不允许包含业务逻辑
+- 每个函数单一职责，不超过 50 行
+
+---
+
+## 5. 代码规范
+
+### Go
+- 遵循 Go 官方风格指南（`gofmt` + `golangci-lint`）
+- 错误处理：不吞错误，返回 `fmt.Errorf("xxx: %w", err)`
+- 日志：使用 `slog` 或 `zap`，结构化日志
+- 配置：环境变量 > 配置文件 > 默认值
+- 测试：核心 Service 层必须有单元测试
+
+### 前端（Vue3）
+- 组合式 API（`<script setup>`）
+- TypeScript 优先
+- 组件不超过 300 行
+
+---
+
+## 6. 任务管理规范
+
+### 任务目录结构
+```
+tasks/000X-任务名/
+├── CONTEXT.md   # 需求上下文（用户故事 + 验收标准 + 约束）
+├── PLAN.md      # 执行计划（分阶段、可验证）
+├── TODO.md      # 待办清单（逐项打勾）
+└── STATUS.md    # 状态记录（当前步骤 + 失败原因 + 重试次数）
+```
+
+### 状态流转
+```
+🟡 待开始 → 🔵 进行中 → ✅ 已完成
+                  ↓ 失败
+              ❌ 失败（重规划）→ 🔵 进行中
+                  ↓ 连续 3 次失败
+              🔴 致命错误（需人工介入）
+```
+
+---
+
+## 7. Commit 规范
+
+```
+feat|fix|docs|chore|refactor: scope - summary
+```
+
+示例：
+- `feat: schedule - add CRUD API`
+- `fix: order - correct amount calculation`
+- `docs: memory-bank - update progress after task 0001`
+
+---
+
+## 8. 常见坑与修复
+
+| 问题 | 原因 | 修复 |
 |:---|:---|:---|
-| 小程序前端 | uni-app (Vue3 + TypeScript) | 微信小程序，一套代码多端发布 |
-| 管理后台 | Vue3 + Element Plus + TypeScript | PC 端管理后台 |
-| 后端 API | Go (Gin 框架) | 高性能，适合轻量级服务 |
-| 数据库 | MySQL 8.0 + GORM | 关系型数据，ORM 简化开发 |
-| 缓存 | Redis | 会话、热点数据、分布式锁 |
-| 支付 | 微信支付 V3 | 小程序原生支持 |
-| 文件存储 | 阿里云 OSS / 腾讯云 COS | 图片、视频存储 |
-| 部署 | Docker + Docker Compose | 容器化部署 |
-| CI/CD | GitHub Actions | 自动化测试与部署 |
+| AI 忘记之前的上下文 | 会话丢失 | 严格执行"会话恢复入口"流程 |
+| 代码分层混乱 | Handler 直接操作 DB | 对照分层架构约束审查 |
+| 需求理解偏差 | 没读 requirements.md | Always 规则：写代码前必须读 memory-bank |
+| 进度不同步 | 忘记更新 progress.md | 每个步骤完成后强制更新 |
+| 重复团期创建 | 缺少唯一约束 | `UNIQUE KEY uk_route_date (route_id, trip_date)` |
 
-## 3. 架构约束
+---
 
-### 3.1 必须遵守
-- **接口先行，实现后补：** 先定义 API 接口文档，再写代码
-- **先结构后代码：** 先设计数据库表结构和目录结构，再实现业务逻辑
-- **单一职责：** 每个文件、每个函数只做一件事
-- **胶水编程原则：** 能用成熟库就不自己写，AI 只写连接层
-- **文档即上下文：** 所有决策、设计、变更必须记录在 docs/ 中
+## 9. 文档同步规则
 
-### 3.2 严禁操作
-- 不在代码中硬编码密钥、Token 或敏感凭证
-- 不修改已有的数据库迁移文件，总是创建新的
-- 不引入未经验证的第三方库（先评估再使用）
-- 不跳过错误处理（每个外部调用都必须有错误处理）
-- 不在没有测试的情况下合并代码
+**任何功能/命令/配置/目录变化必须同步更新：**
+- `memory-bank/architecture.md` — 文件职责变更
+- `memory-bank/progress.md` — 进度变更
+- `tasks/000X/STATUS.md` — 任务状态变更
+- `tasks/INDEX.md` — 全局看板变更
 
-### 3.3 敏感区域
-- `.env*` 文件 — 环境变量，不提交到 Git
-- `config/production.*` — 生产环境配置
-- 数据库迁移脚本 — 只增不改
-
-## 4. 目录结构
-
-```
-yule-go/
-├── AGENTS.md               # 本文件（Agent 行为准则）
-├── README.md               # 项目说明
-├── Makefile                # 自动化脚本
-├── docs/                   # 文档库（单一真相源）
-│   ├── requirements.md     # 需求文档
-│   ├── architecture.md     # 技术架构
-│   ├── database.md         # 数据库设计
-│   └── api.md              # API 接口定义
-├── tasks/                  # 任务管理
-│   ├── INDEX.md            # 任务索引
-│   └── 0001-xxx/           # 单个任务目录
-├── workflow/               # 工作流
-│   ├── auto-dev-loop/      # 全自动开发闭环
-│   └── canvas-dev/         # 白板驱动开发
-├── memory/                 # 记忆库
-│   └── lessons.md          # 踩坑记录
-├── src/                    # 源码
-│   ├── server/             # Go 后端
-│   ├── web/                # 管理后台前端
-│   ├── miniprogram/        # 小程序前端
-│   └── shared/             # 共享类型定义
-├── migrations/             # 数据库迁移
-├── scripts/                # 脚本工具
-├── docker/                 # Docker 配置
-└── tests/                  # 测试代码
-```
-
-## 5. 编码规范
-
-### 5.1 命名规范
-- Go：遵循 Go 官方规范（驼峰命名，首字母大小表可见性）
-- Vue/TS：组件 PascalCase，函数 camelCase，常量 UPPER_SNAKE_CASE
-- 数据库：表名复数蛇形（如 `users`、`schedules`），字段蛇形（如 `created_at`）
-- API：RESTful 风格，路径 kebab-case（如 `/api/v1/schedules`）
-
-### 5.2 Git 规范
-- 分支：`main`（生产）、`develop`（开发）、`feature/xxx`（功能）
-- 提交：`feat|fix|docs|chore|refactor: scope - summary`
-- PR：必须通过 lint 和测试才能合并
-
-### 5.3 错误处理
-- API 统一返回格式：`{ code, message, data }`
-- 所有外部调用必须有超时和重试机制
-- 数据库操作必须有事务保护（涉及多表写入时）
-
-## 6. 业务规则摘要
-
-### 6.1 团期管理
-- 每周六、周日固定发团
-- 每团最大人数由线路决定
-- 支持提前 24 小时免费取消
-
-### 6.2 会员体系
-- 三档充值：200 元（9.5 折）、500 元（9 折）、1000 元（8.5 折）
-- 余额可用于抵扣团费和购买渔具
-- 会员等级永久有效（不降级）
-
-### 6.3 装备租赁
-- 鱼竿 30 元/套、帐篷 50 元/顶、天幕 40 元/个、桌椅 25 元/套
-- 租赁费用随订单一起支付
-- 损坏照价赔偿
-
-### 6.4 老带新裂变
-- 老客户分享邀请码，新客户首单立减 15 元
-- 新客户下单后，老客户返现 20 元到余额
-- 每个新客户只能被邀请一次
-
-## 7. 开发工作流
-
-采用 Vibe Coding 工作流：
-
-1. **需求输入** → 使用 Step1 规格锁定 Agent，生成《锁定规格书》
-2. **执行计划** → 使用 Step2 计划编排 Agent，生成执行计划
-3. **实施变更** → 使用 Step3 实施变更 Agent，生成代码
-4. **验证发布** → 使用 Step4 验证发布 Agent，测试通过
-5. **总控循环** → 使用 Step5 总控 Agent，失败回跳，成功归档
-
-每个功能模块对应一个 task 目录，包含完整的 CONTEXT → PLAN → TODO → ACCEPTANCE 链路。
-
-## 8. 质量门禁
-
-- [ ] 代码通过 lint 检查
-- [ ] 单元测试覆盖率 > 70%
-- [ ] API 接口有文档
-- [ ] 数据库变更有迁移脚本
-- [ ] 关键决策有文档记录
-- [ ] 无硬编码密钥
+**不确定的内容用 TODO 标注，不允许猜测。**
