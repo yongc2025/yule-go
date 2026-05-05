@@ -33,7 +33,7 @@ const routes = [
       {
         path: 'rentals',
         name: 'RentalList',
-        component: () => import('../views/Placeholder.vue'),
+        component: () => import('../views/rental/RentalList.vue'),
         meta: { title: '装备管理' }
       },
       {

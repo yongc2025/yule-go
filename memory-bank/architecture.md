@@ -174,5 +174,13 @@ HTTP Request
 | src/miniprogram/pages/booking/index.vue | 预约页面：人数选择、租赁勾选、联系信息、余额抵扣 |
 | src/miniprogram/pages/order/list.vue | 订单列表：状态筛选、分页加载、下拉刷新 |
 | src/miniprogram/pages/order/detail.vue | 订单详情：状态展示、费用明细、取消/支付 |
+| src/server/model/recharge.go | 充值 Model：Recharge 结构体 + 充值方案配置 + 会员信息响应 |
+| src/server/repository/recharge.go | 充值 Repository：创建、查询、分页 |
+| src/server/service/member.go | 会员 Service：充值方案、创建充值、回调（余额+等级）、记录查询 |
+| src/server/handler/member.go | 会员 Handler：充值方案、会员信息、发起充值、记录 |
+| src/server/router/member.go | 会员路由：小程序端 + 充值回调 |
+| src/miniprogram/api/member.js | 会员 API |
+| src/miniprogram/pages/member/index.vue | 会员中心：等级卡片、余额、权益、充值方案 |
+| src/miniprogram/pages/member/recharge-records.vue | 充值记录：列表 + 下拉刷新 |
 
 <!-- 每创建一个新文件，在此追加记录 -->

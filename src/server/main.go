@@ -69,6 +69,7 @@ func main() {
 		admin.Use(middleware.AdminAuth())
 		{
 			router.RegisterAdminOrderRoutes(admin)
+			router.RegisterAdminRentalRoutes(admin)
 		}
 	}
 
