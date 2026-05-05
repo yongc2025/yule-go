@@ -10,7 +10,7 @@
 | Phase | 名称 | 状态 |
 |:---|:---|:---|
 | 0 | 基建准备 | ✅ 已完成 |
-| 1 | 团期管理 | 🔵 进行中（后端 ✅，前端待开发） |
+| 1 | 团期管理 | 🔵 进行中（后端 ✅，管理后台前端 ✅，小程序前端待开发） |
 | 2 | 用户预约 | 🟡 待开始 |
 | 3 | 会员充值 | 🟡 待开始 |
 | 4 | 装备租赁 | 🟡 待开始 |
@@ -89,6 +89,35 @@
   - MySQL root 用户需 ALTER USER 改用 mysql_native_password 认证
   - go run 需显式 export PATH 包含 /usr/local/go/bin
 - 结论：团期管理后端 API 全部验收标准（AC-01~AC-06）通过，Task 0001 后端部分完成
+
+### 2026-05-05 — Phase 1 / Step 1.2 ✅ 团期管理 — 管理后台前端
+- 做了什么：
+  - 创建 src/web/ 项目（Vite + Vue3）
+  - 安装依赖：Element Plus + Vue Router 4 + Pinia + Axios
+  - 实现管理后台布局：侧边栏导航 + 面包屑 + 主内容区
+  - 实现团期管理页面（ScheduleList.vue）：
+    - 团期列表表格（ID、线路、日期、名额、领队、状态）
+    - 状态筛选
+    - 分页
+    - 创建团期对话框（表单校验）
+    - 编辑团期对话框
+    - 取消团期确认
+    - 团期详情查看
+  - 实现 API 层：axios 封装 + 请求/响应拦截 + 团期 API 模块
+  - 配置 Vite 代理（/api → localhost:8080）
+  - 复制 Logo 资源到 public/
+- 验证：`npx vite build` 编译通过
+- 文件清单：
+  - src/web/src/main.js — 入口（Element Plus + Router + Pinia）
+  - src/web/src/App.vue — 根组件
+  - src/web/src/router/index.js — 路由配置（6 个页面）
+  - src/web/src/api/index.js — axios 封装
+  - src/web/src/api/schedule.js — 团期 API
+  - src/web/src/layouts/AdminLayout.vue — 管理后台布局
+  - src/web/src/views/schedule/ScheduleList.vue — 团期管理页
+  - src/web/src/views/Placeholder.vue — 占位页
+  - src/web/vite.config.js — Vite 配置（含代理）
+- 踩坑：无
 <!-- 格式示例：
 ### 2026-05-05 — Phase 0 / Step 0.1 ✅
 - 做了什么：创建 Go 项目骨架，初始化 go mod

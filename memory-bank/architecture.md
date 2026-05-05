@@ -139,5 +139,12 @@ HTTP Request
 | src/server/router/schedule.go | 团期路由注册：admin 路由 + 小程序端路由 |
 | migrations/001_init.sql | 数据库初始化：9 张表 + 初始数据 |
 | assets/logos/ | 品牌 Logo 资源（App/小程序/管理端/宣传用，SVG 源 + 多尺寸 PNG） |
+| src/web/ | 管理后台前端（Vue3 + Element Plus + Vite） |
+| src/web/src/main.js | 前端入口：Element Plus + Router + Pinia |
+| src/web/src/router/index.js | 路由配置：团期/订单/客户/线路/装备/财务 |
+| src/web/src/api/index.js | axios 封装：拦截器 + 统一错误处理 |
+| src/web/src/api/schedule.js | 团期 API：CRUD + 按周查询 |
+| src/web/src/layouts/AdminLayout.vue | 管理后台布局：侧边栏 + 面包屑 |
+| src/web/src/views/schedule/ScheduleList.vue | 团期管理页：列表 + 筛选 + 创建/编辑/取消/详情 |
 
 <!-- 每创建一个新文件，在此追加记录 -->
