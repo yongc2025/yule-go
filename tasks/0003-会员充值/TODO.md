@@ -1,19 +1,21 @@
 # TODO — 0003 会员充值
 
-## 后端
+## 后端 ✅
 
-- [ ] recharges 表迁移脚本
-- [ ] Recharge Model + Repository
-- [ ] 充值方案配置
-- [ ] 充值下单 Service
-- [ ] 充值回调 Service（余额+等级更新）
-- [ ] 折扣计算工具函数
-- [ ] 充值记录查询 API
-- [ ] 单元测试
+- [x] Recharge Model + 充值方案配置（`model/recharge.go`）
+- [x] RechargeRepository（`repository/recharge.go`）
+- [x] 充值方案列表 API
+- [x] 会员信息查询 API
+- [x] 创建充值订单 Service
+- [x] 充值回调 Service（余额 + 等级更新）
+- [x] 充值记录查询 API
+- [x] Handler + Router + main.go 集成
+- [ ] 微信支付接入
 
-## 小程序前端
+## 小程序前端 ✅
 
-- [ ] 会员中心页面
-- [ ] 充值方案选择页
-- [ ] 充值支付
-- [ ] 充值记录页
+- [x] 会员中心页面（等级卡片、余额、权益、充值入口）
+- [x] 充值方案选择 + 确认
+- [x] 充值记录页
+- [x] 会员 API 封装
+- [ ] 微信支付调用

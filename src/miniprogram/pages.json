@@ -25,6 +25,19 @@
       "style": {
         "navigationBarTitleText": "订单详情"
       }
+    },
+    {
+      "path": "pages/member/index",
+      "style": {
+        "navigationBarTitleText": "会员中心"
+      }
+    },
+    {
+      "path": "pages/member/recharge-records",
+      "style": {
+        "navigationBarTitleText": "充值记录",
+        "enablePullDownRefresh": true
+      }
     }
   ],
   "globalStyle": {
@@ -50,6 +63,12 @@
         "text": "订单",
         "iconPath": "static/tab-order.png",
         "selectedIconPath": "static/tab-order-active.png"
+      },
+      {
+        "pagePath": "pages/member/index",
+        "text": "我的",
+        "iconPath": "static/tab-member.png",
+        "selectedIconPath": "static/tab-member-active.png"
       }
     ]
   }

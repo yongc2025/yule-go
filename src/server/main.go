@@ -54,12 +54,14 @@ func main() {
 		router.RegisterRentalRoutes(v1)
 		router.RegisterPaymentRoutes(v1)
 		router.RegisterRouteRoutes(v1)
+		router.RegisterMemberCallbackRoutes(v1)
 
 		// 小程序端路由（需要 JWT 认证）
 		auth := v1.Group("")
 		auth.Use(middleware.JWTAuth())
 		{
 			router.RegisterOrderRoutes(auth)
+			router.RegisterMemberRoutes(auth)
 		}
 
 		// 管理后台路由（需要管理员认证）
