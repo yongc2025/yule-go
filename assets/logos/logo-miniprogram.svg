@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1565c0"/>
+      <stop offset="100%" style="stop-color:#0d47a1"/>
+    </linearGradient>
+    <linearGradient id="water2" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#4fc3f7"/>
+      <stop offset="100%" style="stop-color:#29b6f6"/>
+    </linearGradient>
+    <clipPath id="rounded">
+      <rect x="0" y="0" width="512" height="512" rx="100" ry="100"/>
+    </clipPath>
+  </defs>
+  <g clip-path="url(#rounded)">
+    <!-- Background -->
+    <rect width="512" height="512" fill="url(#bg2)"/>
+    <!-- Sun -->
+    <circle cx="256" cy="140" r="55" fill="#ffca28"/>
+    <g opacity="0.5" stroke="#ffca28" stroke-width="4" stroke-linecap="round">
+      <line x1="256" y1="60" x2="256" y2="45"/>
+      <line x1="256" y1="220" x2="256" y2="235"/>
+      <line x1="176" y1="140" x2="161" y2="140"/>
+      <line x1="336" y1="140" x2="351" y2="140"/>
+    </g>
+    <!-- Mountains -->
+    <polygon points="80,310 200,180 320,310" fill="#2e7d32" opacity="0.85"/>
+    <polygon points="190,310 320,200 450,310" fill="#388e3c" opacity="0.75"/>
+    <!-- Water -->
+    <path d="M0,330 Q80,305 160,330 Q240,355 320,330 Q400,305 480,330 L512,330 L512,420 Q350,400 256,420 Q130,400 0,420 Z" fill="url(#water2)" opacity="0.8"/>
+    <path d="M0,370 Q120,350 256,370 Q400,350 512,370 L512,450 Q350,430 256,450 Q130,430 0,450 Z" fill="#0288d1" opacity="0.6"/>
+    <!-- Hook -->
+    <line x1="256" y1="220" x2="256" y2="350" stroke="#fff" stroke-width="6" stroke-linecap="round"/>
+    <path d="M256,350 Q256,410 220,410 Q184,410 184,375" stroke="#fff" stroke-width="6" fill="none" stroke-linecap="round"/>
+    <!-- Bobber -->
+    <ellipse cx="256" cy="280" rx="8" ry="16" fill="#ff5722"/>
+    <!-- Jumping fish -->
+    <g transform="translate(370,260) rotate(-25)">
+      <ellipse cx="0" cy="0" rx="32" ry="16" fill="#fdd835"/>
+      <polygon points="28,-10 50,0 28,10" fill="#fdd835"/>
+      <circle cx="-12" cy="-5" r="3.5" fill="#333"/>
+    </g>
+    <!-- Text -->
+    <text x="256" y="490" text-anchor="middle" font-family="'PingFang SC','Microsoft YaHei','Noto Sans SC',sans-serif" font-size="56" font-weight="700" fill="#ffffff" letter-spacing="8">渔乐</text>
+  </g>
+</svg>
