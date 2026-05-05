@@ -182,5 +182,12 @@ HTTP Request
 | src/miniprogram/api/member.js | 会员 API |
 | src/miniprogram/pages/member/index.vue | 会员中心：等级卡片、余额、权益、充值方案 |
 | src/miniprogram/pages/member/recharge-records.vue | 充值记录：列表 + 下拉刷新 |
+| src/server/model/referral.go | 裂变 Model：Referral 结构体 + 邀请信息响应 |
+| src/server/repository/referral.go | 裂变 Repository：创建、查询、统计 |
+| src/server/service/referral.go | 裂变 Service：邀请信息、绑定关系、首单立减、奖励发放 |
+| src/server/handler/referral.go | 裂变 Handler：邀请信息、绑定邀请 |
+| src/server/router/referral.go | 裂变路由 |
+| src/miniprogram/api/referral.js | 裂变 API |
+| src/miniprogram/pages/invite/index.vue | 邀请好友：邀请码、分享、奖励统计、邀请记录 |
 
 <!-- 每创建一个新文件，在此追加记录 -->

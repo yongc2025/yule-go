@@ -135,7 +135,7 @@ function goOrders() {
 }
 
 function goInvite() {
-  uni.showToast({ title: '邀请功能开发中', icon: 'none' })
+  uni.navigateTo({ url: '/pages/invite/index' })
 }
 
 function handleRecharge(plan) {

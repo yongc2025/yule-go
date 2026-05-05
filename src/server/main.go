@@ -62,6 +62,7 @@ func main() {
 		{
 			router.RegisterOrderRoutes(auth)
 			router.RegisterMemberRoutes(auth)
+			router.RegisterReferralRoutes(auth)
 		}
 
 		// 管理后台路由（需要管理员认证）

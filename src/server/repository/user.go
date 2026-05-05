@@ -15,6 +15,7 @@ type userRepository struct {
 type UserRepository interface {
 	FindByID(id uint64) (*model.User, error)
 	FindByOpenID(openid string) (*model.User, error)
+	FindByInviteCode(inviteCode string) (*model.User, error)
 	Create(user *model.User) error
 	Update(user *model.User) error
 }
@@ -38,6 +39,16 @@ func (r *userRepository) FindByID(id uint64) (*model.User, error) {
 func (r *userRepository) FindByOpenID(openid string) (*model.User, error) {
 	var user model.User
 	err := r.db.Where("openid = ?", openid).First(&user).Error
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
+// FindByInviteCode 根据邀请码查询用户
+func (r *userRepository) FindByInviteCode(inviteCode string) (*model.User, error) {
+	var user model.User
+	err := r.db.Where("invite_code = ?", inviteCode).First(&user).Error
 	if err != nil {
 		return nil, err
 	}
