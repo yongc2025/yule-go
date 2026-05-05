@@ -146,5 +146,17 @@ HTTP Request
 | src/web/src/api/schedule.js | 团期 API：CRUD + 按周查询 |
 | src/web/src/layouts/AdminLayout.vue | 管理后台布局：侧边栏 + 面包屑 |
 | src/web/src/views/schedule/ScheduleList.vue | 团期管理页：列表 + 筛选 + 创建/编辑/取消/详情 |
+| src/miniprogram/ | 小程序前端（uni-app + Vue3） |
+| src/miniprogram/main.js | 小程序入口：createSSRApp |
+| src/miniprogram/App.vue | 根组件：全局样式 |
+| src/miniprogram/pages.json | 页面路由配置：团期列表页 |
+| src/miniprogram/manifest.json | 小程序配置：appid、权限、优化 |
+| src/miniprogram/api/index.js | 请求封装：统一错误处理 + toast |
+| src/miniprogram/api/schedule.js | 团期 API：listByWeek |
+| src/miniprogram/pages/schedule/index.vue | 团期列表页：按周展示 + 周切换 + 下拉刷新 |
+| src/miniprogram/components/ScheduleCard.vue | 团期卡片：线路名 + 日期 + 名额进度条 + 状态角标 |
+| src/miniprogram/utils/date.js | 日期工具：ISO 周计算、偏移、中文格式化 |
+| src/miniprogram/uni.scss | 全局 SCSS 变量 |
+| src/miniprogram/vite.config.js | Vite 构建配置（uni 插件） |
 
 <!-- 每创建一个新文件，在此追加记录 -->

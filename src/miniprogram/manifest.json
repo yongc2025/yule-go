@@ -1,0 +1,22 @@
+{
+  "name": "渔乐出行",
+  "appid": "",
+  "description": "渔具店周末短途旅行小程序",
+  "versionName": "0.1.0",
+  "versionCode": "100",
+  "transformPx": false,
+  "mp-weixin": {
+    "appid": "",
+    "setting": {
+      "urlCheck": false,
+      "es6": true,
+      "minified": true,
+      "postcss": true
+    },
+    "usingComponents": true,
+    "permission": {},
+    "optimization": {
+      "subPackages": true
+    }
+  }
+}

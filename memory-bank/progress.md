@@ -10,7 +10,7 @@
 | Phase | 名称 | 状态 |
 |:---|:---|:---|
 | 0 | 基建准备 | ✅ 已完成 |
-| 1 | 团期管理 | 🔵 进行中（后端 ✅，管理后台前端 ✅，小程序前端待开发） |
+| 1 | 团期管理 | ✅ 已完成（后端 + 管理端 + 小程序端） |
 | 2 | 用户预约 | 🟡 待开始 |
 | 3 | 会员充值 | 🟡 待开始 |
 | 4 | 装备租赁 | 🟡 待开始 |
@@ -124,3 +124,37 @@
 - 验证：`make build` 编译通过
 - 踩坑：无
 -->
+
+### 2026-05-06 — Phase 1 / Step 1.3 ✅ 团期管理 — 小程序前端
+- 做了什么：
+  - 创建 src/miniprogram/ 项目（uni-app + Vue3 + Pinia）
+  - 实现团期列表页（pages/schedule/index.vue）：
+    - 按周展示团期列表
+    - 左右箭头切换周
+    - 快捷周选择标签（上周/本周/下周/后周）
+    - 点击标题回到本周
+    - 下拉刷新
+  - 实现团期卡片组件（components/ScheduleCard.vue）：
+    - 线路名称 + 出行日期（中文格式）
+    - 名额进度条（绿/黄/红三色渐变）
+    - 状态角标（报名中/已满/已取消/已出发/已完成）
+    - 剩余名额提示（≤3 位时警告色）
+    - 报名按钮（已满/已取消时禁用）
+  - API 封装层：统一请求 + 错误处理 + toast 提示
+  - 日期工具：ISO 周计算、偏移周、中文格式化
+- 文件清单（13 个文件）：
+  - `package.json` — 项目配置 + uni-app 依赖
+  - `manifest.json` — 小程序配置
+  - `pages.json` — 页面路由 + 全局样式
+  - `App.vue` — 根组件
+  - `main.js` — 入口
+  - `index.html` — Vite 入口
+  - `vite.config.js` — Vite + uni 插件
+  - `uni.scss` — 全局 SCSS 变量
+  - `api/index.js` — 请求封装
+  - `api/schedule.js` — 团期 API
+  - `pages/schedule/index.vue` — 团期列表页
+  - `components/ScheduleCard.vue` — 团期卡片组件
+  - `utils/date.js` — 日期工具
+- 验证：代码结构完整，待本地 `npm install && npm run dev:mp-weixin` 编译验证
+- 踩坑：无
