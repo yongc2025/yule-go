@@ -121,8 +121,15 @@ HTTP Request
 
 ## 文件职责索引（随开发进度更新）
 
-<!-- 每创建一个新文件，在此记录其职责 -->
-<!-- 格式示例：
-| src/server/main.go | 程序入口，初始化 Gin + DB + 路由 |
-| src/server/model/schedule.go | Schedule 数据模型，GORM 标签 |
--->
+| 文件 | 职责 |
+|:---|:---|
+| src/server/main.go | 程序入口：加载配置 → 初始化 Gin → 注册中间件 → 注册路由 → 启动服务 |
+| src/server/config/config.go | 配置管理：Viper 读取 YAML + 环境变量覆盖，全局 Config 结构体 |
+| src/server/config/config.yaml | 默认配置：server/database/redis/jwt/wechat |
+| src/server/middleware/cors.go | CORS 跨域中间件 |
+| src/server/middleware/auth.go | JWT 认证中间件 + 管理员认证占位 |
+| src/server/middleware/logger.go | 请求日志中间件（IP、方法、路径、状态码、耗时） |
+| src/server/pkg/response/response.go | 统一响应格式：Success/Error/Page/Unauthorized 等 |
+| migrations/001_init.sql | 数据库初始化：9 张表 + 初始数据 |
+
+<!-- 每创建一个新文件，在此追加记录 -->
