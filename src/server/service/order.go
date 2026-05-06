@@ -7,8 +7,6 @@ import (
 
 	"yule-go/model"
 	"yule-go/repository"
-
-	"gorm.io/gorm"
 )
 
 type orderService struct {

@@ -11,6 +11,11 @@ func RegisterAdminAuthRoutes(r *gin.RouterGroup) {
 	r.POST("/auth/login", handler.AdminLogin)
 }
 
+// RegisterAdminAuthProtectedRoutes 注册管理员认证保护路由（需登录）
+func RegisterAdminAuthProtectedRoutes(r *gin.RouterGroup) {
+	r.POST("/auth/change-password", handler.AdminChangePassword)
+}
+
 // RegisterAdminDashboardRoutes 注册管理后台仪表盘路由
 func RegisterAdminDashboardRoutes(r *gin.RouterGroup) {
 	r.GET("/dashboard", handler.AdminDashboard)

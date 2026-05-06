@@ -219,3 +219,32 @@
 - 新增文件：11 个后端文件 + 4 个前端文件
 - 验证：代码结构完整，待本地编译验证
 - 踩坑：无
+
+### 2026-05-06 — Task 0007 ✅ 部署安全加固
+- 做了什么：
+  - `config/config.go` 增加 `validateProductionConfig()`：生产环境强制校验 JWT_SECRET 和 DB_PASSWORD 非空
+  - 生产环境自动设置 gin mode = release
+  - 创建 `.env.example` 环境变量模板
+  - `model/admin.go` 增加 `MustChangePassword` 字段（首次登录强制改密）
+  - `handler/admin_auth.go` 新增 `AdminChangePassword` 改密接口
+  - 登录响应增加 `must_change_password` 字段
+  - `router/admin.go` 新增 `RegisterAdminAuthProtectedRoutes`（需认证的管理路由）
+  - `migrations/002_admin_must_change_password.sql` 数据库迁移
+- 验证：
+  - 登录 API 返回 `"must_change_password": true` ✅
+  - 改密接口正常工作 ✅
+  - 生产模式下 JWT_SECRET 为空会拒绝启动 ✅
+- 踩坑：无
+
+### 2026-05-06 — Task 0008 ✅ 定时任务调度
+- 做了什么：
+  - 引入 `github.com/robfig/cron/v3` 依赖
+  - 创建 `scheduler/scheduler.go`：每分钟执行超时订单取消（15 分钟超时）
+  - `handler/scheduler.go`：全局调度器实例 + 手动触发 API
+  - `main.go`：启动调度器 + goroutine 运行服务 + 主线程优雅退出
+  - `router/order.go`：注册 `POST /api/v1/admin/orders/cancel-expired` 路由
+- 验证：
+  - 服务启动日志显示 `⏰ 定时任务调度器已启动` ✅
+  - 手动触发 API 返回 `{"cancelled_count":0}` ✅（无超时订单时正常）
+  - 优雅退出信号处理正常 ✅
+- 踩坑：无

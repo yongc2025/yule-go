@@ -3,7 +3,6 @@ package service
 import (
 	"errors"
 	"fmt"
-	"time"
 
 	"yule-go/model"
 	"yule-go/repository"
@@ -80,8 +79,8 @@ func (s *memberService) CreateRecharge(userID uint64, req *model.CreateRechargeR
 		return nil, errors.New("无效的充值方案")
 	}
 
-	// 2. 查询用户
-	user, err := s.userRepo.FindByID(userID)
+	// 2. 校验用户存在
+	_, err := s.userRepo.FindByID(userID)
 	if err != nil {
 		return nil, errors.New("用户不存在")
 	}
