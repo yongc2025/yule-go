@@ -96,6 +96,27 @@ func Load() {
 		C.JWT.Secret = secret
 	}
 
+	// 生产环境安全校验
+	if os.Getenv("GIN_MODE") == "release" || C.Server.Mode == "release" {
+		validateProductionConfig()
+	}
+
 	log.Printf("✅ 配置加载完成: server=:%s, db=%s:%d/%s",
 		C.Server.Port, C.Database.Host, C.Database.Port, C.Database.DBName)
+}
+
+// validateProductionConfig 生产环境必须项校验
+func validateProductionConfig() {
+	// 强制 gin mode = release
+	C.Server.Mode = "release"
+
+	// JWT_SECRET 必须非空且非默认值
+	if C.JWT.Secret == "" || C.JWT.Secret == "change-me-in-production" {
+		log.Fatal("❌ 生产环境必须设置 JWT_SECRET 环境变量（不能使用默认值）")
+	}
+
+	// 数据库密码必须非空
+	if C.Database.Password == "" {
+		log.Fatal("❌ 生产环境必须设置 DB_PASSWORD 环境变量")
+	}
 }

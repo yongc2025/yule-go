@@ -39,6 +39,7 @@ func RegisterAdminOrderRoutes(r *gin.RouterGroup) {
 
 	r.GET("/orders", orderH.AdminList)
 	r.GET("/orders/:id", orderH.AdminGetByID)
+	r.POST("/orders/cancel-expired", handler.AdminCancelExpiredOrders)
 }
 
 // RegisterPaymentRoutes 注册支付回调路由（无需认证）

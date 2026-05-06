@@ -58,11 +58,53 @@ func AdminLogin(c *gin.Context) {
 	response.Success(c, gin.H{
 		"token": tokenStr,
 		"admin": gin.H{
-			"id":       admin.ID,
-			"username": admin.Username,
-			"role":     admin.Role,
+			"id":                   admin.ID,
+			"username":             admin.Username,
+			"role":                 admin.Role,
+			"must_change_password": admin.MustChangePassword,
 		},
 	})
+}
+
+// AdminChangePassword 管理员修改密码
+// POST /api/v1/admin/auth/change-password
+func AdminChangePassword(c *gin.Context) {
+	adminID, exists := c.Get("admin_id")
+	if !exists {
+		response.Unauthorized(c)
+		return
+	}
+
+	var req struct {
+		OldPassword string `json:"old_password" binding:"required"`
+		NewPassword string `json:"new_password" binding:"required,min=6"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.BadRequest(c, "参数错误：新密码至少 6 位")
+		return
+	}
+
+	var admin model.Admin
+	if err := db.DB.First(&admin, adminID).Error; err != nil {
+		response.Error(c, 40000, "用户不存在")
+		return
+	}
+
+	// 校验旧密码
+	if !verifyPassword(req.OldPassword, admin.PasswordHash) {
+		response.Error(c, 40001, "旧密码错误")
+		return
+	}
+
+	// 更新密码
+	admin.PasswordHash = HashPassword(req.NewPassword)
+	admin.MustChangePassword = false
+	if err := db.DB.Save(&admin).Error; err != nil {
+		response.ServerError(c, "修改密码失败")
+		return
+	}
+
+	response.Success(c, gin.H{"message": "密码修改成功"})
 }
 
 // AdminDashboard 管理后台首页数据
@@ -152,7 +194,7 @@ func verifyPassword(password, encodedHash string) bool {
 		return false
 	}
 
-	hash := argon2.IDKey([]byte(password), salt, iterations, memory, parallelism, uint32(len(expectedHash)))
+	hash := argon2.IDKey([]byte(password), salt, iterations, memory, uint8(parallelism), uint32(len(expectedHash)))
 
 	return subtle.ConstantTimeCompare(hash, expectedHash) == 1
 }

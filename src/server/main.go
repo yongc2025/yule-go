@@ -7,8 +7,11 @@ import (
 
 	"yule-go/config"
 	"yule-go/db"
+	"yule-go/handler"
 	"yule-go/middleware"
+	"yule-go/repository"
 	"yule-go/router"
+	"yule-go/scheduler"
 
 	"github.com/gin-gonic/gin"
 )
@@ -22,6 +25,12 @@ func main() {
 
 	// 设置 Gin 模式
 	gin.SetMode(config.C.Server.Mode)
+
+	// 初始化定时任务调度器
+	orderRepo := repository.NewOrderRepository()
+	sched := scheduler.New(orderRepo)
+	sched.Start()
+	handler.SetScheduler(sched)
 
 	r := gin.New()
 
@@ -74,6 +83,7 @@ func main() {
 		adminAuth := v1.Group("/admin")
 		adminAuth.Use(middleware.AdminAuth())
 		{
+			router.RegisterAdminAuthProtectedRoutes(adminAuth)
 			router.RegisterAdminOrderRoutes(adminAuth)
 			router.RegisterAdminRentalRoutes(adminAuth)
 			router.RegisterAdminDashboardRoutes(adminAuth)
@@ -85,7 +95,14 @@ func main() {
 
 	port := config.C.Server.Port
 	log.Printf("🚀 yule-go server starting on :%s", port)
-	if err := r.Run(fmt.Sprintf(":%s", port)); err != nil {
-		log.Fatalf("Failed to start server: %v", err)
-	}
+
+	// 在 goroutine 中启动服务，主线程等待退出信号
+	go func() {
+		if err := r.Run(fmt.Sprintf(":%s", port)); err != nil {
+			log.Fatalf("Failed to start server: %v", err)
+		}
+	}()
+
+	// 等待退出信号，优雅停止调度器
+	scheduler.WaitForSignal(sched)
 }
