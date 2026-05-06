@@ -260,13 +260,41 @@ function changeRentalQty(id, delta) {
 }
 
 async function loadSchedule() {
+  if (!scheduleId.value) return
+
+  // 先尝试从缓存读取
+  try {
+    const cached = uni.getStorageSync('bookingSchedule')
+    if (cached && cached.id === scheduleId.value) {
+      applyScheduleData(cached)
+      return
+    }
+  } catch (e) {}
+
+  // 缓存未命中，显示加载状态
+  uni.showLoading({ title: '加载中' })
   try {
     const res = await scheduleApi.listByWeek('')
-    // 直接用缓存的 schedule 数据（从团期列表页跳转时传入）
-    // 如果没有缓存，需要从 API 获取
+    const list = res.data?.schedules || []
+    const found = list.find(s => s.id === scheduleId.value)
+    if (found) {
+      applyScheduleData(found)
+    } else {
+      uni.showToast({ title: '团期不存在', icon: 'none' })
+    }
   } catch (e) {
     console.error('加载团期失败', e)
+    uni.showToast({ title: '加载失败', icon: 'none' })
+  } finally {
+    uni.hideLoading()
   }
+}
+
+function applyScheduleData(data) {
+  schedule.value = data
+  routePrice.value = data.route_price || 128
+  childPrice.value = data.child_price || 0
+  isFamily.value = data.route_type === 'family'
 }
 
 async function loadRentals() {
@@ -361,6 +389,7 @@ onMounted(() => {
     }
   } catch (e) {}
 
+  loadSchedule()
   loadRentals()
   loadUserInfo()
 })

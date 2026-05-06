@@ -287,8 +287,10 @@ func (s *orderService) CancelExpiredOrders() (int64, error) {
 	return s.orderRepo.CancelExpiredOrders(15 * time.Minute)
 }
 
-// generateOrderNo 生成订单号：日期 + 6位随机
+// generateOrderNo 生成订单号：日期 + 8位随机（降低冲突概率）
 func generateOrderNo() string {
 	now := time.Now()
-	return now.Format("20060102150405") + fmt.Sprintf("%06d", now.UnixNano()%1000000)
+	// 使用纳秒时间戳的更多位数 + 随机数
+	r := now.UnixNano() % 100000000
+	return now.Format("20060102150405") + fmt.Sprintf("%08d", r)
 }

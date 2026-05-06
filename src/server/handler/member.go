@@ -1,8 +1,11 @@
 package handler
 
 import (
+	"crypto/sha256"
+	"fmt"
 	"strconv"
 
+	"yule-go/config"
 	"yule-go/model"
 	"yule-go/pkg/response"
 	"yule-go/service"
@@ -74,9 +77,18 @@ func (h *memberHandler) RechargeCallback(c *gin.Context) {
 	var req struct {
 		RechargeID    uint64 `json:"recharge_id" binding:"required"`
 		TransactionID string `json:"transaction_id" binding:"required"`
+		Sign          string `json:"sign" binding:"required"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		response.BadRequest(c, "参数错误")
+		return
+	}
+
+	// 校验回调签名
+	expectedSign := fmt.Sprintf("%x", sha256.Sum256([]byte(
+		fmt.Sprintf("%d%s%s", req.RechargeID, req.TransactionID, config.C.Wechat.MchKey))))
+	if req.Sign != expectedSign {
+		response.Error(c, 40300, "签名验证失败")
 		return
 	}
 

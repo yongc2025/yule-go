@@ -1,8 +1,11 @@
 package handler
 
 import (
+	"crypto/sha256"
+	"fmt"
 	"strconv"
 
+	"yule-go/config"
 	"yule-go/model"
 	"yule-go/pkg/response"
 	"yule-go/service"
@@ -61,11 +64,11 @@ func (h *orderHandler) GetByOrderNo(c *gin.Context) {
 	}
 
 	// 校验订单归属
-	if order.OrderNo != "" {
-		// 通过 service 层已做归属校验，这里直接返回
+	if order.UserID != userID.(uint64) {
+		response.Forbidden(c)
+		return
 	}
 
-	_ = userID // 后续可在 service 层做更严格的归属校验
 	response.Success(c, order)
 }
 
@@ -123,9 +126,17 @@ func (h *orderHandler) PaymentCallback(c *gin.Context) {
 	var req struct {
 		OrderNo       string `json:"order_no" binding:"required"`
 		TransactionID string `json:"transaction_id" binding:"required"`
+		Sign          string `json:"sign" binding:"required"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		response.BadRequest(c, "参数错误")
+		return
+	}
+
+	// 校验回调签名（防止伪造）
+	expectedSign := fmt.Sprintf("%x", sha256.Sum256([]byte(req.OrderNo+req.TransactionID+config.C.Wechat.MchKey)))
+	if req.Sign != expectedSign {
+		response.Error(c, 40300, "签名验证失败")
 		return
 	}
 

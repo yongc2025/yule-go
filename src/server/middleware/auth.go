@@ -58,10 +58,47 @@ func JWTAuth() gin.HandlerFunc {
 	}
 }
 
-// AdminAuth 管理员认证中间件（占位，后续实现）
+// AdminAuth 管理员认证中间件
 func AdminAuth() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// TODO: 实现管理员认证
+		authHeader := c.GetHeader("Authorization")
+		if authHeader == "" {
+			response.Unauthorized(c)
+			c.Abort()
+			return
+		}
+
+		parts := strings.SplitN(authHeader, " ", 2)
+		if len(parts) != 2 || parts[0] != "Bearer" {
+			response.Unauthorized(c)
+			c.Abort()
+			return
+		}
+
+		tokenStr := parts[1]
+		claims := jwt.MapClaims{}
+
+		token, err := jwt.ParseWithClaims(tokenStr, &claims, func(token *jwt.Token) (interface{}, error) {
+			return []byte(config.C.JWT.Secret), nil
+		})
+
+		if err != nil || !token.Valid {
+			response.Unauthorized(c)
+			c.Abort()
+			return
+		}
+
+		// 校验是否包含 admin 标识
+		role, _ := claims["role"].(string)
+		if role == "" {
+			response.Forbidden(c)
+			c.Abort()
+			return
+		}
+
+		c.Set("admin_id", claims["user_id"])
+		c.Set("admin_username", claims["username"])
+		c.Set("admin_role", role)
 		c.Next()
 	}
 }

@@ -129,6 +129,7 @@ type OrderQueryRequest struct {
 type OrderResponse struct {
 	ID             uint64            `json:"id"`
 	OrderNo        string            `json:"order_no"`
+	UserID         uint64            `json:"user_id"`
 	ScheduleID     uint64            `json:"schedule_id"`
 	RouteName      string            `json:"route_name"`
 	TripDate       string            `json:"trip_date"`
@@ -163,6 +164,7 @@ func (o *Order) ToResponse() OrderResponse {
 	resp := OrderResponse{
 		ID:             o.ID,
 		OrderNo:        o.OrderNo,
+		UserID:         o.UserID,
 		ScheduleID:     o.ScheduleID,
 		Adults:         o.Adults,
 		Children:       o.Children,

@@ -1,6 +1,11 @@
 package handler
 
 import (
+	"crypto/subtle"
+	"encoding/base64"
+	"fmt"
+	"strings"
+
 	"yule-go/config"
 	"yule-go/db"
 	"yule-go/model"
@@ -9,6 +14,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
+	"golang.org/x/crypto/argon2"
 )
 
 // AdminLogin 管理员登录
@@ -29,8 +35,11 @@ func AdminLogin(c *gin.Context) {
 		return
 	}
 
-	// TODO: 用 argon2id 校验密码，当前简化处理
-	// if !verifyPassword(req.Password, admin.PasswordHash) { ... }
+	// 校验密码（使用 argon2id）
+	if !verifyPassword(req.Password, admin.PasswordHash) {
+		response.Error(c, 40000, "用户名或密码错误")
+		return
+	}
 
 	// 生成 JWT
 	claims := &jwt.MapClaims{
@@ -117,4 +126,43 @@ func AdminDashboard(c *gin.Context) {
 		"total_users":    totalUsers,
 		"week_schedules": weekSchedules,
 	})
+}
+
+// verifyPassword 校验 argon2id 密码
+func verifyPassword(password, encodedHash string) bool {
+	// 格式: $argon2id$v=19$m=65536,t=3,p=2$salt$hash
+	parts := strings.Split(encodedHash, "$")
+	if len(parts) != 6 {
+		return false
+	}
+
+	var memory, iterations, parallelism uint32
+	_, err := fmt.Sscanf(parts[3], "m=%d,t=%d,p=%d", &memory, &iterations, &parallelism)
+	if err != nil {
+		return false
+	}
+
+	salt, err := base64.RawStdEncoding.DecodeString(parts[4])
+	if err != nil {
+		return false
+	}
+
+	expectedHash, err := base64.RawStdEncoding.DecodeString(parts[5])
+	if err != nil {
+		return false
+	}
+
+	hash := argon2.IDKey([]byte(password), salt, iterations, memory, parallelism, uint32(len(expectedHash)))
+
+	return subtle.ConstantTimeCompare(hash, expectedHash) == 1
+}
+
+// HashPassword 生成 argon2id 密码哈希（用于初始化管理员密码）
+func HashPassword(password string) string {
+	salt := make([]byte, 16)
+	// 生产环境应用 crypto/rand
+	hash := argon2.IDKey([]byte(password), salt, 3, 64*1024, 2, 32)
+	return fmt.Sprintf("$argon2id$v=19$m=65536,t=3,p=2$%s$%s",
+		base64.RawStdEncoding.EncodeToString(salt),
+		base64.RawStdEncoding.EncodeToString(hash))
 }

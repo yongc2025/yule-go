@@ -97,15 +97,7 @@ func (s *memberService) CreateRecharge(userID uint64, req *model.CreateRechargeR
 		return nil, fmt.Errorf("创建充值记录失败: %w", err)
 	}
 
-	// 4. 计算新等级（取最高等级）
-	newLevel := plan.Level
-	if user.MemberLevel > newLevel {
-		newLevel = user.MemberLevel
-	}
-
-	_ = newLevel // 充值成功后才更新
-
-	// 5. 返回结果（含支付参数占位）
+	// 4. 返回结果（含支付参数占位）
 	resp := &model.CreateRechargeResponse{
 		RechargeID: recharge.ID,
 		Amount:     plan.Amount,
