@@ -21,6 +21,8 @@
 
 ## 快速开始
 
+> ⚠️ **首次开发请先阅读：[本地开发环境搭建指南](docs/local-setup.md)**（含 Windows 踩坑记录）
+
 ```bash
 # 查看帮助
 make help
