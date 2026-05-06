@@ -3,14 +3,14 @@
 
 server:
   port: 8080
-  mode: debug  # debug / release / test
+  mode: debug # debug / release / test
 
 database:
   host: 127.0.0.1
   port: 3306
   user: root
-  password: "yule123456"
-  dbname: yule
+  password: "yongc20"
+  dbname: mysql
   charset: utf8mb4
   max_idle_conns: 10
   max_open_conns: 100
