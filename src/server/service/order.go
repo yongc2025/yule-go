@@ -56,28 +56,21 @@ func (s *orderService) Create(userID uint64, req *model.CreateOrderRequest) (*mo
 		return nil, errors.New("该团期不可报名")
 	}
 
-	// 3. 校验名额
-	totalPeople := req.Adults + req.Children
-	remaining := schedule.RemainingSlots()
-	if int(totalPeople) > remaining {
-		return nil, fmt.Errorf("名额不足，剩余 %d 位", remaining)
-	}
-
-	// 4. 校验重复下单
+	// 3. 校验重复下单
 	existing, _ := s.orderRepo.FindByUserAndSchedule(userID, req.ScheduleID)
 	if existing != nil {
 		return nil, errors.New("您已报名该团期，请勿重复下单")
 	}
 
-	// 5. 查询用户
+	// 4. 查询用户
 	user, err := s.userRepo.FindByID(userID)
 	if err != nil {
 		return nil, errors.New("用户不存在")
 	}
 
-	// 6. 计算团费
+	// 5. 计算团费
 	route := schedule.Route
-	tripFee := float64(req.Adults)*route.Price
+	tripFee := float64(req.Adults) * route.Price
 	if req.Children > 0 {
 		childPrice := route.ChildPrice
 		if childPrice <= 0 || route.Type != "family" {
@@ -86,16 +79,13 @@ func (s *orderService) Create(userID uint64, req *model.CreateOrderRequest) (*mo
 		tripFee += float64(req.Children) * childPrice
 	}
 
-	// 7. 计算租赁费
+	// 6. 计算租赁费（仅计算价格，库存校验在事务中）
 	var rentalFee float64
 	var rentals []model.OrderRental
 	for _, ri := range req.RentalItems {
 		item, err := s.rentalRepo.FindByID(ri.RentalItemID)
 		if err != nil {
 			return nil, fmt.Errorf("租赁项 %d 不存在", ri.RentalItemID)
-		}
-		if item.Stock < ri.Quantity {
-			return nil, fmt.Errorf("「%s」库存不足，剩余 %d", item.Name, item.Stock)
 		}
 		subtotal := item.PricePerDay * float64(ri.Quantity)
 		rentalFee += subtotal
@@ -107,7 +97,7 @@ func (s *orderService) Create(userID uint64, req *model.CreateOrderRequest) (*mo
 		})
 	}
 
-	// 8. 计算折扣和余额
+	// 7. 计算折扣和余额
 	subtotal := tripFee + rentalFee
 	var discountAmount float64
 	if user.MemberLevel > 0 {
@@ -130,10 +120,10 @@ func (s *orderService) Create(userID uint64, req *model.CreateOrderRequest) (*mo
 		totalAmount = 0
 	}
 
-	// 9. 生成订单号
+	// 8. 生成订单号
 	orderNo := generateOrderNo()
 
-	// 10. 创建订单
+	// 9. 创建订单（事务内含名额校验+扣减+库存扣减）
 	order := &model.Order{
 		OrderNo:        orderNo,
 		UserID:         userID,
@@ -157,17 +147,7 @@ func (s *orderService) Create(userID uint64, req *model.CreateOrderRequest) (*mo
 		return nil, fmt.Errorf("创建订单失败: %w", err)
 	}
 
-	// 11. 更新团期已报名人数
-	schedule.BookedSlots += totalPeople
-	if schedule.BookedSlots >= schedule.MaxSlots {
-		schedule.Status = model.ScheduleStatusFull
-	}
-	if err := s.scheduleRepo.Update(schedule); err != nil {
-		// 日志记录，但不影响订单创建
-		fmt.Printf("更新团期名额失败: %v\n", err)
-	}
-
-	// 12. 扣减余额
+	// 10. 扣减余额（订单创建成功后）
 	if balanceUsed > 0 {
 		user.Balance -= balanceUsed
 		if err := s.userRepo.Update(user); err != nil {
@@ -175,7 +155,10 @@ func (s *orderService) Create(userID uint64, req *model.CreateOrderRequest) (*mo
 		}
 	}
 
-	// 13. 返回结果（含支付参数占位）
+	// 11. 检查首单立减并发放邀请奖励
+	s.checkAndGrantReferral(userID, order.ID)
+
+	// 12. 返回结果
 	resp := &model.CreateOrderResponse{
 		OrderID:        order.ID,
 		OrderNo:        orderNo,
@@ -186,10 +169,20 @@ func (s *orderService) Create(userID uint64, req *model.CreateOrderRequest) (*mo
 		TotalAmount:    totalAmount,
 	}
 
-	// TODO: 如果 totalAmount > 0，调用微信支付下单，返回支付参数
-	// if totalAmount > 0 { resp.PaymentParams = ... }
-
 	return resp, nil
+}
+
+// checkAndGrantReferral 检查并发放邀请奖励
+func (s *orderService) checkAndGrantReferral(userID uint64, orderID uint64) {
+	// 查询是否有待触发的邀请记录
+	referralRepo := repository.NewReferralRepository()
+	userRepo := repository.NewUserRepository()
+	referralSvc := NewReferralService(referralRepo, userRepo)
+
+	// 发放邀请人奖励
+	if err := referralSvc.GrantReward(userID, orderID); err != nil {
+		fmt.Printf("发放邀请奖励失败: %v\n", err)
+	}
 }
 
 // GetByOrderNo 查询订单详情
@@ -239,9 +232,15 @@ func (s *orderService) Cancel(orderNo string, userID uint64, reason string) erro
 		if schedule.BookedSlots < schedule.MaxSlots && schedule.Status == model.ScheduleStatusFull {
 			schedule.Status = model.ScheduleStatusEnrolling
 		}
-		scheduleRepoErr := s.scheduleRepo.Update(schedule)
-		if scheduleRepoErr != nil {
-			fmt.Printf("释放名额失败: %v\n", scheduleRepoErr)
+		if err := s.scheduleRepo.Update(schedule); err != nil {
+			fmt.Printf("释放名额失败: %v\n", err)
+		}
+	}
+
+	// 退还租赁库存
+	for _, rental := range order.Rentals {
+		if err := s.rentalRepo.RestoreStock(rental.RentalItemID, rental.Quantity); err != nil {
+			fmt.Printf("退还库存失败: %v\n", err)
 		}
 	}
 

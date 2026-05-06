@@ -31,20 +31,76 @@ func NewOrderRepository() OrderRepository {
 	return &orderRepository{db: db.DB}
 }
 
-// Create 创建订单（含租赁明细，事务）
+// Create 创建订单（含租赁明细 + 名额更新 + 库存扣减，全部在同一事务）
 func (r *orderRepository) Create(order *model.Order) error {
 	return r.db.Transaction(func(tx *gorm.DB) error {
-		// 创建订单
+		// 1. 锁定团期行（SELECT ... FOR UPDATE 防止并发超卖）
+		var schedule model.Schedule
+		if err := tx.Set("gorm:query_option", "FOR UPDATE").
+			First(&schedule, order.ScheduleID).Error; err != nil {
+			return fmt.Errorf("团期不存在: %w", err)
+		}
+
+		// 2. 校验名额
+		totalPeople := order.Adults + order.Children
+		remaining := int(schedule.MaxSlots) - int(schedule.BookedSlots)
+		if remaining < 0 {
+			remaining = 0
+		}
+		if int(totalPeople) > remaining {
+			return fmt.Errorf("名额不足，剩余 %d 位", remaining)
+		}
+
+		// 3. 锁定并扣减租赁项库存
+		for i := range order.Rentals {
+			var item model.RentalItem
+			if err := tx.Set("gorm:query_option", "FOR UPDATE").
+				First(&item, order.Rentals[i].RentalItemID).Error; err != nil {
+				return fmt.Errorf("租赁项不存在: %w", err)
+			}
+			if item.Stock < order.Rentals[i].Quantity {
+				return fmt.Errorf("「%s」库存不足，剩余 %d", item.Name, item.Stock)
+			}
+			// 扣减库存
+			if err := tx.Model(&model.RentalItem{}).
+				Where("id = ?", item.ID).
+				Update("stock", gorm.Expr("stock - ?", order.Rentals[i].Quantity)).Error; err != nil {
+				return fmt.Errorf("扣减库存失败: %w", err)
+			}
+		}
+
+		// 4. 创建订单
 		if err := tx.Create(order).Error; err != nil {
 			return err
 		}
-		// 创建租赁明细
+
+		// 5. 创建租赁明细
 		for i := range order.Rentals {
 			order.Rentals[i].OrderID = order.ID
 			if err := tx.Create(&order.Rentals[i]).Error; err != nil {
 				return err
 			}
 		}
+
+		// 6. 更新团期已报名人数
+		if err := tx.Model(&model.Schedule{}).
+			Where("id = ?", schedule.ID).
+			Updates(map[string]interface{}{
+				"booked_slots": gorm.Expr("booked_slots + ?", totalPeople),
+			}).Error; err != nil {
+			return fmt.Errorf("更新名额失败: %w", err)
+		}
+
+		// 7. 检查是否已满，自动更新状态
+		newBooked := schedule.BookedSlots + totalPeople
+		if newBooked >= schedule.MaxSlots {
+			if err := tx.Model(&model.Schedule{}).
+				Where("id = ?", schedule.ID).
+				Update("status", model.ScheduleStatusFull).Error; err != nil {
+				return fmt.Errorf("更新团期状态失败: %w", err)
+			}
+		}
+
 		return nil
 	})
 }
@@ -126,17 +182,62 @@ func (r *orderRepository) UpdateStatus(id uint64, status model.OrderStatus) erro
 	return r.db.Model(&model.Order{}).Where("id = ?", id).Update("status", status).Error
 }
 
-// CancelExpiredOrders 取消超时未支付的订单
+// CancelExpiredOrders 取消超时未支付的订单（含库存退还）
 func (r *orderRepository) CancelExpiredOrders(expireDuration time.Duration) (int64, error) {
 	deadline := time.Now().Add(-expireDuration)
-	result := r.db.Model(&model.Order{}).
+
+	// 查找超时订单
+	var expiredOrders []model.Order
+	if err := r.db.
 		Where("status = ? AND payment_status = ? AND created_at < ?",
 			model.OrderStatusPending, model.PaymentStatusUnpaid, deadline).
-		Updates(map[string]interface{}{
-			"status":         model.OrderStatusCancelled,
-			"cancel_reason":  "超时未支付，系统自动取消",
+		Find(&expiredOrders).Error; err != nil {
+		return 0, err
+	}
+
+	var count int64
+	for _, order := range expiredOrders {
+		err := r.db.Transaction(func(tx *gorm.DB) error {
+			// 更新订单状态
+			if err := tx.Model(&model.Order{}).Where("id = ?", order.ID).
+				Updates(map[string]interface{}{
+					"status":        model.OrderStatusCancelled,
+					"cancel_reason": "超时未支付，系统自动取消",
+				}).Error; err != nil {
+				return err
+			}
+
+			// 释放名额
+			if err := tx.Model(&model.Schedule{}).Where("id = ?", order.ScheduleID).
+				Update("booked_slots", gorm.Expr("booked_slots - ?", order.Adults+order.Children)).
+				Error; err != nil {
+				return err
+			}
+
+			// 退还租赁库存
+			var rentals []model.OrderRental
+			if err := tx.Where("order_id = ?", order.ID).Find(&rentals).Error; err == nil {
+				for _, rental := range rentals {
+					tx.Model(&model.RentalItem{}).Where("id = ?", rental.RentalItemID).
+						Update("stock", gorm.Expr("stock + ?", rental.Quantity))
+				}
+			}
+
+			// 退还余额
+			if order.BalanceUsed > 0 {
+				tx.Model(&model.User{}).Where("id = ?", order.UserID).
+					Update("balance", gorm.Expr("balance + ?", order.BalanceUsed))
+			}
+
+			count++
+			return nil
 		})
-	return result.RowsAffected, result.Error
+		if err != nil {
+			fmt.Printf("取消超时订单 %s 失败: %v\n", order.OrderNo, err)
+		}
+	}
+
+	return count, nil
 }
 
 // --- 租赁项 Repository ---
@@ -149,6 +250,7 @@ type rentalItemRepository struct {
 type RentalItemRepository interface {
 	FindAll() ([]model.RentalItem, error)
 	FindByID(id uint64) (*model.RentalItem, error)
+	RestoreStock(id uint64, quantity uint) error
 }
 
 // NewRentalItemRepository 创建租赁项 Repository
@@ -171,4 +273,11 @@ func (r *rentalItemRepository) FindByID(id uint64) (*model.RentalItem, error) {
 		return nil, fmt.Errorf("租赁项不存在: %w", err)
 	}
 	return &item, nil
+}
+
+// RestoreStock 退还库存
+func (r *rentalItemRepository) RestoreStock(id uint64, quantity uint) error {
+	return r.db.Model(&model.RentalItem{}).
+		Where("id = ?", id).
+		Update("stock", gorm.Expr("stock + ?", quantity)).Error
 }
