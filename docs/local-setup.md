@@ -374,6 +374,23 @@ Error 1045 (28000): Access denied for user 'root'@'localhost' (using password: Y
 
 **解决：** 先在 MySQL 中执行 `CREATE DATABASE yule_go;`，再执行建表脚本。
 
+### 坑点 10：管理后台登录密码错误
+
+**现象：** 用 `admin` / `admin123` 登录管理后台，提示"用户名或密码错误"。
+
+**原因：** `001_init.sql` 中管理员密码哈希是占位符，不是有效的 argon2id 哈希。占位符格式不完整（盐被截断），导致任何密码都无法通过验证。
+
+**解决：** 在 MySQL 中执行以下 SQL 更新为正确的哈希（密码仍为 `admin123`）：
+
+```sql
+USE yule_go;
+UPDATE admins SET password_hash = '$argon2id$v=19$m=65536,t=3,p=2$AAAAAAAAAAAAAAAAAAAAAA$DOnSQ1mnoOT0UKFvU/tdiQnZuMIrE+AXDT4nrUKynO4' WHERE username = 'admin';
+```
+
+> ⚠️ 注意盐部分是 **22 个 A**（`AAAAAAAAAAAAAAAAAAAAAA`），不是 16 个。16 个零字节的 base64 无填充编码为 22 个字符。
+
+登录后系统会提示修改密码。
+
 ---
 
 ## 九、快速启动清单（速查版）

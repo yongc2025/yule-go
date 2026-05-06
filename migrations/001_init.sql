@@ -196,9 +196,9 @@ INSERT INTO `rental_items` (`name`, `price_per_day`, `stock`) VALUES
 ('天幕', 40.00, 10),
 ('折叠桌椅', 25.00, 20);
 
--- 初始管理员（密码: admin123，实际部署时需更换）
--- 密码哈希使用 argon2id，此处为占位，部署时由应用生成
+-- 初始管理员（密码: admin123，首次登录后请立即修改）
+-- 密码哈希使用 argon2id，参数：m=65536,t=3,p=2,salt=16字节零值
 INSERT INTO `admins` (`username`, `password_hash`, `role`) VALUES
-('admin', '$argon2id$v=19$m=65536,t=3,p=2$placeholder', 'super_admin');
+('admin', '$argon2id$v=19$m=65536,t=3,p=2$AAAAAAAAAAAAAAAAAAAAAA$DOnSQ1mnoOT0UKFvU/tdiQnZuMIrE+AXDT4nrUKynO4', 'super_admin');
 
 SET FOREIGN_KEY_CHECKS = 1;
