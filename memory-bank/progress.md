@@ -40,10 +40,10 @@
 - M9: 小程序 API 地址配置化 + token 注入
 
 #### 新增任务
-- 0007 部署安全加固（P0）— JWT Secret/生产模式/强制改密
-- 0008 定时任务调度（P0）— 超时订单自动取消
-- 0009 金额精度优化（P1）— RoundToCent 工具函数
-- 0010 邀请码唯一性（P2）— 生成唯一校验 + 重试
+- 0007 部署安全加固（P0）— JWT Secret/生产模式/强制改密 ✅
+- 0008 定时任务调度（P0）— 超时订单自动取消 ✅
+- 0009 金额精度优化（P1）— RoundToCent 工具函数 ✅
+- 0010 邀请码唯一性（P2）— 生成唯一校验 + 重试 ✅
 
 ---
 
@@ -247,4 +247,28 @@
   - 服务启动日志显示 `⏰ 定时任务调度器已启动` ✅
   - 手动触发 API 返回 `{"cancelled_count":0}` ✅（无超时订单时正常）
   - 优雅退出信号处理正常 ✅
+- 踩坑：无
+
+### 2026-05-06 — Task 0009 ✅ 金额精度优化
+- 做了什么：
+  - 创建 `pkg/util/money.go`：`RoundToCent` 函数（`math.Round(amount*100) / 100`）
+  - `service/order.go`：团费、租赁费、小计、折扣、余额抵扣、实付金额全部经过 RoundToCent
+  - `service/referral.go`：邀请人余额增加后 RoundToCent
+  - `service/member.go`：充值回调余额/累计充值 RoundToCent
+  - 前端确认：小程序和管理后台均已使用 `.toFixed(2)`，无需修改
+- 验证：
+  - `go build` 编译通过（33MB）✅
+  - 冒烟测试：health/schedules/rental-items/routes 全部 API 正常响应 ✅
+- 踩坑：无
+
+### 2026-05-06 — Task 0010 ✅ 邀请码唯一性
+- 做了什么：
+  - `service/referral.go` 重构 `GenerateInviteCode`：
+    - 原函数改名为 `generateInviteCodeRaw()`（内部使用）
+    - 新增 `GenerateUniqueInviteCode(userRepo repository.UserRepository)` — 生成后查询数据库确认唯一，冲突自动重试（最多 3 次）
+  - users 表 invite_code 字段已有 UNIQUE INDEX，数据库层面兜底
+- 验证：
+  - `go build` 编译通过 ✅
+  - 冒烟测试：全部 API 正常响应 ✅
+- 备注：`GenerateUniqueInviteCode` 需注入 UserRepository，待微信登录接入时调用
 - 踩坑：无

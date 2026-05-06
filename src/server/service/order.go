@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"yule-go/model"
+	"yule-go/pkg/util"
 	"yule-go/repository"
 )
 
@@ -76,6 +77,7 @@ func (s *orderService) Create(userID uint64, req *model.CreateOrderRequest) (*mo
 		}
 		tripFee += float64(req.Children) * childPrice
 	}
+	tripFee = util.RoundToCent(tripFee)
 
 	// 6. 计算租赁费（仅计算价格，库存校验在事务中）
 	var rentalFee float64
@@ -91,16 +93,18 @@ func (s *orderService) Create(userID uint64, req *model.CreateOrderRequest) (*mo
 			RentalItemID: ri.RentalItemID,
 			Quantity:     ri.Quantity,
 			UnitPrice:    item.PricePerDay,
-			Subtotal:     subtotal,
+			Subtotal:     util.RoundToCent(subtotal),
 		})
 	}
+	rentalFee = util.RoundToCent(rentalFee)
 
 	// 7. 计算折扣和余额
 	subtotal := tripFee + rentalFee
+	subtotal = util.RoundToCent(subtotal)
 	var discountAmount float64
 	if user.MemberLevel > 0 {
 		discount := user.MemberDiscount()
-		discountAmount = subtotal * (1 - discount)
+		discountAmount = util.RoundToCent(subtotal * (1 - discount))
 	}
 
 	var balanceUsed float64
@@ -111,9 +115,10 @@ func (s *orderService) Create(userID uint64, req *model.CreateOrderRequest) (*mo
 		} else {
 			balanceUsed = user.Balance
 		}
+		balanceUsed = util.RoundToCent(balanceUsed)
 	}
 
-	totalAmount := subtotal - discountAmount - balanceUsed
+	totalAmount := util.RoundToCent(subtotal - discountAmount - balanceUsed)
 	if totalAmount < 0 {
 		totalAmount = 0
 	}

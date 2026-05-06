@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"yule-go/model"
+	"yule-go/pkg/util"
 	"yule-go/repository"
 )
 
@@ -154,6 +155,7 @@ func (s *referralService) GrantReward(inviteeID uint64, orderID uint64) error {
 		return errors.New("邀请人不存在")
 	}
 	inviter.Balance += referral.RewardAmount
+	inviter.Balance = util.RoundToCent(inviter.Balance)
 	if err := s.userRepo.Update(inviter); err != nil {
 		return fmt.Errorf("发放奖励失败: %w", err)
 	}
@@ -161,8 +163,8 @@ func (s *referralService) GrantReward(inviteeID uint64, orderID uint64) error {
 	return nil
 }
 
-// GenerateInviteCode 生成 6 位邀请码
-func GenerateInviteCode() string {
+// GenerateInviteCode 生成 6 位邀请码（不校验唯一性，仅供内部使用）
+func generateInviteCodeRaw() string {
 	const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
 	code := make([]byte, 6)
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
@@ -170,4 +172,23 @@ func GenerateInviteCode() string {
 		code[i] = chars[r.Intn(len(chars))]
 	}
 	return string(code)
+}
+
+// GenerateUniqueInviteCode 生成唯一邀请码（查询数据库确认唯一，冲突自动重试，最多 3 次）
+func GenerateUniqueInviteCode(userRepo repository.UserRepository) (string, error) {
+	const maxRetries = 3
+	for i := 0; i < maxRetries; i++ {
+		code := generateInviteCodeRaw()
+		existing, err := userRepo.FindByInviteCode(code)
+		if err != nil {
+			// 查询失败（非"未找到"错误）→ 返回错误
+			if existing == nil {
+				// 未找到记录 = 唯一，可用
+				return code, nil
+			}
+			return "", fmt.Errorf("校验邀请码唯一性失败: %w", err)
+		}
+		// 找到了记录，说明冲突，继续重试
+	}
+	return "", errors.New("生成唯一邀请码失败：连续 3 次冲突")
 }

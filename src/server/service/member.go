@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"yule-go/model"
+	"yule-go/pkg/util"
 	"yule-go/repository"
 )
 
@@ -134,7 +135,9 @@ func (s *memberService) RechargeCallback(rechargeID uint64, transactionID string
 	}
 
 	user.Balance += recharge.Amount + recharge.GiftAmount
+	user.Balance = util.RoundToCent(user.Balance)
 	user.TotalRecharge += recharge.Amount
+	user.TotalRecharge = util.RoundToCent(user.TotalRecharge)
 
 	// 升级会员等级（取最高等级）
 	var planLevel uint8
