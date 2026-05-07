@@ -189,5 +189,14 @@ HTTP Request
 | src/server/router/referral.go | 裂变路由 |
 | src/miniprogram/api/referral.js | 裂变 API |
 | src/miniprogram/pages/invite/index.vue | 邀请好友：邀请码、分享、奖励统计、邀请记录 |
+| src/server/pkg/wechat/mini.go | 微信 SDK：Code2Session（code 换 openid + session_key） |
+| src/server/service/auth.go | 认证 Service：WxLogin（查找/创建用户 + JWT 签发 30 天） |
+| src/server/handler/auth.go | 认证 Handler：POST /api/v1/auth/wx-login |
+| src/server/handler/user.go | 用户 Handler：GET/PUT /user/profile + PUT /user/phone |
+| src/server/router/auth.go | 认证路由：公开，无需 JWT |
+| src/server/router/user.go | 用户路由：JWT 保护 |
+| src/miniprogram/api/auth.js | 认证 API：wx-login |
+| src/miniprogram/utils/auth.js | Token 管理：存储/获取/清除 + wxLogin 流程 |
+| src/miniprogram/pages/user/profile.vue | 个人信息页：昵称、头像、手机号、会员等级、余额 |
 
 <!-- 每创建一个新文件，在此追加记录 -->

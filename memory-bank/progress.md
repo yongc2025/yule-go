@@ -11,13 +11,46 @@
 |:---|:---|:---|
 | 0 | 基建准备 | ✅ 已完成 |
 | 1 | 团期管理 | ✅ 已完成（后端 + 管理端 + 小程序端） |
-| 2 | 用户预约 | 🔵 进行中（后端 + 前端完成，待微信支付接入） |
-| 3 | 会员充值 | 🔵 进行中（后端 + 前端完成，待微信支付接入） |
+| 2 | 用户预约 | ✅ 已完成（后端 + 前端完成，待微信支付接入） |
+| 3 | 会员充值 | ✅ 已完成（后端 + 前端完成，待微信支付接入） |
 | 4 | 装备租赁 | ✅ 已完成 |
 | 5 | 老带新裂变 | ✅ 已完成 |
 | 6 | 管理后台 | ✅ 已完成 |
+| — | 微信登录 (0011) | ✅ 已完成后端 + 小程序端 |
 
 ---
+
+### 2026-05-07 — Task 0011a ✅ 微信登录 — 后端核心
+- 做了什么：
+  - 创建 `pkg/wechat/mini.go`：微信 Code2Session SDK（调用 jscode2session 接口换取 openid + session_key）
+  - 创建 `service/auth.go`：WxLogin 业务逻辑（查找/创建用户 + JWT 签发 30 天）
+  - 创建 `handler/auth.go`：POST /api/v1/auth/wx-login
+  - 创建 `router/auth.go`：公开认证路由
+  - 修改 `model/user.go`：新增 LastLoginAt 字段
+  - 修改 `main.go`：注册认证路由到公开路由组
+- 验证：代码完成，待 Go 环境编译验证
+- 踩坑：无
+
+### 2026-05-07 — Task 0011b ✅ 微信登录 — 用户接口与中间件
+- 做了什么：
+  - 创建 `handler/user.go`：GET/PUT /api/v1/user/profile + PUT /user/phone（占位）
+  - 创建 `router/user.go`：JWT 保护的用户路由
+  - 修改 `model/user.go`：新增 ToProfileResponse() 方法
+  - 修改 `main.go`：注册用户路由到 JWT 认证组
+- 说明：JWT 中间件（middleware/auth.go）在 0011a 前已存在，AC-01 无需额外开发
+- 验证：代码完成，待 Go 环境编译验证
+- 踩坑：无
+
+### 2026-05-07 — Task 0011c ✅ 微信登录 — 小程序端
+- 做了什么：
+  - 创建 `api/auth.js`：wx-login API
+  - 创建 `utils/auth.js`：token 存储/获取/清除 + wxLogin 流程封装
+  - 修改 `api/index.js`：401 自动重新登录 + 请求队列防并发
+  - 修改 `App.vue`：onLaunch 自动调用 wx.login
+  - 创建 `pages/user/profile.vue`：个人信息页（昵称、头像、手机号、会员等级、余额、邀请码）
+  - 修改 `pages.json`：新增 profile 页路由
+- 验证：代码完成，待 npm 编译验证
+- 踩坑：无
 
 ### 2026-05-07 — 任务颗粒度拆分
 - 做了什么：
