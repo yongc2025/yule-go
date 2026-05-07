@@ -100,6 +100,11 @@ Page({
     })
   },
 
+  // 跳转管理页
+  goAdmin() {
+    wx.navigateTo({ url: '/pages/admin/admin' })
+  },
+
   // 下拉刷新
   onPullDownRefresh() {
     this.loadActivities()

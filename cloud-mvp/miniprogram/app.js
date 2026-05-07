@@ -8,7 +8,7 @@ App({
       // env 参数说明：
       // 填入云开发环境 ID（在云开发控制台获取）
       // 如果不填则使用默认环境
-      env: 'yule-prod', // TODO: 替换为实际环境 ID
+      env: 'cloud1-d5gjw44apd3056bda',
       traceUser: true
     })
 
