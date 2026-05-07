@@ -1,15 +1,16 @@
 # 云开发初始数据
 
-> 在云开发控制台 → 数据库中，将以下 JSON 文件导入对应集合
+> 在云开发控制台 → 数据库中，将 `.jsonl` 文件导入对应集合
+> 格式为 **JSON Lines**（每行一个 JSON 对象），不是 JSON 数组
 
 ---
 
 ## 导入顺序
 
-1. `merchants.json` → 导入 `merchants` 集合
-2. `admins.json` → 导入 `admins` 集合
-3. `activities.json` → 导入 `activities` 集合
-4. `schedules.json` → 导入 `schedules` 集合
+1. `merchants.jsonl` → 导入 `merchants` 集合
+2. `admins.jsonl` → 导入 `admins` 集合
+3. `activities.jsonl` → 导入 `activities` 集合
+4. `schedules.jsonl` → 导入 `schedules` 集合
 
 ## 重要提示
 
