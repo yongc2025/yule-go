@@ -60,6 +60,7 @@ func main() {
 
 		// 公开路由（不需要认证）
 		router.RegisterAuthRoutes(v1)
+		router.RegisterSpotRoutes(v1)
 		router.RegisterScheduleRoutes(v1)
 		router.RegisterRentalRoutes(v1)
 		router.RegisterPaymentRoutes(v1)
