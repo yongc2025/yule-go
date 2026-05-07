@@ -9,3 +9,5 @@
 - [ ] 7. 管理后台前端：SpotList.vue（列表 + 创建/编辑对话框）
 - [ ] 8. API：GET /api/v1/spots（小程序端钓场列表）
 - [ ] 9. API：GET /api/v1/spots/:id（小程序端钓场详情）
+- [ ] 10. API：GET /api/v1/spots/nearby（附近钓场，经纬度距离排序）
+- [ ] 11. API：GET /api/v1/spots/:id/routes（钓场关联线路）
