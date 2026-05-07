@@ -1,0 +1,166 @@
+/* pages/admin/admin.wxss */
+
+.admin-login {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 120rpx 60rpx;
+}
+
+.login-title {
+  font-size: 36rpx;
+  font-weight: 700;
+  margin-top: 24rpx;
+  margin-bottom: 8rpx;
+}
+
+.login-desc {
+  font-size: 26rpx;
+  color: #999;
+  margin-bottom: 40rpx;
+}
+
+.login-input {
+  width: 100%;
+  padding: 24rpx;
+  border: 2rpx solid #e8e8e8;
+  border-radius: 12rpx;
+  font-size: 28rpx;
+  text-align: center;
+}
+
+.section-title {
+  font-size: 30rpx;
+  font-weight: 600;
+  margin-bottom: 20rpx;
+}
+
+/* 今日概览 */
+.overview-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16rpx;
+}
+
+.overview-item {
+  background: #f6ffed;
+  border-radius: 12rpx;
+  padding: 24rpx;
+  text-align: center;
+}
+
+.overview-num {
+  font-size: 40rpx;
+  font-weight: 700;
+  color: #1890ff;
+  margin-bottom: 4rpx;
+}
+
+.overview-label {
+  font-size: 22rpx;
+  color: #999;
+}
+
+/* 菜单项 */
+.menu-item {
+  display: flex;
+  align-items: center;
+  padding: 8rpx 0;
+}
+
+.menu-icon {
+  font-size: 48rpx;
+  margin-right: 24rpx;
+}
+
+.menu-text {
+  flex: 1;
+}
+
+.menu-title {
+  font-size: 30rpx;
+  font-weight: 600;
+  margin-bottom: 4rpx;
+}
+
+.menu-desc {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.menu-arrow {
+  color: #ccc;
+  font-size: 24rpx;
+}
+
+/* 团期列表 */
+.schedule-item {
+  padding: 16rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.schedule-item:last-child {
+  border-bottom: none;
+}
+
+.schedule-name {
+  font-size: 28rpx;
+  font-weight: 600;
+  margin-bottom: 8rpx;
+}
+
+.schedule-info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 24rpx;
+  color: #666;
+}
+
+.checkin-progress {
+  color: #52c41a;
+}
+
+/* 订单迷你列表 */
+.order-mini {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.order-mini:last-child {
+  border-bottom: none;
+}
+
+.order-mini-name {
+  font-size: 28rpx;
+  font-weight: 600;
+  margin-right: 16rpx;
+}
+
+.order-mini-activity {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.order-mini-right {
+  text-align: right;
+}
+
+.order-mini-right .price {
+  font-size: 28rpx;
+  display: block;
+}
+
+.order-mini-status {
+  font-size: 22rpx;
+}
+
+.empty-sub {
+  color: #999;
+  font-size: 26rpx;
+  text-align: center;
+  padding: 24rpx 0;
+}

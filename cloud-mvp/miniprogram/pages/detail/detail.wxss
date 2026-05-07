@@ -1,0 +1,192 @@
+/* pages/detail/detail.wxss */
+
+.cover-swiper {
+  height: 480rpx;
+}
+
+.cover-img {
+  width: 100%;
+  height: 100%;
+}
+
+.title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12rpx;
+}
+
+.activity-name {
+  font-size: 36rpx;
+  font-weight: 700;
+  flex: 1;
+  margin-right: 16rpx;
+}
+
+.activity-price .price {
+  font-size: 44rpx;
+}
+
+.shop-link {
+  font-size: 26rpx;
+  color: #666;
+  margin-bottom: 16rpx;
+}
+
+.highlights {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+}
+
+.section-title {
+  font-size: 30rpx;
+  font-weight: 600;
+  margin-bottom: 20rpx;
+}
+
+/* 时间线 */
+.timeline {
+  padding-left: 24rpx;
+  border-left: 4rpx solid #e8e8e8;
+}
+
+.timeline-item {
+  position: relative;
+  padding-left: 24rpx;
+  padding-bottom: 24rpx;
+}
+
+.timeline-item:last-child {
+  padding-bottom: 0;
+}
+
+.timeline-dot {
+  position: absolute;
+  left: -34rpx;
+  top: 8rpx;
+  width: 16rpx;
+  height: 16rpx;
+  border-radius: 50%;
+  background: #1890ff;
+}
+
+.timeline-time {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #1890ff;
+  margin-bottom: 4rpx;
+}
+
+.timeline-desc {
+  font-size: 26rpx;
+  color: #666;
+}
+
+/* 费用包含 */
+.include-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12rpx;
+  font-size: 26rpx;
+}
+
+.include-icon {
+  margin-right: 12rpx;
+  color: #52c41a;
+  font-weight: 700;
+}
+
+.include-icon.exclude {
+  color: #f5222d;
+}
+
+/* 档期选择 */
+.schedule-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+}
+
+.schedule-item {
+  padding: 16rpx 24rpx;
+  border: 2rpx solid #e8e8e8;
+  border-radius: 12rpx;
+  text-align: center;
+  min-width: 200rpx;
+}
+
+.schedule-item.selected {
+  border-color: #1890ff;
+  background: #e6f7ff;
+}
+
+.schedule-item.full {
+  opacity: 0.5;
+  background: #f5f5f5;
+}
+
+.schedule-date {
+  font-size: 26rpx;
+  font-weight: 600;
+  margin-bottom: 4rpx;
+}
+
+.schedule-slots {
+  font-size: 22rpx;
+  color: #999;
+}
+
+/* 出行须知 */
+.notes-text {
+  font-size: 26rpx;
+  color: #666;
+  line-height: 1.8;
+  white-space: pre-wrap;
+}
+
+/* 取消政策 */
+.policy-item {
+  font-size: 26rpx;
+  color: #666;
+  margin-bottom: 8rpx;
+  padding-left: 16rpx;
+  position: relative;
+}
+
+.policy-item::before {
+  content: '•';
+  position: absolute;
+  left: 0;
+  color: #1890ff;
+}
+
+/* 底部操作栏 */
+.bottom-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16rpx 32rpx;
+  padding-bottom: calc(16rpx + env(safe-area-inset-bottom));
+  box-shadow: 0 -4rpx 16rpx rgba(0, 0, 0, 0.06);
+}
+
+.bottom-price .price {
+  font-size: 44rpx;
+}
+
+.btn-bottom {
+  padding: 20rpx 80rpx;
+}
+
+.empty-sub {
+  color: #999;
+  font-size: 26rpx;
+  text-align: center;
+  padding: 16rpx 0;
+}

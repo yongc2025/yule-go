@@ -1,0 +1,158 @@
+/* pages/index/index.wxss */
+
+.page {
+  padding-bottom: 20rpx;
+}
+
+/* 门店头部 */
+.shop-header {
+  background: linear-gradient(135deg, #1890ff, #096dd9);
+  padding: 40rpx 32rpx 32rpx;
+  color: #fff;
+}
+
+.shop-info {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16rpx;
+}
+
+.shop-avatar {
+  width: 96rpx;
+  height: 96rpx;
+  border-radius: 50%;
+  border: 4rpx solid rgba(255, 255, 255, 0.6);
+  margin-right: 24rpx;
+}
+
+.shop-text {
+  flex: 1;
+}
+
+.shop-name {
+  font-size: 36rpx;
+  font-weight: 700;
+  margin-bottom: 4rpx;
+}
+
+.shop-slogan {
+  font-size: 24rpx;
+  opacity: 0.85;
+}
+
+.shop-tags {
+  display: flex;
+  gap: 16rpx;
+}
+
+.shop-tags .tag {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  font-size: 22rpx;
+}
+
+/* 周选择器 */
+.week-selector {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24rpx;
+  background: #fff;
+  margin-bottom: 2rpx;
+}
+
+.week-arrow {
+  padding: 16rpx 24rpx;
+  color: #1890ff;
+  font-size: 28rpx;
+}
+
+.week-label {
+  font-size: 30rpx;
+  font-weight: 600;
+  padding: 0 32rpx;
+}
+
+/* 活动卡片 */
+.activity-card {
+  background: #fff;
+  margin: 24rpx;
+  border-radius: 16rpx;
+  overflow: hidden;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.06);
+}
+
+.activity-cover {
+  position: relative;
+  height: 320rpx;
+}
+
+.activity-cover image {
+  width: 100%;
+  height: 100%;
+}
+
+.activity-type-badge {
+  position: absolute;
+  top: 16rpx;
+  left: 16rpx;
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  font-size: 22rpx;
+  padding: 6rpx 16rpx;
+  border-radius: 8rpx;
+}
+
+.activity-body {
+  padding: 24rpx;
+}
+
+.activity-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  margin-bottom: 12rpx;
+}
+
+.activity-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16rpx;
+  font-size: 26rpx;
+  color: #666;
+}
+
+.slots-warning {
+  color: #fa8c16;
+  font-weight: 600;
+}
+
+.activity-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.activity-price .price {
+  font-size: 40rpx;
+}
+
+.btn-book {
+  background: linear-gradient(135deg, #1890ff, #096dd9);
+  color: #fff;
+  padding: 12rpx 40rpx;
+  border-radius: 8rpx;
+  font-size: 28rpx;
+  font-weight: 600;
+}
+
+.btn-disabled {
+  background: #d9d9d9;
+  color: #999;
+}
+
+.empty-sub {
+  font-size: 24rpx;
+  color: #bbb;
+  margin-top: 8rpx;
+}

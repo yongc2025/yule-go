@@ -1,0 +1,112 @@
+<!--pages/detail/detail.wxml-->
+<!--活动详情页 — GetYourGuide 结构-->
+
+<view class="page" wx:if="{{activity}}">
+  <!-- 封面图轮播 -->
+  <swiper class="cover-swiper" indicator-dots autoplay circular>
+    <swiper-item wx:for="{{activity.images}}" wx:key="*this">
+      <image src="{{item}}" mode="aspectFill" class="cover-img" />
+    </swiper-item>
+  </swiper>
+
+  <!-- 基本信息 -->
+  <view class="card">
+    <view class="title-row">
+      <view class="activity-name">{{activity.name}}</view>
+      <view class="activity-price">
+        <text class="price">¥{{activity.price}}</text>
+        <text class="price-unit">/人</text>
+      </view>
+    </view>
+    <view class="shop-link" wx:if="{{shopInfo.name}}">
+      <text>🏪 {{shopInfo.name}}</text>
+    </view>
+
+    <!-- 亮点标签 -->
+    <view class="highlights" wx:if="{{activity.highlights}}">
+      <view class="tag tag-blue" wx:for="{{activity.highlights}}" wx:key="*this">{{item}}</view>
+    </view>
+  </view>
+
+  <!-- 行程安排 -->
+  <view class="card" wx:if="{{activity.itinerary && activity.itinerary.length > 0}}">
+    <view class="section-title">📋 行程安排</view>
+    <view class="timeline">
+      <view class="timeline-item" wx:for="{{activity.itinerary}}" wx:key="time">
+        <view class="timeline-dot"></view>
+        <view class="timeline-content">
+          <view class="timeline-time">{{item.time}}</view>
+          <view class="timeline-desc">{{item.desc}}</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 费用包含/不包含 -->
+  <view class="card">
+    <view class="section-title">✅ 费用包含</view>
+    <view class="include-list">
+      <view class="include-item" wx:for="{{activity.includes}}" wx:key="*this">
+        <text class="include-icon">✓</text>
+        <text>{{item}}</text>
+      </view>
+    </view>
+
+    <view class="section-title" wx:if="{{activity.excludes && activity.excludes.length > 0}}" style="margin-top: 24rpx;">❌ 费用不含</view>
+    <view class="include-list">
+      <view class="include-item" wx:for="{{activity.excludes}}" wx:key="*this">
+        <text class="include-icon exclude">✗</text>
+        <text>{{item}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 档期选择 -->
+  <view class="card">
+    <view class="section-title">📅 选择档期</view>
+    <view class="schedule-list">
+      <view class="schedule-item {{item.selected ? 'selected' : ''}} {{item.slotsLeft <= 0 ? 'full' : ''}}"
+            wx:for="{{schedules}}" wx:key="_id" bindtap="selectSchedule" data-index="{{index}}">
+        <view class="schedule-date">{{item.dateFormatted}}</view>
+        <view class="schedule-slots">
+          {{item.slotsLeft <= 0 ? '已满' : '余' + item.slotsLeft + '位'}}
+        </view>
+      </view>
+    </view>
+    <view class="empty-sub" wx:if="{{schedules.length === 0}}">暂无可报名档期</view>
+  </view>
+
+  <!-- 出行须知 -->
+  <view class="card" wx:if="{{activity.notes}}">
+    <view class="section-title">📝 出行须知</view>
+    <view class="notes-text">{{activity.notes}}</view>
+  </view>
+
+  <!-- 取消政策 -->
+  <view class="card">
+    <view class="section-title">🔄 取消政策</view>
+    <view class="policy-list">
+      <view class="policy-item">出行前 72 小时以上：全额退款</view>
+      <view class="policy-item">出行前 24-72 小时：退款 50%</view>
+      <view class="policy-item">出行前 24 小时内：不可退款</view>
+      <view class="policy-item">天气/不可抗力：全额退款</view>
+    </view>
+  </view>
+
+  <!-- 底部占位 -->
+  <view style="height: 140rpx;"></view>
+
+  <!-- 底部操作栏 -->
+  <view class="bottom-bar">
+    <view class="bottom-price">
+      <text class="price">¥{{activity.price}}</text>
+      <text class="price-unit">/人</text>
+    </view>
+    <view class="btn-primary btn-bottom" bindtap="goBooking">
+      立即报名
+    </view>
+  </view>
+</view>
+
+<!-- 加载中 -->
+<view class="loading" wx:if="{{loading}}">加载中...</view>

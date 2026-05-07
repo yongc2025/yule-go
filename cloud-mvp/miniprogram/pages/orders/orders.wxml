@@ -1,0 +1,58 @@
+<!--pages/orders/orders.wxml-->
+<!--我的订单页-->
+
+<view class="page">
+  <!-- 状态筛选 -->
+  <view class="status-tabs">
+    <view class="tab-item {{currentTab === 'all' ? 'active' : ''}}" bindtap="switchTab" data-tab="all">全部</view>
+    <view class="tab-item {{currentTab === 'paid' ? 'active' : ''}}" bindtap="switchTab" data-tab="paid">已支付</view>
+    <view class="tab-item {{currentTab === 'completed' ? 'active' : ''}}" bindtap="switchTab" data-tab="completed">已完成</view>
+    <view class="tab-item {{currentTab === 'cancelled' ? 'active' : ''}}" bindtap="switchTab" data-tab="cancelled">已取消</view>
+  </view>
+
+  <!-- 订单列表 -->
+  <view class="order-list" wx:if="{{orders.length > 0}}">
+    <view class="order-card" wx:for="{{orders}}" wx:key="_id">
+      <view class="order-header">
+        <text class="order-no">订单号：{{item.orderNo}}</text>
+        <text class="order-status status-{{item.status}}">{{item.statusText}}</text>
+      </view>
+
+      <view class="order-body" bindtap="goDetail" data-id="{{item._id}}">
+        <view class="order-name">{{item.activityName}}</view>
+        <view class="order-meta">
+          <text>📅 {{item.scheduleDate}}</text>
+          <text>👥 {{item.adults}}成人{{item.children > 0 ? ' + ' + item.children + '儿童' : ''}}</text>
+        </view>
+      </view>
+
+      <view class="order-footer">
+        <view class="order-amount">
+          <text class="price">¥{{item.totalFee}}</text>
+        </view>
+
+        <!-- 核销码展示（已支付状态） -->
+        <view class="checkin-section" wx:if="{{item.status === 'paid'}}">
+          <view class="checkin-code">核销码：{{item.checkinCode}}</view>
+          <canvas canvas-id="qrcode-{{item._id}}" class="qrcode-canvas" />
+        </view>
+
+        <!-- 操作按钮 -->
+        <view class="order-actions">
+          <view class="btn-outline" wx:if="{{item.status === 'pending'}}" bindtap="cancelOrder" data-id="{{item._id}}">取消</view>
+          <view class="btn-primary-sm" wx:if="{{item.status === 'paid'}}" bindtap="showCheckinCode" data-id="{{item._id}}">出示核销码</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty" wx:if="{{!loading && orders.length === 0}}">
+    <view class="empty-icon">📋</view>
+    <view>暂无订单</view>
+    <view class="empty-sub">去报名一个活动吧~</view>
+  </view>
+
+  <!-- 加载中 -->
+  <view class="loading" wx:if="{{loading}}">加载中...</view>
+</view>
