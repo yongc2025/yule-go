@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>渔乐Go - 设计稿</title>
+<style>
+/* ============================================
+   设计系统 — 渔乐Go
+   设计理念：自然、温暖、信任
+   色彩灵感：晨曦中的湖面、夕阳下的钓场
+   ============================================ */
+
+:root {
+  /* 主色系 — 森林绿（自然、信任） */
+  --primary: #2D6A4F;
+  --primary-light: #40916C;
+  --primary-lighter: #52B788;
+  --primary-bg: #D8F3DC;
+  --primary-bg-light: #EDF7EF;
+
+  /* 强调色 — 暖橙（活力、行动） */
+  --accent: #E76F51;
+  --accent-light: #F4A261;
+  --accent-bg: #FFF3E8;
+
+  /* 中性色 */
+  --text-primary: #1B1B1B;
+  --text-secondary: #6B7280;
+  --text-tertiary: #9CA3AF;
+  --text-white: #FFFFFF;
+
+  /* 背景 */
+  --bg-page: #F5F5F0;
+  --bg-card: #FFFFFF;
+  --bg-warm: #FDF8F3;
+
+  /* 功能色 */
+  --success: #2D6A4F;
+  --warning: #E9C46A;
+  --danger: #E63946;
+  --info: #457B9D;
+
+  /* 圆角 */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-full: 999px;
+
+  /* 阴影 */
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
+
+  /* 字号 */
+  --text-xs: 11px;
+  --text-sm: 13px;
+  --text-base: 15px;
+  --text-lg: 17px;
+  --text-xl: 20px;
+  --text-2xl: 24px;
+  --text-3xl: 30px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, 'PingFang SC', 'Helvetica Neue', sans-serif;
+  background: #E8E8E3;
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 手机容器 */
+.phone-frame {
+  width: 375px;
+  min-height: 812px;
+  margin: 20px auto;
+  background: var(--bg-page);
+  border-radius: 40px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.2), 0 0 0 1px rgba(0,0,0,0.05);
+  position: relative;
+}
+.phone-frame::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 150px; height: 30px;
+  background: #000;
+  border-radius: 0 0 20px 20px;
+  z-index: 100;
+}
+
+/* 页面标题 */
+.page-title {
+  text-align: center;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 40px 0 8px;
+  letter-spacing: -0.5px;
+}
+.page-subtitle {
+  text-align: center;
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 24px;
+}
+
+/* 状态栏 */
+.status-bar {
+  height: 44px;
+  padding: 0 20px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-white);
+}
+.status-bar.dark { color: var(--text-primary); }
+
+/* 导航栏 */
+.nav-bar {
+  height: 44px;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.nav-bar .title {
+  font-size: 17px;
+  font-weight: 600;
+}
+.nav-bar .back {
+  font-size: 20px;
+  cursor: pointer;
+}
+
+/* 底部导航 */
+.tab-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0; right: 0;
+  height: 83px;
+  background: var(--bg-card);
+  border-top: 1px solid #E5E5E5;
+  display: flex;
+  align-items: flex-start;
+  padding-top: 8px;
+  padding-bottom: 34px;
+}
+.tab-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  cursor: pointer;
+}
+.tab-item .icon { font-size: 22px; }
+.tab-item .label {
+  font-size: 10px;
+  color: var(--text-tertiary);
+}
+.tab-item.active .label {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+/* 通用组件 */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  font-size: 11px;
+  font-weight: 500;
+}
+.badge-primary { background: var(--primary-bg); color: var(--primary); }
+.badge-accent { background: var(--accent-bg); color: var(--accent); }
+.badge-warning { background: #FEF3C7; color: #92400E; }
+.badge-white { background: rgba(255,255,255,0.2); color: white; backdrop-filter: blur(4px); }
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 24px;
+  border-radius: var(--radius-full);
+  font-size: 15px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-primary { background: var(--primary); color: white; }
+.btn-accent { background: var(--accent); color: white; }
+.btn-outline { background: transparent; border: 1.5px solid var(--primary); color: var(--primary); }
+.btn-block { width: 100%; }
+.btn-lg { padding: 14px 32px; font-size: 17px; }
+.btn-sm { padding: 8px 16px; font-size: 13px; }
+
+.card {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  font-size: 12px;
+  background: var(--bg-page);
+  color: var(--text-secondary);
+}
+
+.divider {
+  height: 8px;
+  background: var(--bg-page);
+}
+
+/* 间距工具 */
+.p-16 { padding: 16px; }
+.p-20 { padding: 20px; }
+.px-16 { padding-left: 16px; padding-right: 16px; }
+.px-20 { padding-left: 20px; padding-right: 20px; }
+.mt-8 { margin-top: 8px; }
+.mt-12 { margin-top: 12px; }
+.mt-16 { margin-top: 16px; }
+.mb-8 { margin-bottom: 8px; }
+.mb-12 { margin-bottom: 12px; }
+.mb-16 { margin-bottom: 16px; }
+.gap-8 { gap: 8px; }
+.gap-12 { gap: 12px; }
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.flex-1 { flex: 1; }
+.text-center { text-align: center; }
+
+/* 页面容器 */
+.page-content {
+  padding-bottom: 100px;
+  overflow-y: auto;
+}
+
+/* 分隔线标注 */
+.design-label {
+  background: var(--primary);
+  color: white;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+  letter-spacing: 1px;
+}
+</style>
+</head>
+<body>
+
+<!-- ============================================
+     PAGE 1: 门店首页（核心页面）
+     用户打开小程序的第一个页面
+     ============================================ -->
+<div class="phone-frame" id="page-store-home">
+  <!-- 状态栏 -->
+  <div style="background: linear-gradient(135deg, #2D6A4F 0%, #40916C 100%); padding-bottom: 0;">
+    <div class="status-bar">
+      <span>9:41</span>
+      <span>📶 🔋</span>
+    </div>
+
+    <!-- 顶部品牌区 -->
+    <div style="padding: 0 20px 20px; display: flex; align-items: center; justify-content: space-between;">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <div style="width: 36px; height: 36px; background: rgba(255,255,255,0.2); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px;">🎣</div>
+        <div>
+          <div style="color: white; font-size: 18px; font-weight: 700; letter-spacing: -0.3px;">渔乐Go</div>
+          <div style="color: rgba(255,255,255,0.7); font-size: 11px;">周末去哪？跟我走！</div>
+        </div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 4px; color: rgba(255,255,255,0.8); font-size: 12px;">
+        📍 芙蓉区
+        <span style="font-size: 10px;">▼</span>
+      </div>
+    </div>
+
+    <!-- 老板信息卡 -->
+    <div style="margin: 0 16px 16px; background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); border-radius: 16px; padding: 16px; display: flex; align-items: center; gap: 14px;">
+      <div style="width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, #F4A261, #E76F51); display: flex; align-items: center; justify-content: center; font-size: 24px; border: 3px solid rgba(255,255,255,0.3);">
+        👨‍🌾
+      </div>
+      <div style="flex: 1;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="color: white; font-size: 18px; font-weight: 700;">老王渔具</span>
+          <span class="badge badge-white" style="font-size: 10px;">⭐ 金牌领队</span>
+        </div>
+        <div style="color: rgba(255,255,255,0.7); font-size: 12px; margin-top: 4px;">
+          已服务 <span style="color: #F4A261; font-weight: 600;">268</span> 人 · 4.9分(128条评价) · 距您1.2km
+        </div>
+      </div>
+      <div style="width: 36px; height: 36px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+        📞
+      </div>
+    </div>
+  </div>
+
+  <!-- 内容区 -->
+  <div class="page-content" style="margin-top: -8px;">
+
+    <!-- 快捷入口 -->
+    <div style="margin: 0 16px; background: var(--bg-card); border-radius: var(--radius-lg); padding: 16px; box-shadow: var(--shadow-md); display: flex; justify-content: space-around; position: relative; z-index: 1;">
+      <div style="display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer;">
+        <div style="width: 48px; height: 48px; background: var(--primary-bg); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 22px;">🎯</div>
+        <span style="font-size: 12px; color: var(--text-secondary);">全部活动</span>
+      </div>
+      <div style="display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer;">
+        <div style="width: 48px; height: 48px; background: #E8F5E9; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 22px;">🏕️</div>
+        <span style="font-size: 12px; color: var(--text-secondary);">露营</span>
+      </div>
+      <div style="display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer;">
+        <div style="width: 48px; height: 48px; background: #FFF3E0; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 22px;">👨‍👩‍👧</div>
+        <span style="font-size: 12px; color: var(--text-secondary);">亲子</span>
+      </div>
+      <div style="display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer;">
+        <div style="width: 48px; height: 48px; background: #F3E5F5; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 22px;">👴</div>
+        <span style="font-size: 12px; color: var(--text-secondary);">慢游</span>
+      </div>
+    </div>
+
+    <!-- 本周活动 -->
+    <div style="padding: 20px 16px 0;">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+        <div>
+          <span style="font-size: 18px; font-weight: 700;">本周活动</span>
+          <span style="font-size: 12px; color: var(--text-tertiary); margin-left: 8px;">5月9日-10日</span>
+        </div>
+        <span style="font-size: 13px; color: var(--primary); font-weight: 500; cursor: pointer;">查看全部 →</span>
+      </div>
+
+      <!-- 活动卡片 1 -->
+      <div class="card" style="margin-bottom: 12px; cursor: pointer;">
+        <div style="height: 140px; background: linear-gradient(135deg, #264653 0%, #2A9D8F 100%); position: relative; display: flex; align-items: flex-end; padding: 14px;">
+          <div style="position: absolute; top: 12px; right: 12px;">
+            <span class="badge badge-accent" style="font-weight: 600;">🔥 仅剩3位</span>
+          </div>
+          <div>
+            <div style="color: white; font-size: 13px; opacity: 0.8;">5月9日 周六</div>
+            <div style="color: white; font-size: 18px; font-weight: 700; margin-top: 2px;">成人钓友单日垂钓团</div>
+          </div>
+        </div>
+        <div style="padding: 14px;">
+          <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 10px;">
+            <span class="tag">🎣 专属钓点</span>
+            <span class="tag">🚌 车接车送</span>
+            <span class="tag">🍱 含午餐</span>
+          </div>
+          <div style="display: flex; align-items: center; justify-content: space-between;">
+            <div>
+              <span style="font-size: 22px; font-weight: 800; color: var(--accent);">¥128</span>
+              <span style="font-size: 13px; color: var(--text-tertiary);">/人</span>
+            </div>
+            <div class="btn btn-primary btn-sm">立即报名</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 活动卡片 2 -->
+      <div class="card" style="margin-bottom: 12px; cursor: pointer;">
+        <div style="height: 140px; background: linear-gradient(135deg, #606C38 0%, #DDA15E 100%); position: relative; display: flex; align-items: flex-end; padding: 14px;">
+          <div style="position: absolute; top: 12px; right: 12px;">
+            <span class="badge badge-white">剩余8位</span>
+          </div>
+          <div>
+            <div style="color: white; font-size: 13px; opacity: 0.8;">5月10日 周日</div>
+            <div style="color: white; font-size: 18px; font-weight: 700; margin-top: 2px;">垂钓+露营一日套餐</div>
+          </div>
+        </div>
+        <div style="padding: 14px;">
+          <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 10px;">
+            <span class="tag">⛺ 露营装备全包</span>
+            <span class="tag">🎣 含钓具</span>
+            <span class="tag">🍖 户外野餐</span>
+          </div>
+          <div style="display: flex; align-items: center; justify-content: space-between;">
+            <div>
+              <span style="font-size: 22px; font-weight: 800; color: var(--accent);">¥198</span>
+              <span style="font-size: 13px; color: var(--text-tertiary);">/人</span>
+            </div>
+            <div class="btn btn-primary btn-sm">立即报名</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 活动卡片 3 -->
+      <div class="card" style="margin-bottom: 12px; cursor: pointer;">
+        <div style="height: 140px; background: linear-gradient(135deg, #BC6C25 0%, #FEFAE0 100%); position: relative; display: flex; align-items: flex-end; padding: 14px;">
+          <div style="position: absolute; top: 12px; right: 12px;">
+            <span class="badge badge-white">剩余5位</span>
+          </div>
+          <div>
+            <div style="color: white; font-size: 13px; opacity: 0.8;">5月10日 周日</div>
+            <div style="color: white; font-size: 18px; font-weight: 700; margin-top: 2px; text-shadow: 0 1px 3px rgba(0,0,0,0.3);">亲子出游套餐</div>
+          </div>
+        </div>
+        <div style="padding: 14px;">
+          <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 10px;">
+            <span class="tag">👨‍👩‍👧 趣味钓鱼</span>
+            <span class="tag">🎮 亲子游戏</span>
+            <span class="tag">🧺 露营野餐</span>
+          </div>
+          <div style="display: flex; align-items: center; justify-content: space-between;">
+            <div>
+              <span style="font-size: 22px; font-weight: 800; color: var(--accent);">¥238</span>
+              <span style="font-size: 13px; color: var(--text-tertiary);">/一大一小</span>
+            </div>
+            <div class="btn btn-primary btn-sm">立即报名</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 活动卡片 4 -->
+      <div class="card" style="margin-bottom: 12px; cursor: pointer;">
+        <div style="height: 140px; background: linear-gradient(135deg, #457B9D 0%, #A8DADC 100%); position: relative; display: flex; align-items: flex-end; padding: 14px;">
+          <div style="position: absolute; top: 12px; right: 12px;">
+            <span class="badge badge-white">剩余12位</span>
+          </div>
+          <div>
+            <div style="color: white; font-size: 13px; opacity: 0.8;">5月9日 周六</div>
+            <div style="color: white; font-size: 18px; font-weight: 700; margin-top: 2px;">退休专属慢游单日团</div>
+          </div>
+        </div>
+        <div style="padding: 14px;">
+          <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 10px;">
+            <span class="tag">🌅 休闲观光</span>
+            <span class="tag">🍲 农家午餐</span>
+            <span class="tag">🚗 全程接送</span>
+          </div>
+          <div style="display: flex; align-items: center; justify-content: space-between;">
+            <div>
+              <span style="font-size: 22px; font-weight: 800; color: var(--accent);">¥98</span>
+              <span style="font-size: 13px; color: var(--text-tertiary);">/人</span>
+            </div>
+            <div class="btn btn-primary btn-sm">立即报名</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 门店信息 -->
+    <div class="divider"></div>
+    <div style="padding: 16px;">
+      <div style="font-size: 18px; font-weight: 700; margin-bottom: 12px;">📍 门店信息</div>
+      <div class="card" style="padding: 16px;">
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+          <div style="width: 60px; height: 60px; background: var(--primary-bg); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 28px;">🏪</div>
+          <div>
+            <div style="font-size: 16px; font-weight: 600;">老王渔具</div>
+            <div style="font-size: 13px; color: var(--text-secondary); margin-top: 2px;">长沙市芙蓉区五一大道88号</div>
+          </div>
+        </div>
+        <div style="display: flex; gap: 10px;">
+          <div class="btn btn-outline btn-sm" style="flex: 1;">🧭 导航过去</div>
+          <div class="btn btn-primary btn-sm" style="flex: 1;">📞 一键拨打</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 服务承诺 -->
+    <div style="padding: 0 16px 16px;">
+      <div class="card" style="padding: 16px; background: var(--primary-bg-light);">
+        <div style="font-size: 14px; font-weight: 600; color: var(--primary); margin-bottom: 10px;">🛡️ 渔乐Go承诺</div>
+        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+          <span style="font-size: 12px; color: var(--primary); background: white; padding: 4px 10px; border-radius: 20px;">✅ 纯玩无购物</span>
+          <span style="font-size: 12px; color: var(--primary); background: white; padding: 4px 10px; border-radius: 20px;">✅ 全程领队陪同</span>
+          <span style="font-size: 12px; color: var(--primary); background: white; padding: 4px 10px; border-radius: 20px;">✅ 装备免费消毒</span>
+          <span style="font-size: 12px; color: var(--primary); background: white; padding: 4px 10px; border-radius: 20px;">✅ 不满意可退款</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 底部导航 -->
+  <div class="tab-bar">
+    <div class="tab-item active">
+      <span class="icon">🏠</span>
+      <span class="label">首页</span>
+    </div>
+    <div class="tab-item">
+      <span class="icon">🔍</span>
+      <span class="label">发现</span>
+    </div>
+    <div class="tab-item">
+      <span class="icon">📋</span>
+      <span class="label">订单</span>
+    </div>
+    <div class="tab-item">
+      <span class="icon">👤</span>
+      <span class="label">我的</span>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
