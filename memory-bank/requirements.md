@@ -1,8 +1,8 @@
-# 需求规格书 — yule-go（终版）
+# 需求规格书 — yule-go v4.0
 
-> **版本**：v3.0
-> **日期**：2026-05-06
-> **状态**：需求冻结，可进入开发
+> **版本**：v4.0
+> **日期**：2026-05-07
+> **状态**：需求定义，替代 v3.0
 > **本文档是项目需求的唯一真相源（Single Source of Truth）**
 
 ---
@@ -14,51 +14,44 @@
 
 **核心机会**：依托现有渔具实体店，打造"零售 + 短途旅行"双盈利模式。
 
-**产品定位**：垂钓领域的 GetYourGuide——连接钓场（供给）与钓鱼爱好者（需求），由商家（渔具店等）组织出行服务的预约平台。
+### 产品定位（v4 重大调整）
+
+**一句话**：有温度、有信任的本地垂钓出行平台——每个门店是一个独立的"超级门店"，用户有自己的主场店，但不被锁死。
 
 ```
-钓场（公共资源，平台维护）
-  │
-  ├── 商家 A（如：渔乐渔具店）创建的线路
-  ├── 商家 B（如：钓友之家）创建的线路    ← V2 开放
-  └── 商家 C ...                          ← V2 开放
-  │
-  └── 用户浏览 → 预约 → 支付 → 出行 → 核销
+用户打开小程序
+    │
+    ├── 有主场店？ ──→ 直接进入门店首页（私域体验）
+    │                      ├── 老板信息 + 信任背书
+    │                      ├── 本周活动（本店线路+团期）
+    │                      ├── 我的订单（本店）
+    │                      └── 切换门店入口
+    │
+    └── 没有/新用户 ──→ 平台发现页（附近门店、热门活动）
+                           └── 进入某门店 → 自动记录"去过的店"
 ```
 
-**MVP 策略**：架构按平台设计，上线时只开放一个商家（渔乐自己），后续无需重构即可扩展多商家。
+**核心理念**：
+- **门店是信任单元**，不是匿名商家。用户认识老板、去过店、有归属感
+- **平台是发现通道**，帮新用户找到附近好店，帮老用户发现新店
+- **私域为主，平台为辅**——80% 流量来自门店老客复购，20% 来自平台发现
 
-### 业务流程
+### 与 v3.0 的核心差异
 
-系统管的是"信息流 + 交易流"，商家与钓场的商业合作在线下完成。
-
-```
-线下（系统外）：
-  商家 ←──商量──→ 钓场（谈价格、谈容量、谈合作方式）
-
-线上（系统内）：
-  平台维护钓场信息（名称、地址、鱼种、设施、图片）
-       ↓
-  商家创建线路 ──┬── 关联钓场（经营性钓场）── 设价格、写行程
-                └── 不关联钓场（野钓线路）── 填目的地描述、写行程
-       ↓
-  商家创建团期（选日期、设名额、指派领队）
-       ↓
-  用户浏览 → 下单 → 支付 → 获得核销码
-       ↓
-  领队带团 → 扫码核销 → 出行完成
-```
-
-系统不需要管：
-- ❌ 钓场和商家之间的分成结算（线下搞定）
-- ❌ 钓场的实时容量/库存（商家线下确认后自己设名额）
-- ❌ 钓场的定价权（商家自己定线路价格）
-
-**团期不受周末限制**——退休中老年周中更闲、节假日也在周中、暑假天天可开团。商家自主决定排期日期。
+| 维度 | v3.0（平台模式） | v4.0（超级门店模式） |
+|:---|:---|:---|
+| 首页 | 平台级：附近钓场+热门线路 | 门店级：我的店+本周活动 |
+| 核心单元 | 线路/钓场 | 门店（商家） |
+| 用户关系 | 匿名平台用户 | 门店会员，有"主场店" |
+| 信任机制 | 平台背书 | 老板个人IP+门店实体背书 |
+| 发现入口 | 钓场列表 | 附近门店+门店详情 |
+| 技术架构 | 多商家平台 | 保持平台能力，前端做门店体验 |
 
 ---
 
 ## 二、目标客群
+
+### 2.1 终端用户（小程序端）
 
 | 客群 | 年龄 | 特征 | 核心需求 | 决策特点 |
 |:-----|:-----|:-----|:---------|:---------|
@@ -66,124 +59,88 @@
 | 亲子家庭 | 28-45 | 携带 5-14 岁儿童 | 安全、亲子互动、自然体验 | 价格敏感度低，决策者通常是妈妈 |
 | 退休中老年 | 55+ | 时间自由，偏好慢节奏 | 同龄人结伴、低成本、休闲出行 | 手机操作弱，可能需子女代下单 |
 
+### 2.2 商业计划书对客群的补充洞察
+
+- **垂钓爱好者**：找钓点难、自驾麻烦、无专业指导——需要"一站式省心"
+- **亲子家庭**：拒绝电子产品，偏好自然户外——需要"安全+有趣"
+- **退休中老年**：时间自由但手机操作弱——需要"大字体、简化流程、电话客服"
+
 ---
 
 ## 三、用户角色
 
-### 3.1 客户端（小程序）
+### 3.1 小程序端角色
 
-**① 垂钓爱好者（核心付费群体）**
-- **核心诉求**：找到好钓场、知道有什么鱼、省心出行
-- **关键功能**：浏览钓场（按距离/鱼种筛选）、查看线路详情、快速复购
-- **特点**：有经验，对钓位质量敏感，是口碑传播的主力
+**① 普通用户（所有终端用户）**
+- 浏览门店、查看活动、下单预约、管理订单
+- 有"主场店"概念，可切换门店
+- 跨门店通用账号（一个微信号走遍所有店）
 
-**② 亲子家庭**
-- **核心诉求**：安全、孩子能玩、大人放松
-- **关键功能**：看套餐包含什么、儿童安全说明、亲子活动详情
-- **特点**：价格敏感度低但对体验要求高，决策者通常是妈妈
+### 3.2 管理后台角色
 
-**③ 退休中老年**
-- **核心诉求**：有人陪、不累、便宜
-- **关键功能**：大字体、简化流程、电话客服
-- **特点**：手机操作能力弱，可能需要子女帮忙下单
+**② 平台管理员**（role=super_admin）
+- 全局管控：钓场维护、商家管理、全局数据
+- MVP 阶段与商家管理员是同一人（渔乐老板）
 
-### 3.2 运营端（管理后台）
+**③ 商家管理员**（role=admin, merchant_id=N）
+- 门店运营核心：线路管理、团期排期、订单处理、装备管理
+- 查看本店数据统计
 
-**④ 平台管理员**（role=super_admin, merchant_id=NULL, fishing_spot_id=NULL）
-- **职责**：平台运营、钓场信息维护、商家管理、全局数据管控
-- **核心诉求**：看全局数据、管控平台质量
-- **MVP 说明**：与商家是同一个人（渔乐老板），系统预留分离能力
+**④ 领队**（role=staff, merchant_id=N）
+- 带团出行：查看本期名单、扫码核销、标记出发/返程
+- 户外场景，操作要极简
 
-**⑤ 商家管理员**（role=admin, merchant_id=N, fishing_spot_id=NULL）
-- **职责**：创建线路、管理团期、处理订单、装备管理
-- **核心诉求**：获客、排期、营收
-- **关键功能**：线路 CRUD、团期管理、订单处理、退款审核
+### 3.3 角色权限矩阵
 
-**⑥ 钓场管理员**（role=spot_admin, merchant_id=NULL, fishing_spot_id=N）— V2 开放
-- **职责**：维护自己钓场的信息、查看预约情况
-- **核心诉求**：让更多人来自己钓场钓鱼
-- **关键功能**：编辑钓场信息（鱼种/设施/图片）、查看本钓场预约统计
-
-**⑦ 领队**（role=staff, merchant_id=N, fishing_spot_id=NULL）
-- **职责**：带团出行、核销确认
-- **核心诉求**：看名单、确认谁到了
-- **关键功能**：查看本期名单、扫码/手动核销、标记出发/返程
-- **特点**：户外用手机，网络可能不好，操作要极简
-
-#### 角色权限矩阵
-
-| 操作 | 平台管理员 | 商家管理员 | 钓场管理员(V2) | 领队 |
-|:-----|:----------|:----------|:--------------|:-----|
-| 钓场 CRUD | ✅ 所有 | ❌ | ✅ 仅自己的 | ❌ |
-| 线路管理 | ✅ 所有 | ✅ 仅自己的 | ❌ | ❌ |
-| 团期管理 | ✅ 所有 | ✅ 仅自己的 | ❌ | ❌ |
-| 订单管理 | ✅ 所有 | ✅ 仅自己的 | 👀 只看自己钓场 | ❌ |
-| 退款审核 | ✅ | ✅ 仅自己的 | ❌ | ❌ |
-| 核销 | ✅ | ✅ | ✅ 自己钓场 | ✅ 自己团期 |
-| 用户管理 | ✅ | ❌ | ❌ | ❌ |
-| 财务统计 | ✅ 所有 | ✅ 仅自己的 | 👀 仅自己钓场 | ❌ |
-| 商家审核 | ✅ | ❌ | ❌ | ❌ |
-
-### 3.3 角色关系
-
-```
-                    ┌─────────────┐
-                    │  平台管理员   │  ← 看数据、管钓场、审商家
-                    └──────┬──────┘
-                           │ 管理
-              ┌────────────┼────────────┐
-              ↓            ↓            ↓
-       ┌──────────┐  ┌──────────┐  ┌──────────┐
-       │ 商家管理员 │  │ 钓场管理员 │  │  (V2)    │
-       │(渔具店)   │  │(水库/鱼塘) │  │          │
-       └────┬─────┘  └──────────┘  └──────────┘
-            │ 派遣
-       ┌────▼─────┐
-       │ 领队(带团) │
-       └──────────┘
-
-  ┌──────────┐  ┌──────────┐  ┌──────────┐
-  │ 垂钓爱好者 │  │ 亲子家庭  │  │ 退休中老年 │  ← 三类客户
-  └──────────┘  └──────────┘  └──────────┘
-```
+| 操作 | 平台管理员 | 商家管理员 | 领队 |
+|:-----|:----------|:----------|:-----|
+| 钓场 CRUD | ✅ 所有 | ❌ | ❌ |
+| 线路管理 | ✅ 所有 | ✅ 仅自己的 | ❌ |
+| 团期管理 | ✅ 所有 | ✅ 仅自己的 | ❌ |
+| 订单管理 | ✅ 所有 | ✅ 仅自己的 | 👀 仅自己团期 |
+| 退款审核 | ✅ | ✅ 仅自己的 | ❌ |
+| 核销 | ✅ | ✅ | ✅ 自己团期 |
+| 用户管理 | ✅ | ❌ | ❌ |
+| 财务统计 | ✅ 所有 | ✅ 仅自己的 | ❌ |
+| 商家管理 | ✅ | ❌ | ❌ |
 
 ---
 
 ## 四、核心业务模型
 
-### 4.1 三方关系
+### 4.1 实体关系
 
 ```
-钓场（fishing_spots）    公共资源，平台维护
+钓场（fishing_spots）    平台公共资源
   │
-  ├── 商家（merchants）    入驻的渔具店/组织方
+  ├── 商家（merchants）    入驻的渔具店/组织方 = "超级门店"
   │     │
-  │     ├── 线路（routes）    商家创建的出行产品
+  │     ├── 线路（routes）    门店创建的出行产品
   │     │     │
   │     │     └── 团期（schedules）  某日期的出行计划
   │     │           │
   │     │           └── 订单（orders）  用户预约记录
   │     │
-  │     └── 装备（rental_items）  商家提供的租赁装备
+  │     └── 装备（rental_items）  门店提供的租赁装备
   │
-  └── 用户（users）    平台用户，跨商家通用
+  ├── 用户（users）    平台用户，跨门店通用
+  │     │
+  │     └── 用户门店关系（user_shops）  "去过的店"
+  │
+  └── 管理员（admins）    平台/商家/领队
 ```
 
 ### 4.2 核心产品（MVP）
 
-#### 五大出行线路
+#### 五大出行线路（商业计划书原始定价）
 
 | 产品 | 类型 | 价格 | 包含项目 |
 |:-----|:-----|:-----|:---------|
 | 成人钓友单日垂钓团 | fishing | 128 元/人 | 往返车费、专属钓点、基础饵料、领队服务、饮用水、出行保险 |
 | 垂钓+露营一日套餐 | camping | 198 元/人 | 交通、钓点、露营天幕桌椅、基础渔具、简餐、保险 |
-| 亲子出游套餐 | family | 238 元/一大一小 | 交通、儿童趣味钓鱼、亲子游戏、露营野餐、全程陪同、保险 |
+| 亲子出游套餐 | family | 238 元/一大一小（加儿童68元） | 交通、儿童趣味钓鱼、亲子游戏、露营野餐、全程陪同、保险 |
 | 退休专属慢游单日团 | senior | 98 元/人 | 往返接送、休闲观光、轻度垂钓、农家清淡午餐、全程陪同、保险 |
 | 野钓探险团 | wild_fishing | 158 元/人 | 往返车费、野钓向导、基础饵料、领队服务、饮用水、出行保险 |
-
-> **野钓线路说明**：野钓线路不关联钓场（`fishing_spot_id = NULL`），目的地为自然水域（河流、水库、野塘等），
-> 线路需在 `description` 中明确标注钓点位置、鱼情、注意事项等信息。
-> 野钓线路需在费用包含中明确标注安全保障措施，管理后台创建时需额外填写目的地描述。
 
 #### 装备租赁
 
@@ -194,402 +151,331 @@
 | 天幕 | 40 元/个 |
 | 折叠桌椅 | 25 元/套 |
 
-#### 会员充值体系
+#### 会员充值体系（商业计划书原始方案，锁客核心）
 
 | 档位 | 渔具折扣 | 旅行立减 | 赠送权益 |
 |:-----|:---------|:---------|:---------|
 | 200 元 | 9.5 折 | 每次立减 10 元 | 钓鱼团优惠券 1 张 |
 | 500 元 | 9 折 | 每次立减 20 元 | 装备免费租赁 3 次 |
-| 1000 元（主推） | 8.5 折 | 每次立减 30 元 | 免费单日出行名额 1 个 |
+| 1000 元（主推） | 8.5 折 | 每次立减 30 元 | 免费单日出行名额 1 个，旺季优先留位 |
 
-#### 老带新裂变
+#### 老带新裂变（商业计划书原始方案）
 
-- 老客户返现/下次参团立减 20 元
-- 新客户首单立减 15 元
+- **老客户**：返现/下次参团立减 20 元
+- **新客户**：首单立减 15 元
+- **多人同行**：2人同行每人立减 10 元，3人及以上每人立减 15 元+赠送鱼饵礼包
 
 ---
 
 ## 五、数据模型
 
-### 5.1 ER 关系
+### 5.1 新增表
 
-```
-users ────────────────────────────────────┐
-  │                                       │
-  ├── orders ── N:1 ── schedules ── N:1 ── routes ── N:1 ── merchants
-  │     │                    │                    │
-  │     ├── order_rentals    │                    └── N:1 ── fishing_spots
-  │     └── checkins         │                            ↑
-  │                          │                            │
-  ├── recharges              └── weather_status     admins.fishing_spot_id
-  └── referrals
-                                    admins ── N:1 ── merchants
-                                    admins ── N:1 ── fishing_spots
-```
-
-### 5.2 钓场表（fishing_spots）— 平台公共资源
+#### user_shops — 用户门店关系表（v4 新增）
 
 ```sql
-CREATE TABLE fishing_spots (
-  id             BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  name           VARCHAR(100) NOT NULL COMMENT '钓场名称',
-  address        VARCHAR(255) NOT NULL COMMENT '详细地址',
-  latitude       DECIMAL(10,7) DEFAULT NULL COMMENT '纬度',
-  longitude      DECIMAL(10,7) DEFAULT NULL COMMENT '经度',
-  description    TEXT COMMENT '钓场介绍',
-  fish_types     JSON COMMENT '主要鱼种',
-  facilities     JSON COMMENT '设施列表',
-  images         JSON COMMENT '图片URL列表',
-  cover_image    VARCHAR(512) DEFAULT '' COMMENT '封面图',
-  contact_name   VARCHAR(64) DEFAULT '' COMMENT '联系人',
-  contact_phone  VARCHAR(20) DEFAULT '' COMMENT '联系电话',
-  business_hours VARCHAR(50) DEFAULT '' COMMENT '营业时间',
-  status         TINYINT DEFAULT 1 COMMENT '0=停用 1=营业中',
-  created_at     DATETIME DEFAULT CURRENT_TIMESTAMP,
-  updated_at     DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  INDEX idx_status (status)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='钓场表';
-```
-
-### 5.3 商家表（merchants）
-
-```sql
-CREATE TABLE merchants (
-  id            BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  name          VARCHAR(100) NOT NULL COMMENT '商家名称',
-  logo          VARCHAR(512) DEFAULT '' COMMENT 'Logo',
-  description   TEXT COMMENT '商家介绍',
-  address       VARCHAR(255) DEFAULT '' COMMENT '门店地址',
-  contact_name  VARCHAR(64) NOT NULL COMMENT '联系人',
-  contact_phone VARCHAR(20) NOT NULL COMMENT '联系电话',
-  status        TINYINT DEFAULT 1 COMMENT '0=禁用 1=启用',
-  created_at    DATETIME DEFAULT CURRENT_TIMESTAMP,
-  updated_at    DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='商家表';
-```
-
-### 5.4 线路表（routes）
-
-```sql
-CREATE TABLE routes (
-  id                   BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  merchant_id          BIGINT UNSIGNED NOT NULL COMMENT '所属商家',
-  fishing_spot_id      BIGINT UNSIGNED DEFAULT NULL COMMENT '关联钓场',
-  name                 VARCHAR(100) NOT NULL COMMENT '线路名称',
-  type                 VARCHAR(20) NOT NULL COMMENT '类型：fishing/camping/family/senior/wild_fishing',
-  price                DECIMAL(10,2) NOT NULL COMMENT '成人价格',
-  child_price          DECIMAL(10,2) DEFAULT 0.00 COMMENT '儿童价格',
-  description          TEXT COMMENT '线路描述',
-  highlights           JSON COMMENT '亮点标签',
-  itinerary            TEXT COMMENT '行程安排（JSON）',
-  includes             JSON COMMENT '包含项目',
-  excludes             JSON COMMENT '不包含项目',
-  cover_image          VARCHAR(512) DEFAULT '' COMMENT '封面图',
-  images               JSON COMMENT '图片列表',
-  max_slots            INT UNSIGNED DEFAULT 30 COMMENT '每团最大人数',
-  min_participants     INT UNSIGNED DEFAULT 1 COMMENT '最少成团人数',
-  duration             VARCHAR(20) DEFAULT '一日游' COMMENT '行程时长',
-  departure_point      VARCHAR(255) DEFAULT '' COMMENT '集合地点',
-  departure_latitude   DECIMAL(10,7) DEFAULT NULL,
-  departure_longitude  DECIMAL(10,7) DEFAULT NULL,
-  departure_time       VARCHAR(20) DEFAULT '' COMMENT '出发时间',
-  return_time          VARCHAR(20) DEFAULT '' COMMENT '返回时间',
-  insurance_included   TINYINT DEFAULT 1 COMMENT '是否含保险',
-  cancel_policy        JSON COMMENT '取消政策',
-  status               TINYINT DEFAULT 1 COMMENT '0=下架 1=上架',
-  created_at           DATETIME DEFAULT CURRENT_TIMESTAMP,
-  updated_at           DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  INDEX idx_merchant (merchant_id),
-  INDEX idx_spot (fishing_spot_id),
-  INDEX idx_type (type),
-  INDEX idx_status (status),
-  FOREIGN KEY (merchant_id) REFERENCES merchants(id),
-  FOREIGN KEY (fishing_spot_id) REFERENCES fishing_spots(id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='线路表';
-```
-
-### 5.5 团期表（schedules）
-
-```sql
-CREATE TABLE schedules (
-  id             BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  route_id       BIGINT UNSIGNED NOT NULL COMMENT '线路ID',
-  merchant_id    BIGINT UNSIGNED NOT NULL COMMENT '商家ID（冗余）',
-  trip_date      DATE NOT NULL COMMENT '出行日期',
-  max_slots      INT UNSIGNED NOT NULL COMMENT '本团最大人数',
-  booked_slots   INT UNSIGNED DEFAULT 0 COMMENT '已报名人数',
-  guide_name     VARCHAR(64) DEFAULT '' COMMENT '领队姓名',
-  guide_phone    VARCHAR(20) DEFAULT '' COMMENT '领队电话',
-  weather_status TINYINT DEFAULT 0 COMMENT '0=未确认 1=正常 2=改期 3=取消',
-  weather_note   VARCHAR(255) DEFAULT '' COMMENT '天气备注',
-  status         TINYINT DEFAULT 1 COMMENT '0=取消 1=报名中 2=已满 3=已出发 4=已完成',
-  created_at     DATETIME DEFAULT CURRENT_TIMESTAMP,
-  updated_at     DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  UNIQUE KEY uk_route_date (route_id, trip_date),
-  INDEX idx_merchant (merchant_id),
-  INDEX idx_trip_date (trip_date),
-  INDEX idx_status (status),
-  FOREIGN KEY (route_id) REFERENCES routes(id),
-  FOREIGN KEY (merchant_id) REFERENCES merchants(id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='团期表';
-```
-
-### 5.6 用户表（users）
-
-```sql
-CREATE TABLE users (
-  id             BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  openid         VARCHAR(64) NOT NULL UNIQUE COMMENT '微信openid',
-  unionid        VARCHAR(64) DEFAULT NULL COMMENT '微信unionid',
-  nickname       VARCHAR(64) DEFAULT '' COMMENT '昵称',
-  avatar         VARCHAR(512) DEFAULT '' COMMENT '头像URL',
-  phone          VARCHAR(20) DEFAULT NULL COMMENT '手机号（加密存储）',
-  member_level   TINYINT UNSIGNED DEFAULT 0 COMMENT '0=普通 1=银卡 2=金卡 3=钻石',
-  balance        DECIMAL(10,2) DEFAULT 0.00 COMMENT '账户余额',
-  total_recharge DECIMAL(10,2) DEFAULT 0.00 COMMENT '累计充值',
-  invite_code    VARCHAR(16) NOT NULL UNIQUE COMMENT '邀请码',
-  invited_by     BIGINT UNSIGNED DEFAULT NULL COMMENT '邀请人ID',
-  last_login_at  DATETIME DEFAULT NULL COMMENT '最近登录时间',
-  created_at     DATETIME DEFAULT CURRENT_TIMESTAMP,
-  updated_at     DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  INDEX idx_phone (phone),
-  INDEX idx_invite_code (invite_code),
-  INDEX idx_invited_by (invited_by)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户表';
-```
-
-### 5.7 订单表（orders）
-
-```sql
-CREATE TABLE orders (
-  id                BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  order_no          VARCHAR(32) NOT NULL UNIQUE COMMENT '订单编号',
-  user_id           BIGINT UNSIGNED NOT NULL COMMENT '用户ID',
-  schedule_id       BIGINT UNSIGNED NOT NULL COMMENT '团期ID',
-  merchant_id       BIGINT UNSIGNED NOT NULL COMMENT '商家ID（冗余）',
-  route_id          BIGINT UNSIGNED NOT NULL COMMENT '线路ID（冗余）',
-  fishing_spot_id   BIGINT UNSIGNED DEFAULT NULL COMMENT '钓场ID（冗余）',
-  adults            INT UNSIGNED DEFAULT 1 COMMENT '成人数',
-  children          INT UNSIGNED DEFAULT 0 COMMENT '儿童数',
-  trip_fee          DECIMAL(10,2) NOT NULL COMMENT '团费小计',
-  rental_fee        DECIMAL(10,2) DEFAULT 0.00 COMMENT '租赁费小计',
-  discount_amount   DECIMAL(10,2) DEFAULT 0.00 COMMENT '折扣金额',
-  balance_used      DECIMAL(10,2) DEFAULT 0.00 COMMENT '余额抵扣',
-  total_amount      DECIMAL(10,2) NOT NULL COMMENT '实付金额',
-  contact_name      VARCHAR(64) NOT NULL COMMENT '联系人',
-  contact_phone     VARCHAR(20) NOT NULL COMMENT '联系电话',
-  checkin_code      VARCHAR(16) DEFAULT NULL COMMENT '核销码',
-  payment_status    TINYINT DEFAULT 0 COMMENT '0=未支付 1=已支付 2=已退款',
-  payment_time      DATETIME DEFAULT NULL,
-  wx_transaction_id VARCHAR(64) DEFAULT NULL,
-  status            TINYINT DEFAULT 0 COMMENT '0=待支付 1=已支付 2=已取消 3=退款中 4=已退款 5=已核销 6=已完成',
-  cancel_reason     VARCHAR(255) DEFAULT '',
-  refund_amount     DECIMAL(10,2) DEFAULT 0.00,
-  refund_time       DATETIME DEFAULT NULL,
-  expire_at         DATETIME DEFAULT NULL COMMENT '支付过期时间',
-  remark            VARCHAR(500) DEFAULT '',
-  created_at        DATETIME DEFAULT CURRENT_TIMESTAMP,
-  updated_at        DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  INDEX idx_user (user_id),
-  INDEX idx_schedule (schedule_id),
-  INDEX idx_merchant (merchant_id),
-  INDEX idx_order_no (order_no),
-  INDEX idx_status (status),
-  INDEX idx_created_at (created_at),
-  FOREIGN KEY (user_id) REFERENCES users(id),
-  FOREIGN KEY (schedule_id) REFERENCES schedules(id),
-  FOREIGN KEY (merchant_id) REFERENCES merchants(id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='订单表';
-```
-
-### 5.8 订单租赁明细表（order_rentals）
-
-```sql
-CREATE TABLE order_rentals (
-  id             BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  order_id       BIGINT UNSIGNED NOT NULL COMMENT '订单ID',
-  rental_item_id BIGINT UNSIGNED NOT NULL COMMENT '租赁项ID',
-  quantity       INT UNSIGNED DEFAULT 1,
-  unit_price     DECIMAL(10,2) NOT NULL,
-  subtotal       DECIMAL(10,2) NOT NULL,
-  created_at     DATETIME DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (order_id) REFERENCES orders(id),
-  FOREIGN KEY (rental_item_id) REFERENCES rental_items(id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='订单租赁明细';
-```
-
-### 5.9 装备租赁项表（rental_items）
-
-```sql
-CREATE TABLE rental_items (
+CREATE TABLE user_shops (
   id           BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  merchant_id  BIGINT UNSIGNED NOT NULL COMMENT '所属商家',
-  name         VARCHAR(100) NOT NULL COMMENT '装备名称',
-  price_per_day DECIMAL(10,2) NOT NULL COMMENT '每日租金',
-  stock        INT UNSIGNED DEFAULT 10 COMMENT '库存数量',
-  status       TINYINT DEFAULT 1 COMMENT '0=下架 1=上架',
+  user_id      BIGINT UNSIGNED NOT NULL COMMENT '用户ID',
+  merchant_id  BIGINT UNSIGNED NOT NULL COMMENT '门店ID',
+  is_primary   TINYINT DEFAULT 0 COMMENT '是否主场店：0=否 1=是',
+  visit_count  INT UNSIGNED DEFAULT 1 COMMENT '访问次数',
+  last_visit   DATETIME DEFAULT NULL COMMENT '最近访问时间',
   created_at   DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at   DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY uk_user_merchant (user_id, merchant_id),
+  INDEX idx_user (user_id),
   INDEX idx_merchant (merchant_id),
-  FOREIGN KEY (merchant_id) REFERENCES merchants(id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='装备租赁项';
-```
-
-### 5.10 核销表（checkins）
-
-```sql
-CREATE TABLE checkins (
-  id             BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  order_id       BIGINT UNSIGNED NOT NULL,
-  user_id        BIGINT UNSIGNED NOT NULL,
-  schedule_id    BIGINT UNSIGNED NOT NULL,
-  checkin_code   VARCHAR(16) NOT NULL,
-  status         TINYINT DEFAULT 0 COMMENT '0=未核销 1=已核销 2=已过期',
-  checked_in_at  DATETIME DEFAULT NULL,
-  checked_by     BIGINT UNSIGNED DEFAULT NULL COMMENT '核销人（admin_id）',
-  checkin_method TINYINT DEFAULT 1 COMMENT '1=扫码 2=手动',
-  created_at     DATETIME DEFAULT CURRENT_TIMESTAMP,
-  UNIQUE KEY uk_code (checkin_code),
-  INDEX idx_order (order_id),
-  INDEX idx_schedule (schedule_id),
-  FOREIGN KEY (order_id) REFERENCES orders(id),
   FOREIGN KEY (user_id) REFERENCES users(id),
-  FOREIGN KEY (schedule_id) REFERENCES schedules(id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='核销表';
+  FOREIGN KEY (merchant_id) REFERENCES merchants(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户门店关系';
 ```
 
-### 5.11 充值记录表（recharges）
+#### merchants — 商家表（已有，补充字段）
 
 ```sql
-CREATE TABLE recharges (
-  id                BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  user_id           BIGINT UNSIGNED NOT NULL,
-  amount            DECIMAL(10,2) NOT NULL COMMENT '充值金额',
-  gift_amount       DECIMAL(10,2) DEFAULT 0.00 COMMENT '赠送金额',
-  payment_status    TINYINT DEFAULT 0 COMMENT '0=未支付 1=已支付',
-  wx_transaction_id VARCHAR(64) DEFAULT NULL,
-  created_at        DATETIME DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (user_id) REFERENCES users(id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='充值记录';
+-- 在 v3.0 merchants 表基础上新增：
+ALTER TABLE merchants ADD COLUMN owner_name VARCHAR(64) DEFAULT '' COMMENT '老板姓名/昵称';
+ALTER TABLE merchants ADD COLUMN owner_avatar VARCHAR(512) DEFAULT '' COMMENT '老板头像';
+ALTER TABLE merchants ADD COLUMN owner_title VARCHAR(50) DEFAULT '' COMMENT '老板称号（如"金牌领队"）';
+ALTER TABLE merchants ADD COLUMN slogan VARCHAR(200) DEFAULT '' COMMENT '门店口号';
+ALTER TABLE merchants ADD COLUMN service_count INT UNSIGNED DEFAULT 0 COMMENT '已服务人数';
+ALTER TABLE merchants ADD COLUMN rating DECIMAL(2,1) DEFAULT 5.0 COMMENT '评分';
+ALTER TABLE merchants ADD COLUMN rating_count INT UNSIGNED DEFAULT 0 COMMENT '评价数';
+ALTER TABLE merchants ADD COLUMN cover_image VARCHAR(512) DEFAULT '' COMMENT '门店封面图';
+ALTER TABLE merchants ADD COLUMN images JSON COMMENT '门店图片列表';
+ALTER TABLE merchants ADD COLUMN video_url VARCHAR(512) DEFAULT '' COMMENT '门店介绍视频URL';
+ALTER TABLE merchants ADD COLUMN latitude DECIMAL(10,7) DEFAULT NULL COMMENT '纬度';
+ALTER TABLE merchants ADD COLUMN longitude DECIMAL(10,7) DEFAULT NULL COMMENT '经度';
+ALTER TABLE merchants ADD COLUMN address VARCHAR(255) DEFAULT '' COMMENT '门店地址';
 ```
 
-### 5.12 裂变记录表（referrals）
+### 5.2 已有表（保持 v3.0 设计，无需修改）
 
-```sql
-CREATE TABLE referrals (
-  id               BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  inviter_id       BIGINT UNSIGNED NOT NULL COMMENT '邀请人',
-  invitee_id       BIGINT UNSIGNED NOT NULL COMMENT '被邀请人',
-  invitee_order_id BIGINT UNSIGNED DEFAULT NULL COMMENT '触发奖励的订单',
-  reward_amount    DECIMAL(10,2) DEFAULT 20.00 COMMENT '邀请人奖励',
-  new_user_discount DECIMAL(10,2) DEFAULT 15.00 COMMENT '新用户立减',
-  status           TINYINT DEFAULT 0 COMMENT '0=待触发 1=已奖励 2=已失效',
-  created_at       DATETIME DEFAULT CURRENT_TIMESTAMP,
-  updated_at       DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  UNIQUE KEY uk_invitee (invitee_id),
-  INDEX idx_inviter (inviter_id),
-  FOREIGN KEY (inviter_id) REFERENCES users(id),
-  FOREIGN KEY (invitee_id) REFERENCES users(id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='裂变记录';
-```
-
-### 5.13 管理员表（admins）
-
-```sql
-CREATE TABLE admins (
-  id              BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  merchant_id     BIGINT UNSIGNED DEFAULT NULL COMMENT '所属商家（NULL=不限）',
-  fishing_spot_id BIGINT UNSIGNED DEFAULT NULL COMMENT '所属钓场（NULL=不限）',
-  username        VARCHAR(64) NOT NULL UNIQUE,
-  password_hash   VARCHAR(255) NOT NULL,
-  phone           VARCHAR(20) DEFAULT '',
-  real_name       VARCHAR(64) DEFAULT '',
-  role            VARCHAR(20) DEFAULT 'admin' COMMENT 'super_admin/admin/spot_admin/staff',
-  status          TINYINT DEFAULT 1 COMMENT '0=禁用 1=启用',
-  created_at      DATETIME DEFAULT CURRENT_TIMESTAMP,
-  updated_at      DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  INDEX idx_merchant (merchant_id),
-  INDEX idx_spot (fishing_spot_id),
-  FOREIGN KEY (merchant_id) REFERENCES merchants(id),
-  FOREIGN KEY (fishing_spot_id) REFERENCES fishing_spots(id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='管理员表';
-```
+以下表结构保持不变：
+- `fishing_spots` — 钓场表
+- `routes` — 线路表（已有 merchant_id）
+- `schedules` — 团期表（已有 merchant_id）
+- `orders` — 订单表（已有 merchant_id）
+- `users` — 用户表
+- `order_rentals` — 订单租赁明细
+- `rental_items` — 装备租赁项（已有 merchant_id）
+- `recharges` — 充值记录
+- `referrals` — 裂变记录
+- `admins` — 管理员表（已有 merchant_id）
+- `checkins` — 核销表
 
 ---
 
 ## 六、功能需求
 
-### 6.1 小程序端（客户）
+### 6.1 小程序端
 
-| 模块 | 功能 | 优先级 | 说明 |
-|:-----|:-----|:-------|:-----|
-| 微信登录 | 一键登录、获取手机号 | P0 | 整个小程序的入口 |
-| 首页 | 附近钓场、本周团期、热门线路 | P0 | GetYourGuide 信息架构 |
-| 钓场列表 | 按距离排序、按鱼种/设施筛选 | P0 | 钓场是发现入口 |
-| 钓场详情 | 地址、鱼种、设施、图片、关联线路 | P0 | 决策关键页 |
-| 线路详情 | 行程安排、费用包含/不包含、集合地点、取消政策 | P0 | GetYourGuide 结构 |
-| 在线预约 | 选日期 → 填人数 → 勾选装备 → 支付 | P0 | 核心转化流程 |
-| 支付 | 微信支付 | P0 | 交易闭环 |
-| 我的订单 | 订单列表、详情、核销码展示 | P0 | 订单管理 |
-| 核销码 | 展示 QR 码，出行当天出示 | P0 | 服务交付凭证 |
-| 会员中心 | 余额查询、会员等级、充值 | P0 | 锁客 |
-| 装备租赁 | 下单时勾选，费用合并 | P0 | 已有 |
-| 邀请好友 | 邀请码、返现 | P0 | 已有 |
-| 取消/退款 | 申请取消、查看退款状态 | P0 | 闭环 |
-| 出行须知 | 免责声明、天气政策、保险说明 | P1 | 合规 |
+#### 6.1.1 门店首页（替代原"平台首页"，核心页面）
 
-### 6.2 管理后台（平台管理 + 商家运营）
+**设计原则**：用户打开小程序，3秒内知道"这是哪个店"、"这周有什么活动"、"老板是谁"。
 
-| 模块 | 功能 | 优先级 | 说明 |
-|:-----|:-----|:-------|:-----|
-| 登录 | 管理员登录、首次改密 | P0 | 已有 |
-| 钓场管理 | CRUD、图片上传 | P0 | 平台维护公共资源 |
-| 线路管理 | CRUD、关联钓场、设置取消政策 | P0 | 商家核心操作 |
-| 团期管理 | 创建/编辑/取消/批量创建 | P0 | 已有，需增强 |
-| 订单管理 | 列表、详情、退款审核、导出 | P0 | 需增强 |
-| 核销 | 扫码/手动输入核销码、实时统计 | P0 | 新增 |
-| 装备管理 | CRUD、库存 | P0 | 需增强 |
-| 客户管理 | 列表、详情、会员等级 | P1 | 需增强 |
-| 财务统计 | 日/周/月营收、按线路/钓场统计 | P1 | 需增强 |
-| 数据看板 | 今日数据、趋势图 | P1 | 新增 |
-| 商家管理 | 商家入驻审核 | P2 | MVP 不开放 |
+**页面结构**：
+
+| 区域 | 内容 | 说明 |
+|:-----|:-----|:-----|
+| 顶部品牌区 | 门店Logo + 名称 + 口号 | 如"渔乐渔具 · 周末去哪？跟我走！" |
+| 老板信息卡 | 头像 + 昵称 + 称号 + 已服务人数 | 如"老王 · 金牌领队 · 已服务268人" |
+| 信任标签 | 评分 + 评价数 + 距离 | "4.9分(128条) · 距您1.2km" |
+| 本周活动 | 本店本周可报名的活动列表 | 卡片式：线路名+日期+价格+剩余名额 |
+| 往期精彩 | 图片/短视频轮播 | 往期出行实拍、渔获展示 |
+| 门店信息 | 地址+电话+营业时间 | 点击可导航、一键拨打 |
+| 底部操作 | "切换其他门店"入口 | 引导发现更多门店 |
+
+**交互逻辑**：
+- 有主场店 → 直接展示该店首页
+- 无主场店 → 展示最近去过的店
+- 新用户 → 展示平台发现页（附近门店列表）
+
+#### 6.1.2 平台发现页（新用户入口 + 老用户探索）
+
+**页面结构**：
+
+| 区域 | 内容 |
+|:-----|:-----|
+| 定位区 | 当前位置（自动获取，可切换） |
+| 附近门店 | 按距离排序的门店卡片列表（头像+名称+评分+距离+本周热门活动） |
+| 本周热门 | 跨门店的热门活动瀑布流 |
+| 按类型找 | 钓鱼/露营/亲子/慢游 快捷筛选 |
+
+**门店卡片内容**：
+- 门店封面图
+- 老板头像 + 昵称 + 称号
+- 评分 + 距离
+- 本周最火活动（一行预览）
+- "去看看"按钮
+
+#### 6.1.3 门店详情页
+
+**页面结构**：
+
+| 区域 | 内容 |
+|:-----|:-----|
+| 视频/图片轮播 | 老板打招呼视频（15秒内）+ 门店环境 + 往期合影 |
+| 老板信息 | 头像 + 昵称 + 称号 + 评分 + 评价数 |
+| 门店信息 | 地址（导航）+ 电话（一键拨打）+ 营业时间 |
+| 本周活动 | 本店所有可报名活动列表 |
+| 装备清单 | 可租赁装备及价格 |
+| 服务承诺 | "全程领队陪同"、"装备免费消毒"、"不满意可退款" |
+| 用户评价 | 带图好评，展示渔获/笑脸 |
+| 底部操作 | "设为主场店" + "去看看活动" |
+
+#### 6.1.4 活动详情页（线路详情）
+
+**页面结构**（GetYourGuide 结构）：
+
+| 区域 | 内容 |
+|:-----|:-----|
+| 标题区 | 活动名 + 所属门店 + 价格 |
+| 图片轮播 | 高清实拍（钓场环境、午餐、活动氛围） |
+| 亮点标签 | 3-5 个标签（如"含午餐"、"车接车送"、"新手友好"） |
+| 行程安排 | 时间线形式 |
+| 费用包含/不包含 | 图标+文字 |
+| 档期选择 | 可选日期列表（显示剩余名额） |
+| 集合地点 | 地图+导航跳转 |
+| 装备租赁 | 可勾选的装备列表 |
+| 取消政策 | 退改规则 |
+| 出行须知 | 注意事项、天气提示 |
+| 关联钓场 | 钓场简介、鱼种、设施（如有） |
+| 用户评价 | 该活动的专属评价 |
+| 底部固定栏 | 收藏 + "立即报名" |
+
+#### 6.1.5 预约下单页
+
+**流程**：选日期 → 选人数 → 勾选装备 → 填联系信息 → 确认支付
+
+| 区域 | 内容 |
+|:-----|:-----|
+| 活动摘要 | 线路名+日期+门店名 |
+| 人数选择 | 成人数 ± 、儿童数 ± |
+| 装备租赁 | 勾选框+数量 |
+| 联系信息 | 姓名+手机号（自动填充） |
+| 费用明细 | 团费+租赁费-折扣-余额=实付 |
+| 会员抵扣 | 显示可用余额、会员折扣 |
+| 支付按钮 | 微信支付 |
+
+#### 6.1.6 我的订单
+
+**按门店分组展示**，每个门店下显示该店的订单列表。
+
+| 功能 | 说明 |
+|:-----|:-----|
+| 订单列表 | 按门店分组，状态筛选（全部/待支付/已确认/已完成/已取消） |
+| 订单详情 | 状态展示、费用明细、核销码、取消/退款 |
+| 核销码展示 | QR 二维码，出行当天出示 |
+
+#### 6.1.7 会员中心
+
+| 功能 | 说明 |
+|:-----|:-----|
+| 会员信息 | 等级、余额、累计充值 |
+| 充值入口 | 三档充值（200/500/1000） |
+| 充值记录 | 充值历史 |
+| 邀请好友 | 邀请码、返现规则、邀请记录 |
+
+#### 6.1.8 我的（个人中心）
+
+| 区域 | 内容 |
+|:-----|:-----|
+| 用户信息 | 头像+昵称+手机号 |
+| 我的门店 | "去过的店"列表，可设主场店、切换门店 |
+| 我的订单 | 快捷入口 |
+| 会员中心 | 等级+余额 |
+| 邀请好友 | 裂变入口 |
+| 联系客服 | 电话/微信 |
+
+#### 6.1.9 "去过的店"页面
+
+| 功能 | 说明 |
+|:-----|:-----|
+| 门店列表 | 按最近访问排序，显示门店名+老板头像+距离+最近活动 |
+| 设为主场店 | 长按或点击设为默认进入的门店 |
+| 移除记录 | 可删除某门店的访问记录 |
+| 发现新门店 | 底部引导跳转平台发现页 |
+
+#### 6.1.10 天气与出行提示（v4 新增）
+
+- 活动详情页显示出行日天气预报
+- 建议穿搭（防晒/防雨/保暖）
+- 商业计划书要求："遇阴雨恶劣天气，支持团期改期、全额退款"
+
+### 6.2 管理后台
+
+#### 6.2.1 登录与权限
+
+- 管理员登录（已有）
+- 首次登录强制改密（已有）
+- 角色区分：平台管理员看全局，商家管理员看本店
+
+#### 6.2.2 钓场管理（平台管理员）
+
+- 钓场 CRUD（名称、地址、经纬度、鱼种、设施、图片、联系方式）
+- 钓场列表（分页、筛选）
+
+#### 6.2.3 门店管理（平台管理员）
+
+- 商家 CRUD（门店信息、老板信息、封面图、视频）
+- 商家启用/禁用
+- MVP 阶段只有一家店，但预留多商家能力
+
+#### 6.2.4 线路管理
+
+- 线路 CRUD（名称、类型、价格、儿童价、描述、行程、包含/不包含、图片、取消政策）
+- 关联钓场（经营性钓场）或不关联（野钓线路）
+- 线路上下架
+
+#### 6.2.5 团期管理（已有，需增强）
+
+- 创建/编辑/取消团期
+- **批量创建**（v4 新增）：按周批量生成团期
+- 团期列表（按线路、按周、按状态筛选）
+
+#### 6.2.6 订单管理
+
+- 订单列表（按门店、按状态、按日期筛选）
+- 订单详情（用户信息、费用明细、租赁明细、核销状态）
+- 退款审核（通过/驳回，退款金额设置）
+- 订单导出 Excel
+
+#### 6.2.7 核销管理（v4 新增）
+
+- 扫码核销（调用摄像头扫描用户 QR 码）
+- 手动输入核销码
+- 本期团期核销统计（已核销/未核销/总人数）
+- 核销历史记录
+
+#### 6.2.8 装备管理
+
+- 装备 CRUD（名称、日租价、库存）
+- 装备上下架
+
+#### 6.2.9 客户管理
+
+- 客户列表（姓名、手机、会员等级、余额、订单数、最近消费）
+- 客户详情（订单历史、充值历史）
+- 会员等级调整
+
+#### 6.2.10 财务统计
+
+- 日/周/月营收汇总
+- 按线路统计
+- 按门店统计（平台管理员视角）
+- 充值统计
+
+#### 6.2.11 数据看板（v4 新增）
+
+- 今日数据：新增订单数、今日营收、待核销人数、本周团期数
+- 趋势图：近7天/30天订单量和营收
 
 ---
 
-## 七、预约流程
+## 七、预约流程（用户端完整旅程）
 
-### 7.1 用户端完整旅程
+### 7.1 新用户首次旅程
 
 ```
 ① 打开小程序 → 微信登录授权
-② 首页浏览 → 附近钓场 / 本周团期 / 热门线路
-③ 点击钓场 → 钓场详情（鱼种、设施、图片）
-④ 点击线路 → 线路详情（行程、包含、集合地、取消政策）
+② 进入平台发现页 → 看到附近门店列表
+③ 点击某门店 → 门店详情（老板介绍、本周活动、往期精彩）
+④ 点击某活动 → 活动详情（行程、包含、集合地、取消政策）
 ⑤ 点击预约 → 选日期 → 选人数 → 勾选装备 → 填联系信息
 ⑥ 确认支付 → 微信支付 → 获得核销码
-⑦ 出行当天 → 打开核销码 → 领队扫码确认
-⑧ 出行结束 → 订单自动完成 → 邀请好友返现
+⑦ 自动成为该门店"去过的店"
 ```
 
-### 7.2 线路详情页结构（GetYourGuide 模式）
+### 7.2 老用户复购旅程
 
 ```
-① 标题 + 钓场名 + 价格
+① 打开小程序 → 自动进入主场店首页
+② 看到本周活动 → 有想参加的
+③ 点击活动 → 确认详情
+④ 一键预约（信息自动填充）→ 支付
+⑤ 全程 < 2 分钟
+```
+
+### 7.3 线路详情页结构（GetYourGuide 模式）
+
+```
+① 标题 + 门店名 + 价格
 ② 精选图片轮播
 ③ 亮点 Highlights（3-5 个标签）
 ④ 行程安排 Itinerary（时间线形式）
 ⑤ 费用包含 / 不包含 Includes & Excludes
-⑥ 集合地点 Meeting point（含地图 + 导航跳转）
-⑦ 取消政策 Cancellation policy
-⑧ 出行须知 Know before you go
-⑨ 钓场信息（关联钓场的简介、鱼种、设施）
+⑥ 档期选择（日期 + 剩余名额）
+⑦ 集合地点 Meeting point（含地图 + 导航跳转）
+⑧ 取消政策 Cancellation policy
+⑨ 出行须知 Know before you go
+⑩ 关联钓场信息（如有）
 ```
 
 ---
 
 ## 八、订单状态机
-
-### 8.1 状态定义
 
 ```
          支付成功           出行当天           核销完成
@@ -610,22 +496,7 @@ CANCELLED    REFUNDING ───→ REFUNDED              ─────┘
 | 5 | EN_ROUTE | 出行中 | 领队标记出发 |
 | 6 | COMPLETED | 已完成 | 核销完成 / 团期结束自动完成 |
 
-### 8.2 状态流转规则
-
-| 当前状态 | 可转到 | 触发方 | 说明 |
-|:---------|:-------|:-------|:-----|
-| PENDING | PAID | 系统 | 支付成功回调 |
-| PENDING | CANCELLED | 用户/系统 | 用户取消或超时（15分钟） |
-| PAID | EN_ROUTE | 管理员 | 领队标记出发 |
-| PAID | REFUNDING | 用户 | 出行前申请退款 |
-| PAID | CANCELLED | 管理员 | 管理员取消团期 |
-| EN_ROUTE | COMPLETED | 系统/管理员 | 核销完成 |
-| REFUNDING | REFUNDED | 管理员 | 审核通过，退款到账 |
-| REFUNDING | PAID | 管理员 | 审核驳回，恢复已支付 |
-
-### 8.3 取消退款政策
-
-线路级别可配置，默认策略：
+### 取消退款政策（线路级别可配置）
 
 | 取消时间 | 退款比例 | 说明 |
 |:---------|:---------|:-----|
@@ -663,9 +534,45 @@ CANCELLED    REFUNDING ───→ REFUNDED              ─────┘
 
 ---
 
-## 十、API 接口清单
+## 十、营销与运营（商业计划书核心方案）
 
-### 10.1 用户认证
+### 10.1 私域运营支持
+
+- 门店详情页可展示门店微信群二维码（引导加群）
+- 每周活动可一键分享到朋友圈（生成海报图片）
+- 门店老板可在后台编辑本周推荐语
+
+### 10.2 会员充值体系
+
+- 三档充值（200/500/1000），余额跨门店通用
+- 会员折扣在线路价格上自动计算
+- 充值赠送权益（优惠券、免费租赁次数、免费出行名额）
+
+### 10.3 老带新裂变
+
+- 每个用户有唯一邀请码
+- 新用户通过邀请码注册，首单立减 15 元
+- 老用户获得 20 元返现/立减
+- 多人同行优惠：2人各减10元，3人+各减15元+赠鱼饵礼包
+
+### 10.4 四季主题活动（商业计划书）
+
+- 春季踏青垂钓
+- 夏季露营夜钓
+- 秋季户外野游
+- 冬季休闲慢旅
+
+### 10.5 分享与传播
+
+- 活动详情页"分享到朋友圈"按钮
+- 自动生成带门店信息的分享海报
+- 支持小程序码直接跳转到门店/活动页
+
+---
+
+## 十一、API 接口清单
+
+### 11.1 用户认证
 
 ```
 POST   /api/v1/auth/wx-login          # 微信登录
@@ -673,46 +580,64 @@ POST   /api/v1/auth/get-phone         # 获取手机号
 PUT    /api/v1/user/profile           # 更新用户信息
 ```
 
-### 10.2 钓场
+### 11.2 门店（v4 新增/调整）
+
+```
+GET    /api/v1/merchants              # 门店列表（附近门店，支持距离排序）
+GET    /api/v1/merchants/:id          # 门店详情（含老板信息、评分、活动数）
+GET    /api/v1/merchants/:id/routes   # 门店的线路列表
+GET    /api/v1/merchants/:id/schedules # 门店的团期列表（按周）
+GET    /api/v1/merchants/:id/reviews  # 门店的评价列表
+```
+
+### 11.3 用户门店关系（v4 新增）
+
+```
+GET    /api/v1/user/shops             # 我去过的店
+POST   /api/v1/user/shops/:id/primary # 设为主场店
+DELETE /api/v1/user/shops/:id         # 移除记录
+```
+
+### 11.4 钓场
 
 ```
 GET    /api/v1/spots                  # 钓场列表
 GET    /api/v1/spots/:id              # 钓场详情
-GET    /api/v1/spots/nearby           # 附近钓场（lat, lng, radius）
+GET    /api/v1/spots/nearby           # 附近钓场
 GET    /api/v1/spots/:id/routes       # 钓场关联的线路
 ```
 
-### 10.3 线路
+### 11.5 线路
 
 ```
-GET    /api/v1/routes                 # 线路列表（可按钓场、类型筛选）
-GET    /api/v1/routes/:id             # 线路详情（含钓场、取消政策）
+GET    /api/v1/routes                 # 线路列表（可按门店、类型筛选）
+GET    /api/v1/routes/:id             # 线路详情
 ```
 
-### 10.4 团期
+### 11.6 团期
 
 ```
-GET    /api/v1/schedules?week=xxx     # 按周查询团期
+GET    /api/v1/schedules?week=xxx     # 按周查询团期（可按门店筛选）
 GET    /api/v1/schedules/:id          # 团期详情
 ```
 
-### 10.5 订单
+### 11.7 订单
 
 ```
 POST   /api/v1/orders                 # 创建订单
-GET    /api/v1/orders                 # 用户订单列表
-GET    /api/v1/orders/:order_no       # 订单详情（含核销码）
+GET    /api/v1/orders                 # 用户订单列表（可按门店筛选）
+GET    /api/v1/orders/:order_no       # 订单详情
 POST   /api/v1/orders/:order_no/cancel # 取消订单
-GET    /api/v1/orders/:order_no/checkin-code  # 获取核销码/二维码
+GET    /api/v1/orders/:order_no/checkin-code # 获取核销码
 ```
 
-### 10.6 装备租赁
+### 11.8 装备租赁
 
 ```
-GET    /api/v1/rental-items           # 租赁项列表
+GET    /api/v1/rental-items           # 租赁项列表（可按门店筛选）
 ```
 
-### 10.7 会员
+### 11.9 会员
 
 ```
 POST   /api/v1/member/recharge        # 充值
@@ -720,21 +645,30 @@ GET    /api/v1/member/info            # 会员信息
 GET    /api/v1/member/recharge-records # 充值记录
 ```
 
-### 10.8 裂变
+### 11.10 裂变
 
 ```
 GET    /api/v1/referral/info          # 邀请信息
 GET    /api/v1/referral/records       # 邀请记录
 ```
 
-### 10.9 管理后台
+### 11.11 管理后台
 
 ```
+# 认证
+POST   /api/v1/admin/login            # 管理员登录
+POST   /api/v1/admin/change-password  # 修改密码
+
 # 钓场管理
 POST   /api/v1/admin/spots            # 创建钓场
 GET    /api/v1/admin/spots            # 钓场列表
 PUT    /api/v1/admin/spots/:id        # 编辑钓场
 DELETE /api/v1/admin/spots/:id        # 删除钓场
+
+# 门店管理（v4 新增）
+POST   /api/v1/admin/merchants        # 创建门店
+GET    /api/v1/admin/merchants        # 门店列表
+PUT    /api/v1/admin/merchants/:id    # 编辑门店
 
 # 线路管理
 POST   /api/v1/admin/routes           # 创建线路
@@ -745,11 +679,13 @@ PUT    /api/v1/admin/routes/:id       # 编辑线路
 POST   /api/v1/admin/schedules        # 创建团期
 PUT    /api/v1/admin/schedules/:id    # 编辑团期
 PUT    /api/v1/admin/schedules/:id/cancel # 取消团期
+POST   /api/v1/admin/schedules/batch  # 批量创建团期（v4 新增）
 
 # 订单管理
 GET    /api/v1/admin/orders           # 订单列表
 GET    /api/v1/admin/orders/:id       # 订单详情
 POST   /api/v1/admin/orders/:id/refund # 退款审核
+GET    /api/v1/admin/orders/export    # 导出Excel（v4 新增）
 
 # 核销
 POST   /api/v1/admin/checkin/scan     # 扫码核销
@@ -760,9 +696,16 @@ GET    /api/v1/admin/schedules/:id/checkins # 核销统计
 POST   /api/v1/admin/rental-items     # 创建租赁项
 PUT    /api/v1/admin/rental-items/:id # 编辑租赁项
 
-# 管理员认证
-POST   /api/v1/admin/login            # 管理员登录
-POST   /api/v1/admin/change-password  # 修改密码
+# 客户管理
+GET    /api/v1/admin/customers        # 客户列表
+GET    /api/v1/admin/customers/:id    # 客户详情
+
+# 财务统计
+GET    /api/v1/admin/finance/summary  # 营收汇总
+GET    /api/v1/admin/finance/by-route # 按线路统计
+
+# 数据看板
+GET    /api/v1/admin/dashboard        # 今日数据
 
 # 定时任务
 POST   /api/v1/admin/orders/cancel-expired # 手动触发超时取消
@@ -770,57 +713,50 @@ POST   /api/v1/admin/orders/cancel-expired # 手动触发超时取消
 
 ---
 
-## 十一、非功能需求
+## 十二、非功能需求
 
 | 维度 | 要求 |
 |:-----|:-----|
 | 性能 | API 响应 < 500ms，支持 100 并发 |
-| 可用性 | 预约流程不超过 5 步 |
+| 可用性 | 预约流程不超过 3 步（老用户可 2 步完成） |
 | 安全 | 微信支付 V3 RSA 签名、敏感数据加密、JWT 认证 |
 | 兼容性 | 微信小程序基础库 2.20+ |
 | 可维护性 | 代码注释 > 30%，关键接口有文档 |
-| 可扩展性 | 数据模型支持多商家，MVP 只开一个 |
+| 可扩展性 | 数据模型支持多商家，MVP 只开一个门店 |
+| 用户体验 | 长沙本地化文案，大字体模式（退休人群），3秒内理解页面 |
 
 ---
 
-## 十二、技术架构
+## 十三、技术架构
 
 ```
-┌─────────────────────────────────────────────────────┐
-│                     客户端                            │
-│  ┌──────────────────┐  ┌──────────────────────────┐ │
-│  │  微信小程序        │  │  管理后台 (PC)            │ │
-│  │  uni-app + Vue3   │  │  Vue3 + Element Plus     │ │
-│  └────────┬─────────┘  └──────────────┬───────────┘ │
-└───────────┼───────────────────────────┼─────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│                        客户端                                │
+│  ┌──────────────────┐  ┌──────────────────────────────────┐ │
+│  │  微信小程序        │  │  管理后台 (PC)                    │ │
+│  │  uni-app + Vue3   │  │  Vue3 + Element Plus             │ │
+│  └────────┬─────────┘  └──────────────┬───────────────────┘ │
+└───────────┼───────────────────────────┼─────────────────────┘
             │                           │
             ▼                           ▼
-┌─────────────────────────────────────────────────────┐
-│                   Go API Server (Gin)                │
-│  ┌──────────┐ ┌──────────┐ ┌──────────┐            │
-│  │ 用户模块  │ │ 钓场模块  │ │ 商家模块  │            │
-│  └──────────┘ └──────────┘ └──────────┘            │
-│  ┌──────────┐ ┌──────────┐ ┌──────────┐            │
-│  │ 线路模块  │ │ 团期模块  │ │ 订单模块  │            │
-│  └──────────┘ └──────────┘ └──────────┘            │
-│  ┌──────────┐ ┌──────────┐ ┌──────────┐            │
-│  │ 支付模块  │ │ 核销模块  │ │ 装备模块  │            │
-│  └──────────┘ └──────────┘ └──────────┘            │
-└────────┬──────────────────────┬─────────────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│                   Go API Server (Gin)                        │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌───────────────┐  │
+│  │ 用户模块  │ │ 门店模块  │ │ 线路模块  │ │ 团期模块      │  │
+│  └──────────┘ └──────────┘ └──────────┘ └───────────────┘  │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌───────────────┐  │
+│  │ 订单模块  │ │ 支付模块  │ │ 核销模块  │ │ 装备模块      │  │
+│  └──────────┘ └──────────┘ └──────────┘ └───────────────┘  │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐                    │
+│  │ 会员模块  │ │ 裂变模块  │ │ 后台管理  │                    │
+│  └──────────┘ └──────────┘ └──────────┘                    │
+└────────┬──────────────────────┬─────────────────────────────┘
          │                      │
          ▼                      ▼
 ┌─────────────────┐    ┌─────────────────┐
 │   MySQL 8.0     │    │     Redis       │
-│   (主数据存储)    │    │  (缓存/会话/GEO) │
+│   (主数据存储)    │    │  (缓存/会话)     │
 └─────────────────┘    └─────────────────┘
-         │
-         ▼
-┌─────────────────────────────────────────┐
-│           外部服务                        │
-│  ┌──────────┐ ┌──────────┐ ┌─────────┐ │
-│  │ 微信支付  │ │ 微信登录  │ │  OSS    │ │
-│  └──────────┘ └──────────┘ └─────────┘ │
-└─────────────────────────────────────────┘
 ```
 
 ### 分层架构
@@ -837,56 +773,55 @@ Model（数据结构定义 + GORM 标签）
 
 ---
 
-## 十三、MVP 任务清单
+## 十四、MVP 任务清单（v4 版）
 
 ### 第一阶段：核心链路（约 18 天）
 
-| # | 任务 | 估时 | 说明 |
-|:--|:-----|:-----|:-----|
-| 1 | 微信登录 + JWT | 2 天 | 小程序用户身份 |
-| 2 | 钓场 CRUD（管理后台） | 1.5 天 | 平台维护钓场信息 |
-| 3 | 商家表 + 线路改造 | 2.5 天 | 加 merchant_id，线路关联钓场，线路 CRUD |
-| 4 | 微信支付 | 3 天 | 统一下单 + 回调 + 充值 + 退款 |
-| 5 | 核销流程 | 2 天 | 核销码 + 扫码核销 + 统计 |
-| 6 | 订单状态机 + 退款 | 2 天 | 完整状态 + 退款审核 + 微信退款 |
-| 7 | 小程序首页 + 钓场 | 2 天 | 首页、附近钓场、线路详情 |
-| 8 | 预约流程改造 | 1.5 天 | 对接新数据模型 + 核销码展示 |
-| 9 | 管理后台增强 | 1.5 天 | 订单详情/退款审核/核销页/导出 |
+| # | 任务 | 估时 | 说明 | 与 v3.0 差异 |
+|:--|:-----|:-----|:-----|:-------------|
+| 1 | 微信登录 + JWT | 2 天 | 小程序用户身份 | 不变 |
+| 2 | 钓场 CRUD | 1.5 天 | 平台维护钓场信息 | 不变 |
+| 3 | 商家表改造 + 门店信息 | 2 天 | 补充老板信息、评分、位置等字段 | v3.0 无老板信息 |
+| 4 | 线路 CRUD + 关联门店 | 1.5 天 | 线路关联商家+钓场 | 微调 |
+| 5 | 团期管理 + 批量创建 | 1.5 天 | 含批量按周创建 | v3.0 无批量 |
+| 6 | 微信支付 | 3 天 | 统一下单+回调+退款 | 不变 |
+| 7 | 核销流程 | 2 天 | 核销码+扫码+统计 | 不变 |
+| 8 | 订单状态机 + 退款审核 | 1.5 天 | 完整状态+退款规则 | 不变 |
+| 9 | 小程序门店首页 | 2 天 | 老板卡片+本周活动+信任标签 | **全新设计** |
+| 10 | 小程序门店详情+活动详情 | 2 天 | GetYourGuide 结构 | **全新设计** |
+| 11 | 预约流程改造 | 1.5 天 | 对接新数据模型 | 微调 |
+| 12 | "去过的店" + 主场店 | 1 天 | user_shops 表+切换逻辑 | **全新功能** |
+| 13 | 管理后台增强 | 1.5 天 | 订单详情/退款审核/核销/导出 | 不变 |
 
 ### 第二阶段：体验完善（约 10 天）
 
-| # | 任务 | 估时 |
-|:--|:-----|:-----|
-| 10 | 消息通知（订阅消息） | 2 天 |
-| 11 | 团期批量创建 | 1 天 |
-| 12 | 订单导出 Excel | 1 天 |
-| 13 | 集合地导航 | 0.5 天 |
-| 14 | Dashboard + 财务报表 | 3 天 |
-| 15 | 客户管理增强 | 1.5 天 |
-| 16 | 天气/改期流程 | 1 天 |
+| # | 任务 | 估时 | 说明 |
+|:--|:-----|:-----|:-----|
+| 14 | 平台发现页 | 1.5 天 | 附近门店+热门活动 |
+| 15 | 消息通知 | 2 天 | 订阅消息 |
+| 16 | 数据看板 | 1.5 天 | 今日数据+趋势图 |
+| 17 | 客户管理增强 | 1 天 | 客户列表+详情 |
+| 18 | 财务统计 | 1 天 | 日/周/月营收 |
+| 19 | 天气/改期流程 | 1 天 | 天气预报+改期 |
+| 20 | 分享海报 | 1 天 | 生成带门店信息的分享图 |
 
 ---
 
-## 十四、MVP 不做（明确排除）
+## 十五、MVP 不做（明确排除）
 
-- ❌ 商家入驻流程（V2）
+- ❌ 商家入驻流程（V2，MVP 手动创建）
 - ❌ 结算分成（V2）
 - ❌ 钓位选择（到了现场分配）
-- ❌ 评价体系（V2）
-- ❌ 数据看板（V1.5）
+- ❌ 评价体系（V2，MVP 用简单好评展示）
 - ❌ 多城市连锁（先做单城）
 - ❌ APP 原生（先做小程序）
 - ❌ 赛事活动（V2）
-- ❌ 水下监控（V2 考虑）
 - ❌ 领队排班（线下先做）
-- ❌ 同行优惠梯度（V2）
-- ❌ 会员赠送权益（V2）
+- ❌ 钓场管理员角色（V2）
+- ❌ 同行优惠梯度（V2，MVP 只做2人/3人优惠）
+- ❌ 会员赠送权益兑换（V2）
+- ❌ 门店视频介绍（V2，MVP 用图片）
 
 ---
 
-*文档结束。本文档是项目需求的唯一真相源，替代以下旧文档：*
-- ~~docs/requirements.md（v1 原始需求）~~
-- ~~docs/requirements-v2.md（v2 平台模式）~~
-- ~~docs/requirements-gap-analysis.md（差距分析）~~
-- ~~docs/missing-entities-analysis.md（实体缺失分析）~~
-- ~~memory-bank/requirements.md（v1 副本）~~
+*文档结束。本文档替代 v3.0，是项目需求的唯一真相源。*
