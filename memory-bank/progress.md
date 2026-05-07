@@ -20,6 +20,15 @@
 
 ---
 
+### 2026-05-07 — 野钓线路设计决策
+- 做了什么：
+  - 确认野钓场作为特殊线路类型（wild_fishing），而非钓场
+  - 线路不关联 fishing_spot_id（NULL），目的地描述在线路 description 中填写
+  - 新增第五条产品线"野钓探险团"（158 元/人，12 人/团）
+  - 更新需求文档（memory-bank + docs）、路由模型注释、初始数据
+- 设计依据：经营性钓场有管理方，野钓场是自然水域，信息结构不同，不宜混为一谈
+- 影响范围：routes.type 枚举新增 wild_fishing，初始数据新增 1 条线路
+
 ### 2026-05-07 — Task 0011a ✅ 微信登录 — 后端核心
 - 做了什么：
   - 创建 `pkg/wechat/mini.go`：微信 Code2Session SDK（调用 jscode2session 接口换取 openid + session_key）

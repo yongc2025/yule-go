@@ -170,14 +170,15 @@
 
 ### 4.2 核心产品（MVP）
 
-#### 四大出行线路
+#### 五大出行线路
 
-| 产品 | 价格 | 包含项目 |
-|:-----|:-----|:---------|
-| 成人钓友单日垂钓团 | 128 元/人 | 往返车费、专属钓点、基础饵料、领队服务、饮用水、出行保险 |
-| 垂钓+露营一日套餐 | 198 元/人 | 交通、钓点、露营天幕桌椅、基础渔具、简餐、保险 |
-| 亲子出游套餐 | 238 元/一大一小 | 交通、儿童趣味钓鱼、亲子游戏、露营野餐、全程陪同、保险 |
-| 退休专属慢游单日团 | 98 元/人 | 往返接送、休闲观光、轻度垂钓、农家清淡午餐、全程陪同、保险 |
+| 产品 | 类型 | 价格 | 包含项目 |
+|:-----|:-----|:-----|:---------|
+| 成人钓友单日垂钓团 | fishing | 128 元/人 | 往返车费、专属钓点、基础饵料、领队服务、饮用水、出行保险 |
+| 垂钓+露营一日套餐 | camping | 198 元/人 | 交通、钓点、露营天幕桌椅、基础渔具、简餐、保险 |
+| 亲子出游套餐 | family | 238 元/一大一小 | 交通、儿童趣味钓鱼、亲子游戏、露营野餐、全程陪同、保险 |
+| 退休专属慢游单日团 | senior | 98 元/人 | 往返接送、休闲观光、轻度垂钓、农家清淡午餐、全程陪同、保险 |
+| 野钓探险团 | wild_fishing | 158 元/人 | 往返车费、野钓向导、基础饵料、领队服务、饮用水、出行保险 |
 
 > **⚠️ 保险说明**：产品标注的"含出行保险"由商家线下统一购买团体出行险，按出行人数批量投保，成本计入团费。系统不对接保险公司 API，不收集出行人身份信息用于投保。用户下单时需在出行须知中勾选确认"已知悉保险由商家统一购买"。如后续需要系统化保险流程（自动投保、理赔对接），纳入 V2 规划。
 
@@ -272,7 +273,7 @@ CREATE TABLE routes (
   merchant_id          BIGINT UNSIGNED NOT NULL COMMENT '所属商家',
   fishing_spot_id      BIGINT UNSIGNED DEFAULT NULL COMMENT '关联钓场',
   name                 VARCHAR(100) NOT NULL COMMENT '线路名称',
-  type                 VARCHAR(20) NOT NULL COMMENT '类型：fishing/camping/family/senior',
+  type                 VARCHAR(20) NOT NULL COMMENT '类型：fishing/camping/family/senior/wild_fishing',
   price                DECIMAL(10,2) NOT NULL COMMENT '成人价格',
   child_price          DECIMAL(10,2) DEFAULT 0.00 COMMENT '儿童价格',
   description          TEXT COMMENT '线路描述',

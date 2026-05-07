@@ -7,7 +7,7 @@ type Route struct {
 	ID             uint64    `json:"id" gorm:"primaryKey;autoIncrement"`
 	Name           string    `json:"name" gorm:"size:100;not null"`
 	FishingSpotID  *uint64   `json:"fishing_spot_id" gorm:"index"`
-	Type           string    `json:"type" gorm:"size:20;not null;index"`
+	Type           string    `json:"type" gorm:"size:20;not null;index"` // fishing/camping/family/senior/wild_fishing
 	Price          float64   `json:"price" gorm:"type:DECIMAL(10,2);not null"`
 	ChildPrice     float64   `json:"child_price" gorm:"type:DECIMAL(10,2);default:0"`
 	Description    string    `json:"description" gorm:"type:TEXT"`
