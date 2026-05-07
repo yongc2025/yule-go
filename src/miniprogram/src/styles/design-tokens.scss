@@ -1,0 +1,45 @@
+/* ============================================
+   渔乐Go 设计系统
+   设计理念：自然、温暖、信任
+   ============================================ */
+
+/* 主色系 — 森林绿 */
+$primary: #2D6A4F;
+$primary-light: #40916C;
+$primary-lighter: #52B788;
+$primary-bg: #D8F3DC;
+$primary-bg-light: #EDF7EF;
+
+/* 强调色 — 暖橙 */
+$accent: #E76F51;
+$accent-light: #F4A261;
+$accent-bg: #FFF3E8;
+
+/* 中性色 */
+$text-primary: #1B1B1B;
+$text-secondary: #6B7280;
+$text-tertiary: #9CA3AF;
+$text-white: #FFFFFF;
+
+/* 背景 */
+$bg-page: #F5F5F0;
+$bg-card: #FFFFFF;
+$bg-warm: #FDF8F3;
+
+/* 功能色 */
+$success: #2D6A4F;
+$warning: #E9C46A;
+$danger: #E63946;
+$info: #457B9D;
+
+/* 圆角 */
+$radius-sm: 8rpx;
+$radius-md: 16rpx;
+$radius-lg: 24rpx;
+$radius-xl: 32rpx;
+$radius-full: 999rpx;
+
+/* 阴影 */
+$shadow-sm: 0 2rpx 6rpx rgba(0, 0, 0, 0.06);
+$shadow-md: 0 8rpx 24rpx rgba(0, 0, 0, 0.08);
+$shadow-lg: 0 16rpx 48rpx rgba(0, 0, 0, 0.12);

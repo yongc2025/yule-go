@@ -1,22 +1,40 @@
 {
   "pages": [
     {
-      "path": "pages/schedule/index",
+      "path": "pages/store/index",
       "style": {
-        "navigationBarTitleText": "本周团期",
+        "navigationStyle": "custom",
         "enablePullDownRefresh": true
+      }
+    },
+    {
+      "path": "pages/store/detail",
+      "style": {
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/activity/detail",
+      "style": {
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/discovery/index",
+      "style": {
+        "navigationStyle": "custom"
       }
     },
     {
       "path": "pages/booking/index",
       "style": {
-        "navigationBarTitleText": "确认预约"
+        "navigationStyle": "custom"
       }
     },
     {
       "path": "pages/order/list",
       "style": {
-        "navigationBarTitleText": "我的订单",
+        "navigationStyle": "custom",
         "enablePullDownRefresh": true
       }
     },
@@ -24,6 +42,12 @@
       "path": "pages/order/detail",
       "style": {
         "navigationBarTitleText": "订单详情"
+      }
+    },
+    {
+      "path": "pages/my/index",
+      "style": {
+        "navigationStyle": "custom"
       }
     },
     {
@@ -35,8 +59,7 @@
     {
       "path": "pages/member/recharge-records",
       "style": {
-        "navigationBarTitleText": "充值记录",
-        "enablePullDownRefresh": true
+        "navigationBarTitleText": "充值记录"
       }
     },
     {
@@ -50,25 +73,38 @@
       "style": {
         "navigationBarTitleText": "个人信息"
       }
+    },
+    {
+      "path": "pages/schedule/index",
+      "style": {
+        "navigationBarTitleText": "本周团期",
+        "enablePullDownRefresh": true
+      }
     }
   ],
   "globalStyle": {
     "navigationBarTextStyle": "white",
-    "navigationBarTitleText": "渔乐出行",
-    "navigationBarBackgroundColor": "#1890ff",
-    "backgroundColor": "#f5f5f5"
+    "navigationBarTitleText": "渔乐Go",
+    "navigationBarBackgroundColor": "#2D6A4F",
+    "backgroundColor": "#F5F5F0"
   },
   "tabBar": {
-    "color": "#999",
-    "selectedColor": "#1890ff",
-    "backgroundColor": "#fff",
+    "color": "#9CA3AF",
+    "selectedColor": "#2D6A4F",
+    "backgroundColor": "#FFFFFF",
     "borderStyle": "white",
     "list": [
       {
-        "pagePath": "pages/schedule/index",
-        "text": "团期",
-        "iconPath": "static/tab-schedule.png",
-        "selectedIconPath": "static/tab-schedule-active.png"
+        "pagePath": "pages/store/index",
+        "text": "首页",
+        "iconPath": "static/tab-home.png",
+        "selectedIconPath": "static/tab-home-active.png"
+      },
+      {
+        "pagePath": "pages/discovery/index",
+        "text": "发现",
+        "iconPath": "static/tab-discovery.png",
+        "selectedIconPath": "static/tab-discovery-active.png"
       },
       {
         "pagePath": "pages/order/list",
@@ -77,7 +113,7 @@
         "selectedIconPath": "static/tab-order-active.png"
       },
       {
-        "pagePath": "pages/member/index",
+        "pagePath": "pages/my/index",
         "text": "我的",
         "iconPath": "static/tab-member.png",
         "selectedIconPath": "static/tab-member-active.png"

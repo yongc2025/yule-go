@@ -1,336 +1,292 @@
 <template>
-  <view class="order-list-page">
+  <view class="page">
+    <!-- 导航栏 -->
+    <view class="nav-bar">
+      <text class="nav-title">我的订单</text>
+    </view>
+
     <!-- 状态筛选 -->
-    <view class="filter-tabs">
+    <view class="filter-bar">
       <view
-        v-for="tab in tabs"
-        :key="tab.value"
-        class="tab-item"
-        :class="{ active: currentTab === tab.value }"
-        @tap="switchTab(tab.value)"
+        class="filter-item"
+        :class="{ active: activeTab === i }"
+        v-for="(tab, i) in tabs"
+        :key="tab"
+        @tap="activeTab = i"
       >
-        <text>{{ tab.label }}</text>
+        {{ tab }}
       </view>
     </view>
 
-    <!-- 加载中 -->
-    <view v-if="loading && !orders.length" class="loading-wrap">
-      <view class="loading-spinner"></view>
-      <text>加载中...</text>
-    </view>
+    <!-- 按门店分组 -->
+    <view class="order-group">
+      <view class="group-header">
+        <view class="group-icon">👨‍🌾</view>
+        <text class="group-name">老王渔具</text>
+      </view>
 
-    <!-- 空状态 -->
-    <view v-else-if="!loading && !orders.length" class="empty-wrap">
-      <text class="empty-icon">📋</text>
-      <text class="empty-title">暂无订单</text>
-      <text class="empty-desc">去团期页面看看吧</text>
-    </view>
-
-    <!-- 订单列表 -->
-    <view v-else class="order-cards">
       <view
-        v-for="order in orders"
-        :key="order.order_no"
         class="order-card"
-        @tap="goDetail(order.order_no)"
+        v-for="order in filteredOrders"
+        :key="order.id"
+        @tap="goOrderDetail(order)"
       >
-        <!-- 头部：线路 + 状态 -->
-        <view class="card-top">
-          <text class="route-name">{{ order.route_name || '未知线路' }}</text>
-          <text class="order-status" :class="'status-' + order.status">{{ order.status_text }}</text>
+        <view class="order-top">
+          <text class="order-date">{{ order.date }} {{ order.dayOfWeek }}</text>
+          <text class="order-status" :class="order.status">{{ order.statusText }}</text>
+        </view>
+        <view class="order-body">
+          <view class="order-icon" :style="{ background: order.gradient }">{{ order.activityEmoji }}</view>
+          <view class="order-info">
+            <text class="order-name">{{ order.activityName }}</text>
+            <text class="order-meta">
+              {{ order.adultCount }}成人{{ order.childCount > 0 ? ' · ' + order.childCount + '儿童' : '' }} · {{ order.collectionTime }}集合
+            </text>
+          </view>
+          <text class="order-amount">¥{{ order.totalAmount.toFixed(2) }}</text>
         </view>
 
-        <!-- 信息行 -->
-        <view class="card-info">
-          <view class="info-item">
-            <text class="info-icon">📅</text>
-            <text>{{ formatDateCN(order.trip_date) }}</text>
+        <!-- 核销码（已支付状态） -->
+        <view class="checkin-section" v-if="order.status === 'paid'">
+          <view class="checkin-info">
+            <text class="checkin-label">核销码</text>
+            <text class="checkin-code">{{ formatCode(order.checkinCode) }}</text>
           </view>
-          <view class="info-item">
-            <text class="info-icon">👥</text>
-            <text>{{ order.adults }}成人{{ order.children > 0 ? ' + ' + order.children + '儿童' : '' }}</text>
-          </view>
-        </view>
-
-        <!-- 底部：金额 + 时间 -->
-        <view class="card-bottom">
-          <text class="order-time">{{ formatTime(order.created_at) }}</text>
-          <text class="order-amount">¥{{ order.total_amount.toFixed(2) }}</text>
+          <view class="checkin-qr">QR码</view>
         </view>
       </view>
-    </view>
-
-    <!-- 加载更多 -->
-    <view v-if="hasMore && !loading" class="load-more" @tap="loadMore">
-      <text>加载更多</text>
     </view>
   </view>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { orderApi } from '../../api/order'
-import { formatDateCN } from '../../utils/date'
+import { ref, computed } from 'vue'
+import { mockOrders } from '@/mock/data.js'
 
-// --- 状态 ---
-const loading = ref(false)
-const orders = ref([])
-const currentTab = ref(-1) // -1 = 全部
-const page = ref(1)
-const hasMore = ref(true)
+const activeTab = ref(1) // 默认"已支付"
+const tabs = ['全部', '已支付', '已完成', '已取消']
 
-const tabs = [
-  { label: '全部', value: -1 },
-  { label: '待支付', value: 0 },
-  { label: '已确认', value: 1 },
-  { label: '已完成', value: 3 },
-  { label: '已取消', value: 4 }
-]
+const statusMap = { 0: '', 1: 'paid', 2: 'completed', 3: 'cancelled' }
 
-// --- 方法 ---
-async function fetchOrders(reset = false) {
-  if (reset) {
-    page.value = 1
-    hasMore.value = true
-    orders.value = []
-  }
-
-  loading.value = true
-  try {
-    const params = {
-      page: page.value,
-      page_size: 10
-    }
-    if (currentTab.value >= 0) {
-      params.status = currentTab.value
-    }
-
-    const res = await orderApi.list(params)
-    const list = res.data?.list || []
-
-    if (reset) {
-      orders.value = list
-    } else {
-      orders.value.push(...list)
-    }
-
-    hasMore.value = list.length >= 10
-  } catch (e) {
-    console.error('获取订单失败', e)
-  } finally {
-    loading.value = false
-  }
-}
-
-function switchTab(value) {
-  currentTab.value = value
-  fetchOrders(true)
-}
-
-function loadMore() {
-  page.value++
-  fetchOrders()
-}
-
-function goDetail(orderNo) {
-  uni.navigateTo({
-    url: `/pages/order/detail?order_no=${orderNo}`
-  })
-}
-
-function formatTime(dateStr) {
-  if (!dateStr) return ''
-  const d = new Date(dateStr)
-  return `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
-}
-
-// --- 生命周期 ---
-onMounted(() => {
-  fetchOrders(true)
+const filteredOrders = computed(() => {
+  if (activeTab.value === 0) return mockOrders
+  const status = Object.values(statusMap)[activeTab.value]
+  return mockOrders.filter(o => o.status === status)
 })
 
-onPullDownRefresh(() => {
-  fetchOrders(true).finally(() => {
-    uni.stopPullDownRefresh()
-  })
-})
+const formatCode = (code) => {
+  return code.split('').join(' ')
+}
+
+const goOrderDetail = (order) => {
+  uni.navigateTo({ url: `/pages/order/detail?orderNo=${order.orderNo}` })
+}
 </script>
 
 <style lang="scss" scoped>
-.order-list-page {
+@import '@/styles/design-tokens.scss';
+
+.page {
+  background: $bg-page;
   min-height: 100vh;
-  background: #f5f5f5;
+  padding-bottom: 120rpx;
 }
 
-/* 筛选标签 */
-.filter-tabs {
+.nav-bar {
+  background: $bg-card;
+  height: 88rpx;
   display: flex;
-  background: #fff;
-  padding: 16rpx 24rpx;
-  gap: 16rpx;
-  border-bottom: 1rpx solid #eee;
-  overflow-x: auto;
-  white-space: nowrap;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 2rpx solid #F0F0F0;
 }
 
-.tab-item {
-  padding: 12rpx 28rpx;
-  border-radius: 32rpx;
-  font-size: 26rpx;
-  color: #666;
-  background: #f5f5f5;
-  flex-shrink: 0;
+.nav-title {
+  font-size: 34rpx;
+  font-weight: 600;
+}
+
+/* 筛选 */
+.filter-bar {
+  display: flex;
+  background: $bg-card;
+  border-bottom: 2rpx solid #F0F0F0;
+  padding: 0 16rpx;
+}
+
+.filter-item {
+  flex: 1;
+  text-align: center;
+  padding: 24rpx 0;
+  font-size: 28rpx;
+  color: $text-tertiary;
+  position: relative;
 
   &.active {
-    background: #e6f7ff;
-    color: #1890ff;
-    font-weight: 500;
+    color: $primary;
+    font-weight: 600;
+
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 30%;
+      right: 30%;
+      height: 4rpx;
+      background: $primary;
+      border-radius: 2rpx;
+    }
   }
 }
 
-/* 加载 & 空状态 */
-.loading-wrap, .empty-wrap {
+/* 门店分组 */
+.order-group {
+  padding: 32rpx;
+}
+
+.group-header {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  padding: 120rpx 0;
+  gap: 16rpx;
+  margin-bottom: 24rpx;
 }
 
-.loading-spinner {
-  width: 60rpx;
-  height: 60rpx;
-  border: 4rpx solid #e6f7ff;
-  border-top-color: #1890ff;
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-  margin-bottom: 20rpx;
+.group-icon {
+  width: 56rpx;
+  height: 56rpx;
+  background: linear-gradient(135deg, #F4A261, #E76F51);
+  border-radius: 16rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28rpx;
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-.empty-icon {
-  font-size: 80rpx;
-  margin-bottom: 20rpx;
-}
-
-.empty-title {
-  font-size: 30rpx;
-  color: #333;
-  margin-bottom: 8rpx;
-}
-
-.empty-desc {
-  font-size: 26rpx;
-  color: #999;
+.group-name {
+  font-size: 28rpx;
+  font-weight: 600;
 }
 
 /* 订单卡片 */
-.order-cards {
-  padding: 20rpx 24rpx;
-}
-
 .order-card {
-  background: #fff;
-  border-radius: 20rpx;
+  background: $bg-card;
+  border-radius: 24rpx;
   padding: 28rpx;
-  margin-bottom: 20rpx;
-  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
-
-  &:active {
-    background: #fafafa;
-  }
+  box-shadow: $shadow-sm;
+  margin-bottom: 24rpx;
 }
 
-.card-top {
+.order-top {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
   margin-bottom: 20rpx;
 }
 
-.route-name {
-  font-size: 32rpx;
-  font-weight: 600;
-  color: #333;
-  flex: 1;
+.order-date {
+  font-size: 26rpx;
+  color: $text-tertiary;
 }
 
 .order-status {
-  font-size: 24rpx;
+  font-size: 22rpx;
+  padding: 4rpx 16rpx;
+  border-radius: $radius-full;
   font-weight: 500;
-  padding: 6rpx 16rpx;
-  border-radius: 8rpx;
+
+  &.paid {
+    background: $primary-bg;
+    color: $primary;
+  }
+
+  &.completed {
+    background: #E8F5E9;
+    color: $primary;
+  }
+
+  &.cancelled {
+    background: #FEE2E2;
+    color: $danger;
+  }
 }
 
-.status-0 {
-  color: #faad14;
-  background: #fffbe6;
-}
-
-.status-1 {
-  color: #1890ff;
-  background: #e6f7ff;
-}
-
-.status-2 {
-  color: #722ed1;
-  background: #f9f0ff;
-}
-
-.status-3 {
-  color: #52c41a;
-  background: #f6ffed;
-}
-
-.status-4, .status-5 {
-  color: #999;
-  background: #f5f5f5;
-}
-
-.card-info {
-  display: flex;
-  gap: 32rpx;
-  margin-bottom: 20rpx;
-}
-
-.info-item {
+.order-body {
   display: flex;
   align-items: center;
-  font-size: 26rpx;
-  color: #666;
+  gap: 24rpx;
 }
 
-.info-icon {
-  margin-right: 8rpx;
-  font-size: 24rpx;
-}
-
-.card-bottom {
+.order-icon {
+  width: 112rpx;
+  height: 112rpx;
+  border-radius: 20rpx;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding-top: 16rpx;
-  border-top: 1rpx solid #f5f5f5;
+  justify-content: center;
+  font-size: 44rpx;
 }
 
-.order-time {
+.order-info {
+  flex: 1;
+}
+
+.order-name {
+  font-size: 30rpx;
+  font-weight: 600;
+  display: block;
+}
+
+.order-meta {
   font-size: 24rpx;
-  color: #999;
+  color: $text-secondary;
+  margin-top: 6rpx;
+  display: block;
 }
 
 .order-amount {
-  font-size: 32rpx;
-  font-weight: 600;
-  color: #ff4d4f;
+  font-size: 34rpx;
+  font-weight: 700;
+  color: $accent;
 }
 
-/* 加载更多 */
-.load-more {
-  text-align: center;
-  padding: 24rpx 0 48rpx;
-  font-size: 26rpx;
-  color: #1890ff;
+/* 核销码 */
+.checkin-section {
+  margin-top: 24rpx;
+  background: $primary-bg-light;
+  border-radius: 20rpx;
+  padding: 24rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.checkin-info { flex: 1; }
+
+.checkin-label {
+  font-size: 24rpx;
+  color: $primary;
+  font-weight: 600;
+  display: block;
+}
+
+.checkin-code {
+  font-size: 40rpx;
+  font-weight: 800;
+  color: $primary;
+  letter-spacing: 6rpx;
+  margin-top: 4rpx;
+  display: block;
+}
+
+.checkin-qr {
+  width: 112rpx;
+  height: 112rpx;
+  background: white;
+  border-radius: 16rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20rpx;
+  color: $text-tertiary;
 }
 </style>
