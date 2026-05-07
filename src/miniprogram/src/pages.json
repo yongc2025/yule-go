@@ -44,6 +44,12 @@
       "style": {
         "navigationBarTitleText": "邀请好友"
       }
+    },
+    {
+      "path": "pages/user/profile",
+      "style": {
+        "navigationBarTitleText": "个人信息"
+      }
     }
   ],
   "globalStyle": {
