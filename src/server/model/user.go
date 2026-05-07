@@ -38,3 +38,29 @@ func (u *User) MemberDiscount() float64 {
 		return 1.0
 	}
 }
+
+// UserProfileResponse 用户个人信息响应
+type UserProfileResponse struct {
+	ID          uint64  `json:"id"`
+	Nickname    string  `json:"nickname"`
+	Avatar      string  `json:"avatar"`
+	Phone       string  `json:"phone"`
+	MemberLevel uint8   `json:"member_level"`
+	Balance     float64 `json:"balance"`
+	InviteCode  string  `json:"invite_code"`
+	CreatedAt   string  `json:"created_at"`
+}
+
+// ToProfileResponse 转换为个人信息响应
+func (u *User) ToProfileResponse() *UserProfileResponse {
+	return &UserProfileResponse{
+		ID:          u.ID,
+		Nickname:    u.Nickname,
+		Avatar:      u.Avatar,
+		Phone:       u.Phone,
+		MemberLevel: u.MemberLevel,
+		Balance:     u.Balance,
+		InviteCode:  u.InviteCode,
+		CreatedAt:   u.CreatedAt.Format("2006-01-02"),
+	}
+}

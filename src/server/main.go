@@ -70,6 +70,7 @@ func main() {
 		auth := v1.Group("")
 		auth.Use(middleware.JWTAuth())
 		{
+			router.RegisterUserRoutes(auth)
 			router.RegisterOrderRoutes(auth)
 			router.RegisterMemberRoutes(auth)
 			router.RegisterReferralRoutes(auth)
