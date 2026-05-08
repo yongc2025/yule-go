@@ -49,7 +49,7 @@
 
   <!-- 活动列表 -->
   <view class="activity-list" wx:if="{{activities.length > 0}}">
-    <view class="activity-card" wx:for="{{activities}}" wx:key="_id" bindtap="goDetail" data-id="{{item._id}}">
+    <view class="activity-card" wx:for="{{activities}}" wx:key="scheduleId" bindtap="goDetail" data-id="{{item._id}}" data-scheduleid="{{item.scheduleId}}">
       <view class="activity-cover">
         <image src="{{item.coverImage || '/images/default-cover.png'}}" mode="aspectFill" />
         <view class="activity-type-badge">{{item.typeIcon}} {{item.typeName}}</view>

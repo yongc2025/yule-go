@@ -61,23 +61,51 @@ Page({
     const db = wx.cloud.database()
     const _ = db.command
 
-    db.collection('activities')
+    // 1. 先查本周的团期
+    db.collection('schedules')
       .where({
         date: _.gte(week.start.toISOString()).and(_.lte(week.end.toISOString())),
-        status: 'active' // 只显示上架的
+        status: 'active'
       })
       .orderBy('date', 'asc')
       .limit(20)
       .get()
       .then(res => {
-        const activities = res.data.map(item => ({
-          ...item,
-          typeName: TYPE_MAP[item.type] || item.type,
-          typeIcon: TYPE_ICON_MAP[item.type] || '🎣',
-          dateFormatted: dateUtil.formatDate(item.date),
-          slotsLeft: (item.maxSlots || 0) - (item.bookedSlots || 0)
-        }))
-        this.setData({ activities, loading: false })
+        const schedules = res.data
+        if (schedules.length === 0) {
+          this.setData({ activities: [], loading: false })
+          return
+        }
+
+        // 2. 去重获取活动ID
+        const activityIds = [...new Set(schedules.map(s => s.activityId))]
+
+        // 3. 查询活动详情
+        db.collection('activities')
+          .where({ _id: _.in(activityIds), status: 'active' })
+          .get()
+          .then(actRes => {
+            const activityMap = {}
+            actRes.data.forEach(a => { activityMap[a._id] = a })
+
+            // 4. 合并团期信息到活动
+            const activities = schedules.map(schedule => {
+              const activity = activityMap[schedule.activityId] || {}
+              return {
+                ...activity,
+                scheduleId: schedule._id,
+                date: schedule.date,
+                maxSlots: schedule.maxSlots,
+                bookedSlots: schedule.bookedSlots,
+                typeName: TYPE_MAP[activity.type] || activity.type,
+                typeIcon: TYPE_ICON_MAP[activity.type] || '🎣',
+                dateFormatted: dateUtil.formatDate(schedule.date),
+                slotsLeft: (schedule.maxSlots || 0) - (schedule.bookedSlots || 0)
+              }
+            })
+
+            this.setData({ activities, loading: false })
+          })
       })
       .catch(err => {
         console.error('加载活动失败:', err)
@@ -108,8 +136,9 @@ Page({
   // 跳转活动详情
   goDetail(e) {
     const id = e.currentTarget.dataset.id
+    const scheduleId = e.currentTarget.dataset.scheduleid
     wx.navigateTo({
-      url: `/pages/detail/detail?id=${id}`
+      url: `/pages/detail/detail?id=${id}&scheduleId=${scheduleId}`
     })
   },
 
