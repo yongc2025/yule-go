@@ -119,10 +119,14 @@ Page({
       children,
       couponId: selectedCoupon ? selectedCoupon._id : '',
       useBalance
-    }, { showLoading: false }).then(res => {
-      if (res.code === 0) return res.data
+    }, { showLoading: false }).then(data => {
+      // api.call 成功时直接返回 result.data，所以 data 就是折扣数据
+      console.log('[DEBUG] orders.calcDiscount data:', JSON.stringify(data))
+      return data
+    }).catch(err => {
+      console.error('[DEBUG] orders.calcDiscount FAILED:', JSON.stringify(err))
       return null
-    }).catch(() => null)
+    })
 
     Promise.all([couponPromise, discountPromise]).then(([coupons, d]) => {
       console.log('[DEBUG] coupons count:', coupons.length)
