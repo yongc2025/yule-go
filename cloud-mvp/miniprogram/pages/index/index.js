@@ -9,6 +9,14 @@ const TYPE_MAP = {
   wild_fishing: '野钓探险'
 }
 
+const TYPE_ICON_MAP = {
+  fishing: '🎣',
+  camping: '⛺',
+  family: '👨‍👩‍👧',
+  senior: '👴',
+  wild_fishing: '🎣'
+}
+
 Page({
   data: {
     shopInfo: {},
@@ -61,6 +69,7 @@ Page({
         const activities = res.data.map(item => ({
           ...item,
           typeName: TYPE_MAP[item.type] || item.type,
+          typeIcon: TYPE_ICON_MAP[item.type] || '🎣',
           dateFormatted: dateUtil.formatDate(item.date),
           slotsLeft: (item.maxSlots || 0) - (item.bookedSlots || 0)
         }))

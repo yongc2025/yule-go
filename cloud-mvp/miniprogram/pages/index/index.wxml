@@ -50,7 +50,7 @@
     <view class="activity-card" wx:for="{{activities}}" wx:key="_id" bindtap="goDetail" data-id="{{item._id}}">
       <view class="activity-cover">
         <image src="{{item.coverImage || '/images/default-cover.png'}}" mode="aspectFill" />
-        <view class="activity-type-badge">{{item.typeName}}</view>
+        <view class="activity-type-badge">{{item.typeIcon}} {{item.typeName}}</view>
       </view>
       <view class="activity-body">
         <view class="activity-title">{{item.name}}</view>
