@@ -6,7 +6,9 @@
     "pages/booking/booking",
     "pages/orders/orders",
     "pages/profile/profile",
-    "pages/admin/admin"
+    "pages/admin/admin",
+    "pages/admin/activities",
+    "pages/admin/schedules"
   ],
   "window": {
     "backgroundTextStyle": "light",

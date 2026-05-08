@@ -126,6 +126,11 @@ Page({
       })
   },
 
+  // 跳转活动管理
+  goActivities() {
+    wx.navigateTo({ url: '/pages/admin/activities' })
+  },
+
   // 跳转核销页（扫码）
   goCheckin() {
     wx.scanCode({
