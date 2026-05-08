@@ -40,22 +40,6 @@
     </view>
   </view>
 
-  <!-- 优惠券选择 -->
-  <view class="card" bindtap="openCouponPicker">
-    <view class="coupon-row">
-      <view class="coupon-left">
-        <text class="coupon-icon">🎫</text>
-        <text class="coupon-label">优惠券</text>
-      </view>
-      <view class="coupon-right">
-        <text class="coupon-value" wx:if="{{selectedCoupon}}">-¥{{couponDiscount}}</text>
-        <text class="coupon-placeholder" wx:elif="{{availableCoupons.length > 0}}">{{availableCoupons.length}}张可用</text>
-        <text class="coupon-placeholder" wx:else>暂无可用</text>
-        <text class="menu-arrow">→</text>
-      </view>
-    </view>
-  </view>
-
   <!-- 邀请立减提示 -->
   <view class="card invite-card" wx:if="{{isFirstOrder && inviteDiscount > 0}}">
     <text class="invite-icon">🎁</text>
@@ -101,6 +85,27 @@
   <!-- 费用明细 -->
   <view class="card">
     <view class="section-title">💰 费用明细</view>
+
+    <!-- 优惠券选择（整合到费用明细） -->
+    <view class="coupon-bar" bindtap="openCouponPicker">
+      <view class="coupon-bar-left">
+        <view class="coupon-badge">券</view>
+        <text class="coupon-bar-label">优惠券</text>
+      </view>
+      <view class="coupon-bar-right">
+        <block wx:if="{{selectedCoupon}}">
+          <text class="coupon-bar-amount">-¥{{couponDiscount}}</text>
+        </block>
+        <block wx:elif="{{availableCoupons.length > 0}}">
+          <text class="coupon-bar-count">{{availableCoupons.length}}张可用</text>
+        </block>
+        <block wx:else>
+          <text class="coupon-bar-empty">暂无可用</text>
+        </block>
+        <text class="coupon-bar-arrow">›</text>
+      </view>
+    </view>
+
     <view class="fee-row">
       <text>原价小计</text>
       <text>¥{{originalFee}}</text>

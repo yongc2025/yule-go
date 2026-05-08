@@ -72,45 +72,6 @@
   text-align: center;
 }
 
-/* 优惠券选择 */
-.coupon-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.coupon-left {
-  display: flex;
-  align-items: center;
-  gap: 12rpx;
-}
-
-.coupon-icon {
-  font-size: 32rpx;
-}
-
-.coupon-label {
-  font-size: 28rpx;
-  font-weight: 500;
-}
-
-.coupon-right {
-  display: flex;
-  align-items: center;
-  gap: 8rpx;
-}
-
-.coupon-value {
-  font-size: 28rpx;
-  color: #E76F51;
-  font-weight: 600;
-}
-
-.coupon-placeholder {
-  font-size: 26rpx;
-  color: #999;
-}
-
 /* 邀请立减卡片 */
 .invite-card {
   background: #FFF8E1;
@@ -202,6 +163,70 @@
   background: #f9f9f9;
   border-radius: 8rpx;
   box-sizing: border-box;
+}
+
+/* 优惠券选择（整合到费用明细） */
+.coupon-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20rpx 0;
+  margin-bottom: 16rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.coupon-bar-left {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.coupon-badge {
+  width: 44rpx;
+  height: 44rpx;
+  background: linear-gradient(135deg, #E76F51, #F4845F);
+  color: #fff;
+  font-size: 22rpx;
+  font-weight: 700;
+  border-radius: 10rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.coupon-bar-label {
+  font-size: 28rpx;
+  font-weight: 500;
+  color: #333;
+}
+
+.coupon-bar-right {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.coupon-bar-amount {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #E76F51;
+}
+
+.coupon-bar-count {
+  font-size: 26rpx;
+  color: #E76F51;
+  font-weight: 500;
+}
+
+.coupon-bar-empty {
+  font-size: 26rpx;
+  color: #999;
+}
+
+.coupon-bar-arrow {
+  font-size: 32rpx;
+  color: #ccc;
+  margin-left: 4rpx;
 }
 
 /* 费用明细 */
