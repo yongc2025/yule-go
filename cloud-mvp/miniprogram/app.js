@@ -28,11 +28,12 @@ App({
       name: 'login',
       data: {}
     }).then(res => {
-      this.globalData.openid = res.result.openid
-      console.log('登录成功，openid:', res.result.openid)
+      const openid = res.result.data ? res.result.data.openid : res.result.openid
+      this.globalData.openid = openid
+      console.log('登录成功，openid:', openid)
 
       // 检查是否是管理员
-      this.checkAdmin(res.result.openid)
+      this.checkAdmin(openid)
     }).catch(err => {
       console.error('登录失败:', err)
     })
@@ -40,6 +41,7 @@ App({
 
   // 检查管理员身份
   checkAdmin(openid) {
+    if (!openid) return
     const db = wx.cloud.database()
     db.collection('admins').where({
       openid: openid
