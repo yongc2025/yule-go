@@ -48,12 +48,12 @@ async function listCoupons(openid, { status = 'unused', page = 1, pageSize = 20 
 
     if (status === 'unused') {
       where.status = 'unused'
-      where.expireAt = _.gte(new Date())
+      // expireAt 过滤在 JS 层处理，兼容字符串和 Date 类型
     } else if (status === 'used') {
       where.status = 'used'
     } else if (status === 'expired') {
       where.status = 'unused'
-      where.expireAt = _.lt(new Date())
+      // 过期判断在 JS 层处理
     }
     // status === 'all' 不加筛选
 
@@ -61,22 +61,30 @@ async function listCoupons(openid, { status = 'unused', page = 1, pageSize = 20 
     const dataRes = await db.collection('coupons')
       .where(where)
       .orderBy('createdAt', 'desc')
-      .skip((page - 1) * pageSize)
-      .limit(pageSize)
       .get()
 
-    // 标记过期状态 + 补充类型名称
+    // 标记过期状态 + 补充类型名称 + JS 层过滤（兼容 expireAt 字符串/Date）
     const now = new Date()
-    const list = dataRes.data.map(c => ({
+    let filtered = dataRes.data.map(c => ({
       ...c,
       typeName: (COUPON_TYPES[c.type] || {}).name || c.type,
       expired: c.status === 'unused' && c.expireAt && new Date(c.expireAt) < now,
       desc: c.description || (COUPON_TYPES[c.type] || {}).desc || ''
     }))
 
+    if (status === 'unused') {
+      filtered = filtered.filter(c => !c.expired)
+    } else if (status === 'expired') {
+      filtered = filtered.filter(c => c.expired)
+    }
+
+    // 分页
+    const total = filtered.length
+    const list = filtered.slice((page - 1) * pageSize, page * pageSize)
+
     return {
       code: 0,
-      data: { list, total: countRes.total, page, pageSize }
+      data: { list, total, page, pageSize }
     }
   } catch (err) {
     return { code: -1, message: '查询失败: ' + err.message }
@@ -89,14 +97,14 @@ async function getAvailableCoupons(openid, { orderType = 'travel', orderAmount =
     const now = new Date()
     const where = {
       openid,
-      status: 'unused',
-      expireAt: _.gte(now)
+      status: 'unused'
     }
 
     const res = await db.collection('coupons').where(where).get()
 
-    // 筛选适用的券
+    // 筛选适用的券（expireAt 在 JS 层判断，兼容字符串/Date）
     const available = res.data.filter(c => {
+      if (c.expireAt && new Date(c.expireAt) < now) return false
       // 装备券只能用于租赁订单
       if (c.type === 'equipment' && orderType !== 'equipment') return false
       // 旅行类券用于旅行订单
@@ -187,13 +195,14 @@ async function useCoupon(openid, { couponId, orderId }) {
 async function countCoupons(openid) {
   try {
     const now = new Date()
-    const res = await db.collection('coupons').where({
-      openid,
-      status: 'unused',
-      expireAt: _.gte(now)
-    }).count()
+    const res = await db.collection('coupons')
+      .where({ openid, status: 'unused' })
+      .get()
 
-    return { code: 0, data: { count: res.total } }
+    // 过滤未过期的券（兼容 expireAt 为字符串或 Date）
+    const count = res.data.filter(c => !c.expireAt || new Date(c.expireAt) >= now).length
+
+    return { code: 0, data: { count } }
   } catch (err) {
     return { code: -1, message: '统计失败: ' + err.message }
   }

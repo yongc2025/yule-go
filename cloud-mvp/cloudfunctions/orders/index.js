@@ -739,13 +739,17 @@ async function calcDiscountPreview({ activityId, adults, children, couponId, use
       }
     }
 
-    // 可用优惠券列表
+    // 可用优惠券列表（expireAt 兼容字符串和 Date 类型）
     const now = new Date()
     const couponsRes = await db.collection('coupons')
-      .where({ openid, status: 'unused', expireAt: _.gte(now) })
+      .where({ openid, status: 'unused' })
       .get()
     const availableCoupons = couponsRes.data
-      .filter(c => c.type !== 'equipment')
+      .filter(c => {
+        if (c.type === 'equipment') return false
+        if (c.expireAt && new Date(c.expireAt) < now) return false
+        return true
+      })
       .map(c => ({
         _id: c._id,
         type: c.type,
