@@ -1,9 +1,11 @@
 {
   "pages": [
     "pages/index/index",
+    "pages/discover/discover",
     "pages/detail/detail",
     "pages/booking/booking",
     "pages/orders/orders",
+    "pages/profile/profile",
     "pages/admin/admin"
   ],
   "window": {
@@ -19,15 +21,27 @@
     "list": [
       {
         "pagePath": "pages/index/index",
-        "text": "活动",
-        "iconPath": "images/tab-activity.png",
-        "selectedIconPath": "images/tab-activity-active.png"
+        "text": "首页",
+        "iconPath": "images/icon-home.png",
+        "selectedIconPath": "images/icon-home-active.png"
+      },
+      {
+        "pagePath": "pages/discover/discover",
+        "text": "发现",
+        "iconPath": "images/icon-discover.png",
+        "selectedIconPath": "images/icon-discover-active.png"
       },
       {
         "pagePath": "pages/orders/orders",
         "text": "订单",
-        "iconPath": "images/tab-order.png",
-        "selectedIconPath": "images/tab-order-active.png"
+        "iconPath": "images/icon-order.png",
+        "selectedIconPath": "images/icon-order-active.png"
+      },
+      {
+        "pagePath": "pages/profile/profile",
+        "text": "我的",
+        "iconPath": "images/icon-profile.png",
+        "selectedIconPath": "images/icon-profile-active.png"
       }
     ]
   },

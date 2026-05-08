@@ -1,0 +1,52 @@
+<!--pages/discover/discover.wxml-->
+<!--发现页 — 附近门店-->
+
+<view class="page">
+  <!-- 顶部标题 -->
+  <view class="page-header">
+    <view class="page-title">发现好店</view>
+    <view class="page-sub">为您推荐附近门店</view>
+  </view>
+
+  <!-- 分类筛选 -->
+  <view class="filter-bar">
+    <view class="filter-item {{currentType === 'all' ? 'active' : ''}}" bindtap="switchType" data-type="all">全部</view>
+    <view class="filter-item {{currentType === 'fishing' ? 'active' : ''}}" bindtap="switchType" data-type="fishing">🎣 钓鱼</view>
+    <view class="filter-item {{currentType === 'camping' ? 'active' : ''}}" bindtap="switchType" data-type="camping">⛺ 露营</view>
+    <view class="filter-item {{currentType === 'family' ? 'active' : ''}}" bindtap="switchType" data-type="family">👨‍👩‍👧 亲子</view>
+    <view class="filter-item {{currentType === 'senior' ? 'active' : ''}}" bindtap="switchType" data-type="senior">👴 慢游</view>
+  </view>
+
+  <!-- 门店列表 -->
+  <view class="shop-list" wx:if="{{shops.length > 0}}">
+    <view class="shop-card" wx:for="{{shops}}" wx:key="_id" bindtap="goShop" data-id="{{item._id}}">
+      <view class="shop-cover">
+        <view class="shop-badge">🔥 本周{{item.activityCount}}个活动</view>
+        <image class="shop-avatar" src="{{item.ownerAvatar || '/images/default-avatar.png'}}" mode="aspectFill" />
+      </view>
+      <view class="shop-body">
+        <view class="shop-name">{{item.name}}</view>
+        <view class="shop-meta">
+          <text>⭐ {{item.rating || '5.0'}}</text>
+          <text>已服务{{item.serviceCount || 0}}人</text>
+        </view>
+        <view class="shop-hot" wx:if="{{item.hotActivity}}">
+          本周热门：{{item.hotActivity.name}} ¥{{item.hotActivity.price}}
+        </view>
+        <view class="shop-action">
+          <view class="btn-go">去看看</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty" wx:if="{{!loading && shops.length === 0}}">
+    <view class="empty-icon">🏪</view>
+    <view>暂无门店</view>
+    <view class="empty-sub">敬请期待~</view>
+  </view>
+
+  <!-- 加载中 -->
+  <view class="loading" wx:if="{{loading}}">加载中...</view>
+</view>

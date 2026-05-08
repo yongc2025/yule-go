@@ -1,0 +1,136 @@
+/* pages/profile/profile.wxss */
+
+.page {
+  padding-bottom: 20rpx;
+}
+
+/* 用户卡片 */
+.user-card {
+  background: linear-gradient(135deg, #2D6A4F, #40916C);
+  padding: 60rpx 32rpx 40rpx;
+  display: flex;
+  align-items: center;
+  color: #fff;
+}
+
+.user-avatar {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 50%;
+  border: 4rpx solid rgba(255, 255, 255, 0.6);
+  margin-right: 24rpx;
+}
+
+.user-name {
+  font-size: 36rpx;
+  font-weight: 700;
+  margin-bottom: 8rpx;
+}
+
+.user-tag {
+  font-size: 24rpx;
+  opacity: 0.85;
+}
+
+/* 我的门店 */
+.section {
+  background: #fff;
+  margin: 24rpx;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.05);
+}
+
+.section-header {
+  margin-bottom: 20rpx;
+}
+
+.section-title {
+  font-size: 30rpx;
+  font-weight: 600;
+}
+
+.shop-item {
+  display: flex;
+  align-items: center;
+  padding: 16rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.shop-item:last-child {
+  border-bottom: none;
+}
+
+.shop-avatar {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 50%;
+  margin-right: 20rpx;
+}
+
+.shop-info {
+  flex: 1;
+}
+
+.shop-name {
+  font-size: 28rpx;
+  font-weight: 600;
+  margin-bottom: 4rpx;
+}
+
+.shop-primary {
+  font-size: 22rpx;
+  color: #E76F51;
+  margin-left: 8rpx;
+}
+
+.shop-meta {
+  font-size: 24rpx;
+  color: #6B7280;
+}
+
+.shop-arrow {
+  color: #ccc;
+  font-size: 28rpx;
+}
+
+/* 快捷入口 */
+.menu-section {
+  background: #fff;
+  margin: 24rpx;
+  border-radius: 16rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.05);
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  padding: 28rpx 24rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.menu-item:last-child {
+  border-bottom: none;
+}
+
+.menu-icon {
+  font-size: 36rpx;
+  margin-right: 20rpx;
+}
+
+.menu-text {
+  flex: 1;
+  font-size: 28rpx;
+}
+
+.menu-arrow {
+  color: #ccc;
+  font-size: 28rpx;
+}
+
+.empty-sub {
+  color: #999;
+  font-size: 26rpx;
+  text-align: center;
+  padding: 24rpx 0;
+}

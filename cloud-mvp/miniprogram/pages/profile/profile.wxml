@@ -1,0 +1,53 @@
+<!--pages/profile/profile.wxml-->
+<!--我的 — 个人中心-->
+
+<view class="page">
+  <!-- 用户信息 -->
+  <view class="user-card">
+    <image class="user-avatar" src="{{userInfo.avatarUrl || '/images/default-avatar.png'}}" mode="aspectFill" />
+    <view class="user-info">
+      <view class="user-name">{{userInfo.nickName || '钓鱼爱好者'}}</view>
+      <view class="user-tag">🎣 渔乐会员</view>
+    </view>
+  </view>
+
+  <!-- 我的门店 -->
+  <view class="section">
+    <view class="section-header">
+      <text class="section-title">🏪 我的门店</text>
+    </view>
+    <view class="shop-list" wx:if="{{myShops.length > 0}}">
+      <view class="shop-item" wx:for="{{myShops}}" wx:key="_id">
+        <image class="shop-avatar" src="{{item.ownerAvatar || '/images/default-avatar.png'}}" mode="aspectFill" />
+        <view class="shop-info">
+          <view class="shop-name">
+            {{item.name}}
+            <text class="shop-primary" wx:if="{{item.isPrimary}}">⭐ 主场店</text>
+          </view>
+          <view class="shop-meta">本周{{item.activityCount || 0}}个活动</view>
+        </view>
+        <view class="shop-arrow">→</view>
+      </view>
+    </view>
+    <view class="empty-sub" wx:else>还没有去过任何门店~</view>
+  </view>
+
+  <!-- 快捷入口 -->
+  <view class="menu-section">
+    <view class="menu-item" bindtap="goOrders">
+      <text class="menu-icon">📋</text>
+      <text class="menu-text">我的订单</text>
+      <text class="menu-arrow">→</text>
+    </view>
+    <view class="menu-item" bindtap="callService">
+      <text class="menu-icon">📞</text>
+      <text class="menu-text">联系客服</text>
+      <text class="menu-arrow">→</text>
+    </view>
+    <view class="menu-item" bindtap="goDiscover">
+      <text class="menu-icon">🔍</text>
+      <text class="menu-text">发现新门店</text>
+      <text class="menu-arrow">→</text>
+    </view>
+  </view>
+</view>
