@@ -1,5 +1,5 @@
 <!--pages/admin/schedules.wxml-->
-<!--团期管理-->
+<!--团期管理 — 支持批量创建 + picker 防穿透-->
 
 <view class="page">
   <view class="top-bar">
@@ -19,12 +19,12 @@
           <text>👥 {{item.bookedSlots || 0}}/{{item.maxSlots}} 已报名</text>
           <text class="slots-left" wx:if="{{item.slotsLeft <= 3 && item.slotsLeft > 0}}">（仅剩 {{item.slotsLeft}} 位）</text>
         </view>
-        <!-- 名额进度条 -->
         <view class="progress-bar">
           <view class="progress-fill" style="width: {{item.bookedSlots / item.maxSlots * 100}}%; background: {{item.slotsLeft <= 0 ? '#e74c3c' : item.slotsLeft <= 3 ? '#f39c12' : '#2D6A4F'}}"></view>
         </view>
       </view>
       <view class="card-actions" wx:if="{{item.status === 'active'}}">
+        <view class="btn-sm" bindtap="editSchedule" data-id="{{item._id}}">✏️ 编辑</view>
         <view class="btn-sm btn-danger" bindtap="cancelSchedule" data-id="{{item._id}}">取消团期</view>
       </view>
       <view class="card-actions" wx:if="{{item.status === 'cancelled'}}">
@@ -37,22 +37,49 @@
   <view class="empty" wx:if="{{!loading && schedules.length === 0}}">
     <view class="empty-icon">📅</view>
     <view>暂无团期</view>
-    <view class="empty-sub">点击右上角创建第一个团期</view>
+    <view class="empty-sub">点击右上角批量创建团期</view>
   </view>
 
   <view class="loading" wx:if="{{loading}}">加载中...</view>
 
-  <!-- 新建弹窗 -->
+  <!-- 新建/编辑弹窗 -->
   <view class="modal" wx:if="{{showForm}}" bindtap="closeForm">
     <view class="modal-content" catchtap="">
-      <view class="modal-title">新建团期</view>
+      <view class="modal-title">{{editId ? '编辑团期' : '批量创建团期'}}</view>
 
-      <view class="form-group">
-        <view class="form-label">出行日期</view>
-        <picker mode="date" value="{{form.date}}" bindchange="onDateChange">
-          <view class="form-input picker-value">{{form.date || '请选择日期'}}</view>
-        </picker>
-      </view>
+      <!-- 编辑模式：单日期 -->
+      <block wx:if="{{editId}}">
+        <view class="form-group">
+          <view class="form-label">出行日期</view>
+          <picker mode="date" value="{{form.date}}" bindchange="onDateChange"
+                  bindtap="onPickerOpen" bindcolumnchange="onPickerOpen">
+            <view class="form-input picker-value">{{form.date || '请选择日期'}}</view>
+          </picker>
+        </view>
+      </block>
+
+      <!-- 新建模式：多日期 -->
+      <block wx:else>
+        <view class="form-group">
+          <view class="form-label">选择日期（可多选）</view>
+          <!-- 已选日期列表 -->
+          <view class="date-tags" wx:if="{{form.dates.length > 0}}">
+            <view class="date-tag" wx:for="{{form.dates}}" wx:key="*this">
+              <text>{{item}}</text>
+              <view class="date-tag-remove" catchtap="removeDate" data-index="{{index}}">✕</view>
+            </view>
+          </view>
+          <view class="date-add-row">
+            <picker mode="date" value="{{tempDate}}" bindchange="onTempDateChange"
+                    bindtap="onPickerOpen" bindcolumnchange="onPickerOpen">
+              <view class="btn-add-date">+ 添加日期</view>
+            </picker>
+            <view class="quick-dates">
+              <view class="btn-quick" bindtap="addNextWeekends">+近4周周末</view>
+            </view>
+          </view>
+        </view>
+      </block>
 
       <view class="form-group">
         <view class="form-label">名额上限</view>
@@ -61,7 +88,9 @@
 
       <view class="modal-actions">
         <view class="btn-cancel" bindtap="closeForm">取消</view>
-        <view class="btn-confirm" bindtap="submitForm">创建</view>
+        <view class="btn-confirm" bindtap="submitForm">
+          {{editId ? '保存' : '创建 ' + form.dates.length + ' 个团期'}}
+        </view>
       </view>
     </view>
   </view>
