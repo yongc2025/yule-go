@@ -161,6 +161,39 @@
   color: #2D6A4F;
 }
 
+/* 集合地点 */
+.meeting-point {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.meeting-info {
+  flex: 1;
+}
+
+.meeting-name {
+  font-size: 28rpx;
+  font-weight: 600;
+  margin-bottom: 4rpx;
+}
+
+.meeting-addr {
+  font-size: 24rpx;
+  color: #6B7280;
+}
+
+.btn-navigate {
+  background: #D8F3DC;
+  color: #2D6A4F;
+  padding: 12rpx 28rpx;
+  border-radius: 999rpx;
+  font-size: 26rpx;
+  font-weight: 600;
+  flex-shrink: 0;
+  margin-left: 16rpx;
+}
+
 /* 底部操作栏 */
 .bottom-bar {
   position: fixed;

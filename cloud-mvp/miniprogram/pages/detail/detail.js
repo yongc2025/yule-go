@@ -92,6 +92,21 @@ Page({
     })
   },
 
+  // 导航到门店
+  openNavigation() {
+    const shop = this.data.shopInfo
+    if (shop.latitude && shop.longitude) {
+      wx.openLocation({
+        latitude: shop.latitude,
+        longitude: shop.longitude,
+        name: shop.name || '集合地点',
+        address: shop.address || ''
+      })
+    } else if (shop.address) {
+      wx.showToast({ title: shop.address, icon: 'none', duration: 3000 })
+    }
+  },
+
   // 跳转预约
   goBooking() {
     if (!this.data.selectedSchedule) {

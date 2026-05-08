@@ -93,6 +93,18 @@
     </view>
   </view>
 
+  <!-- 集合地点 -->
+  <view class="card" wx:if="{{shopInfo.address}}">
+    <view class="section-title">📍 集合地点</view>
+    <view class="meeting-point">
+      <view class="meeting-info">
+        <view class="meeting-name">🏪 {{shopInfo.name || '门店'}}</view>
+        <view class="meeting-addr">{{shopInfo.address}}</view>
+      </view>
+      <view class="btn-navigate" bindtap="openNavigation">🧭 导航</view>
+    </view>
+  </view>
+
   <!-- 底部占位 -->
   <view style="height: 140rpx;"></view>
 
