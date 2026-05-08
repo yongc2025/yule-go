@@ -13,6 +13,15 @@
     <text class="edit-arrow">✏️</text>
   </view>
 
+  <!-- 余额卡片 -->
+  <view class="balance-card" wx:if="{{totalBalance > 0}}">
+    <view class="balance-main">
+      <text class="balance-label">我的余额</text>
+      <text class="balance-amount">¥{{totalBalance}}</text>
+    </view>
+    <view class="balance-btn" bindtap="goRechargeAll">充值</view>
+  </view>
+
   <!-- 个人相册预览 -->
   <view class="section" wx:if="{{userInfo.album && userInfo.album.length > 0}}">
     <view class="section-header">

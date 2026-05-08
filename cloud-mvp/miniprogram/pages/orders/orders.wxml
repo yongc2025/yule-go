@@ -31,8 +31,27 @@
       </view>
 
       <view class="order-footer">
+        <!-- 优惠摘要 -->
+        <view class="order-discount" wx:if="{{item.discountDetail}}">
+          <text class="discount-summary" wx:if="{{item.discountDetail.companionDiscount}}">
+            🎁同行减¥{{item.discountDetail.companionDiscount.totalDiscount}}
+          </text>
+          <text class="discount-summary" wx:if="{{item.discountDetail.memberDiscount > 0 && item.discountDetail.discountType === 'member'}}">
+            👑会员减¥{{item.discountDetail.memberDiscount}}
+          </text>
+          <text class="discount-summary" wx:if="{{item.discountDetail.inviteDiscount > 0}}">
+            🤝邀请减¥{{item.discountDetail.inviteDiscount}}
+          </text>
+          <text class="discount-summary" wx:if="{{item.discountDetail.couponDiscount > 0}}">
+            🎫券减¥{{item.discountDetail.couponDiscount}}
+          </text>
+          <text class="discount-summary" wx:if="{{item.discountDetail.balanceDeduction > 0}}">
+            💰余额抵¥{{item.discountDetail.balanceDeduction}}
+          </text>
+        </view>
         <view class="order-amount">
           <text class="price">¥{{item.totalFee}}</text>
+          <text class="original-fee" wx:if="{{item.originalFee && item.originalFee !== item.totalFee}}">原价¥{{item.originalFee}}</text>
           <text class="refund-amount" wx:if="{{item.status === 'refunded'}}"> 已退 ¥{{item.refundAmount}}</text>
         </view>
 

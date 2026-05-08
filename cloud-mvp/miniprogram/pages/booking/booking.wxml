@@ -1,5 +1,5 @@
 <!--pages/booking/booking.wxml-->
-<!--预约下单页-->
+<!--预约下单页（含优惠券/余额/邀请立减/同行优惠）-->
 
 <view class="page">
   <!-- 活动摘要 -->
@@ -40,6 +40,45 @@
     </view>
   </view>
 
+  <!-- 优惠券选择 -->
+  <view class="card" bindtap="openCouponPicker">
+    <view class="coupon-row">
+      <view class="coupon-left">
+        <text class="coupon-icon">🎫</text>
+        <text class="coupon-label">优惠券</text>
+      </view>
+      <view class="coupon-right">
+        <text class="coupon-value" wx:if="{{selectedCoupon}}">-¥{{couponDiscount}}</text>
+        <text class="coupon-placeholder" wx:elif="{{availableCoupons.length > 0}}">{{availableCoupons.length}}张可用</text>
+        <text class="coupon-placeholder" wx:else>暂无可用</text>
+        <text class="menu-arrow">→</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 邀请立减提示 -->
+  <view class="card invite-card" wx:if="{{isFirstOrder && inviteDiscount > 0}}">
+    <text class="invite-icon">🎁</text>
+    <view class="invite-text">
+      <text class="invite-title">好友邀请立减 ¥{{inviteDiscount}}</text>
+      <text class="invite-desc">首次下单自动抵扣</text>
+    </view>
+  </view>
+
+  <!-- 余额抵扣 -->
+  <view class="card" wx:if="{{userBalance > 0}}">
+    <view class="balance-row">
+      <view class="balance-left">
+        <text class="balance-icon">💰</text>
+        <view class="balance-text">
+          <text class="balance-label">余额抵扣</text>
+          <text class="balance-amount">可用 ¥{{userBalance}}</text>
+        </view>
+      </view>
+      <switch checked="{{useBalance}}" bindchange="toggleBalance" color="#2D6A4F" />
+    </view>
+  </view>
+
   <!-- 联系信息 -->
   <view class="card">
     <view class="section-title">📱 联系信息</view>
@@ -59,29 +98,10 @@
     <textarea class="remark-input" placeholder="有什么特殊需求可以写在这里" value="{{remark}}" bindinput="onInputRemark" maxlength="200" />
   </view>
 
-  <!-- 通知提醒 -->
-  <view class="card notify-card" wx:if="{{!subscribed}}">
-    <view class="notify-row">
-      <text class="notify-icon">🔔</text>
-      <view class="notify-text">
-        <text class="notify-title">开启活动通知</text>
-        <text class="notify-desc">团期变更或取消时第一时间通知您</text>
-      </view>
-    </view>
-  </view>
-
   <!-- 费用明细 -->
   <view class="card">
     <view class="section-title">💰 费用明细</view>
     <view class="fee-row">
-      <text>团费（成人 × {{adults}}）</text>
-      <text>¥{{adultFee}}</text>
-    </view>
-    <view class="fee-row" wx:if="{{children > 0}}">
-      <text>团费（儿童 × {{children}}）</text>
-      <text>¥{{childFee}}</text>
-    </view>
-    <view class="fee-row" wx:if="{{originalFee !== totalFee}}">
       <text>原价小计</text>
       <text>¥{{originalFee}}</text>
     </view>
@@ -98,7 +118,7 @@
       <text class="gift-text">🎉 赠送：{{companionGift}}</text>
     </view>
 
-    <!-- 会员折扣（仅当会员折扣更优时显示） -->
+    <!-- 会员立减（仅当会员折扣更优时） -->
     <view class="fee-row discount-row" wx:if="{{memberDiscount > 0 && discountType === 'member'}}">
       <view class="discount-label">
         <text class="discount-tag">👑 会员立减</text>
@@ -106,9 +126,33 @@
       <text class="discount-amount">-¥{{memberDiscount}}</text>
     </view>
 
+    <!-- 邀请立减 -->
+    <view class="fee-row discount-row" wx:if="{{inviteDiscount > 0}}">
+      <view class="discount-label">
+        <text class="discount-tag">🤝 邀请立减</text>
+      </view>
+      <text class="discount-amount">-¥{{inviteDiscount}}</text>
+    </view>
+
+    <!-- 优惠券 -->
+    <view class="fee-row discount-row" wx:if="{{couponDiscount > 0}}">
+      <view class="discount-label">
+        <text class="discount-tag">🎫 优惠券</text>
+      </view>
+      <text class="discount-amount">-¥{{couponDiscount}}</text>
+    </view>
+
+    <!-- 余额抵扣 -->
+    <view class="fee-row discount-row" wx:if="{{balanceDeduction > 0}}">
+      <view class="discount-label">
+        <text class="discount-tag">💰 余额抵扣</text>
+      </view>
+      <text class="discount-amount">-¥{{balanceDeduction}}</text>
+    </view>
+
     <view class="fee-row total">
-      <text>合计</text>
-      <text class="price">¥{{totalFee}}</text>
+      <text>实付金额</text>
+      <text class="price">¥{{finalFee}}</text>
     </view>
   </view>
 
@@ -118,9 +162,47 @@
   <!-- 底部提交栏 -->
   <view class="bottom-bar">
     <view class="bottom-total">
-      <text class="bottom-label">合计：</text>
-      <text class="price">¥{{totalFee}}</text>
+      <text class="bottom-label">实付：</text>
+      <text class="price">¥{{finalFee}}</text>
     </view>
-    <view class="btn-primary btn-submit" bindtap="submitOrder">确认支付</view>
+    <view class="btn-primary btn-submit {{submitting ? 'btn-disabled' : ''}}" bindtap="submitOrder">
+      {{submitting ? '提交中...' : '确认支付'}}
+    </view>
+  </view>
+
+  <!-- 优惠券选择弹窗 -->
+  <view class="coupon-modal" wx:if="{{showCouponPicker}}" bindtap="closeCouponPicker">
+    <view class="coupon-modal-content" catchtap="">
+      <view class="coupon-modal-header">
+        <text class="coupon-modal-title">选择优惠券</text>
+        <text class="coupon-modal-close" bindtap="closeCouponPicker">✕</text>
+      </view>
+
+      <!-- 不使用优惠券 -->
+      <view class="coupon-option {{!selectedCoupon ? 'coupon-selected' : ''}}" bindtap="clearCoupon">
+        <text>不使用优惠券</text>
+        <text class="coupon-check" wx:if="{{!selectedCoupon}}">✓</text>
+      </view>
+
+      <!-- 可用券列表 -->
+      <scroll-view scroll-y class="coupon-scroll">
+        <view class="coupon-option {{selectedCoupon._id === item._id ? 'coupon-selected' : ''}}"
+              wx:for="{{availableCoupons}}" wx:key="_id"
+              bindtap="selectCoupon" data-coupon="{{item}}">
+          <view class="coupon-option-left">
+            <view class="coupon-amount-tag">¥{{item.amount}}</view>
+            <view class="coupon-option-info">
+              <text class="coupon-option-type">{{item.typeName}}</text>
+              <text class="coupon-option-desc">{{item.description}}</text>
+            </view>
+          </view>
+          <text class="coupon-check" wx:if="{{selectedCoupon._id === item._id}}">✓</text>
+        </view>
+      </scroll-view>
+
+      <view class="coupon-empty" wx:if="{{availableCoupons.length === 0}}">
+        <text>暂无可用优惠券</text>
+      </view>
+    </view>
   </view>
 </view>

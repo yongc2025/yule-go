@@ -1,3 +1,6 @@
+// pages/booking/booking.js
+// 预约下单页（含优惠券/余额/邀请立减/同行优惠）
+
 const api = require('../../utils/api')
 
 Page({
@@ -8,18 +11,33 @@ Page({
     contactName: '',
     contactPhone: '',
     remark: '',
+
+    // 费用
+    originalFee: 0,
     adultFee: 0,
     childFee: 0,
-    originalFee: 0,
+    finalFee: 0,
+
+    // 优惠明细
     companionDiscount: 0,
     companionRule: '',
     companionGift: '',
     memberDiscount: 0,
+    inviteDiscount: 0,
+    isFirstOrder: false,
+    couponDiscount: 0,
+    selectedCoupon: null,
+    availableCoupons: [],
+    userBalance: 0,
+    balanceDeduction: 0,
+    useBalance: false,
     bestDiscount: 0,
     discountType: '',
-    totalFee: 0,
+
+    // UI 状态
     submitting: false,
-    subscribed: false  // 是否已授权订阅消息
+    subscribed: false,
+    showCouponPicker: false
   },
 
   onLoad(options) {
@@ -46,14 +64,14 @@ Page({
     this.calcFee()
   },
 
-  // 计算费用（含优惠预览）
+  // 计算费用（本地快速预览 + 异步精确计算）
   calcFee() {
     const { info, adults, children } = this.data
     const adultFee = (info.price || 0) * adults
     const childFee = (info.childPrice || 0) * children
     const originalFee = adultFee + childFee
 
-    // 先用本地规则快速预览同行优惠
+    // 本地快速预览同行优惠
     const totalPeople = adults + children
     let companionDiscount = 0
     let companionRule = ''
@@ -67,7 +85,6 @@ Page({
       companionRule = `${totalPeople}人同行，每人立减¥10`
     }
 
-    // 本地先算一个预估总价，异步获取精确值（含会员折扣）
     this.setData({
       adultFee,
       childFee,
@@ -75,23 +92,25 @@ Page({
       companionDiscount,
       companionRule,
       companionGift,
-      totalFee: Math.max(0, originalFee - companionDiscount)
+      finalFee: Math.max(0, originalFee - companionDiscount)
     })
 
-    // 异步获取精确优惠（含会员折扣）
+    // 异步精确计算（含会员/券/余额/邀请）
     this._fetchDiscountPreview()
   },
 
   // 异步获取优惠预览
   _fetchDiscountPreview() {
-    const { info, adults, children } = this.data
+    const { info, adults, children, selectedCoupon, useBalance } = this.data
     if (!info.activityId) return
 
     api.call('orders', {
       action: 'calcDiscount',
       activityId: info.activityId,
       adults,
-      children
+      children,
+      couponId: selectedCoupon ? selectedCoupon._id : '',
+      useBalance
     }, { showLoading: false }).then(res => {
       if (res.code === 0) {
         const d = res.data
@@ -101,12 +120,53 @@ Page({
           companionRule: d.companionRule,
           companionGift: d.companionGift,
           memberDiscount: d.memberDiscount,
+          inviteDiscount: d.inviteDiscount,
+          isFirstOrder: d.isFirstOrder,
+          couponDiscount: d.couponDiscount,
+          availableCoupons: d.availableCoupons || [],
+          userBalance: d.userBalance,
+          balanceDeduction: d.balanceDeduction,
           bestDiscount: d.bestDiscount,
           discountType: d.discountType,
-          totalFee: d.finalFee
+          finalFee: d.finalFee
         })
       }
     }).catch(() => {})
+  },
+
+  // 切换余额抵扣
+  toggleBalance() {
+    this.setData({ useBalance: !this.data.useBalance })
+    this._fetchDiscountPreview()
+  },
+
+  // 打开优惠券选择器
+  openCouponPicker() {
+    this.setData({ showCouponPicker: true })
+  },
+
+  // 关闭优惠券选择器
+  closeCouponPicker() {
+    this.setData({ showCouponPicker: false })
+  },
+
+  // 选择优惠券
+  selectCoupon(e) {
+    const coupon = e.currentTarget.dataset.coupon
+    const current = this.data.selectedCoupon
+    // 点击已选中的券则取消选择
+    if (current && current._id === coupon._id) {
+      this.setData({ selectedCoupon: null, showCouponPicker: false })
+    } else {
+      this.setData({ selectedCoupon: coupon, showCouponPicker: false })
+    }
+    this._fetchDiscountPreview()
+  },
+
+  // 不使用优惠券
+  clearCoupon() {
+    this.setData({ selectedCoupon: null, showCouponPicker: false })
+    this._fetchDiscountPreview()
   },
 
   // 输入联系人
@@ -124,27 +184,17 @@ Page({
 
   // 请求订阅消息授权
   requestSubscribe() {
-    // 模板 ID 需要在微信公众平台申请后填入
-    // TODO: 部署时替换为真实模板 ID
-    const templateIds = [
-      // 'your_template_id_1',  // 团期变更通知
-      // 'your_template_id_2',  // 团期取消通知
-    ]
-
+    const templateIds = []
     if (templateIds.length === 0) {
-      console.log('未配置订阅消息模板，跳过授权')
       return Promise.resolve()
     }
-
     return new Promise((resolve) => {
       wx.requestSubscribeMessage({
         tmplIds: templateIds,
         success: (res) => {
-          // res 格式: { templateId: 'accept' | 'reject' | 'ban' }
           const accepted = Object.values(res).some(v => v === 'accept')
           if (accepted) {
             this.setData({ subscribed: true })
-            // 保存授权状态到云端
             for (const [tid, status] of Object.entries(res)) {
               if (status === 'accept') {
                 api.callSilent('notify', {
@@ -157,17 +207,13 @@ Page({
           }
           resolve()
         },
-        fail: (err) => {
-          console.warn('订阅消息授权失败:', err)
-          resolve() // 不阻塞下单流程
-        }
+        fail: () => resolve()
       })
     })
   },
 
   // 提交订单
   submitOrder() {
-    // 校验
     if (!this.data.contactName.trim()) {
       wx.showToast({ title: '请输入姓名', icon: 'none' })
       return
@@ -180,7 +226,6 @@ Page({
 
     this.setData({ submitting: true })
 
-    // 先请求订阅消息授权（不阻塞）
     this.requestSubscribe().then(() => {
       return this._doCreateOrder()
     }).catch(err => {
@@ -191,9 +236,8 @@ Page({
   },
 
   _doCreateOrder() {
-    const { info, adults, children, contactName, contactPhone, remark, totalFee } = this.data
+    const { info, adults, children, contactName, contactPhone, remark, finalFee, selectedCoupon, useBalance } = this.data
 
-    // 调用云函数创建订单
     api.call('orders', {
       action: 'create',
       activityId: info.activityId,
@@ -203,14 +247,14 @@ Page({
       contactName,
       contactPhone,
       remark,
-      totalFee
+      totalFee: finalFee,
+      couponId: selectedCoupon ? selectedCoupon._id : '',
+      useBalance
     }).then(orderInfo => {
       if (orderInfo.mockPay) {
-        // 测试模式：云函数已直接标记为已支付，跳过微信支付
         console.log('[MOCK_PAY] 模拟支付成功，订单号:', orderInfo.orderNo)
         return Promise.resolve()
       }
-      // 正式模式：发起微信支付
       return this.wxPay(orderInfo)
     }).then(() => {
       wx.showToast({ title: '支付成功！', icon: 'success' })
@@ -230,12 +274,10 @@ Page({
         ...orderInfo.payment,
         success: resolve,
         fail: (err) => {
-          // 支付取消/失败 → 回滚名额
           api.callSilent('orders', {
             action: 'cancel',
             orderId: orderInfo.orderId
           })
-
           if (err.errMsg.includes('cancel')) {
             wx.showToast({ title: '已取消支付', icon: 'none' })
           } else {

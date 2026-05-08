@@ -72,6 +72,108 @@
   text-align: center;
 }
 
+/* 优惠券选择 */
+.coupon-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.coupon-left {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.coupon-icon {
+  font-size: 32rpx;
+}
+
+.coupon-label {
+  font-size: 28rpx;
+  font-weight: 500;
+}
+
+.coupon-right {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.coupon-value {
+  font-size: 28rpx;
+  color: #E76F51;
+  font-weight: 600;
+}
+
+.coupon-placeholder {
+  font-size: 26rpx;
+  color: #999;
+}
+
+/* 邀请立减卡片 */
+.invite-card {
+  background: #FFF8E1;
+  border: 1rpx solid #FFE082;
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.invite-icon {
+  font-size: 40rpx;
+}
+
+.invite-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.invite-title {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #E76F51;
+}
+
+.invite-desc {
+  font-size: 22rpx;
+  color: #999;
+  margin-top: 4rpx;
+}
+
+/* 余额抵扣 */
+.balance-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.balance-left {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.balance-icon {
+  font-size: 32rpx;
+}
+
+.balance-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.balance-label {
+  font-size: 28rpx;
+  font-weight: 500;
+}
+
+.balance-amount {
+  font-size: 22rpx;
+  color: #999;
+  margin-top: 2rpx;
+}
+
 /* 表单 */
 .form-item {
   display: flex;
@@ -120,7 +222,7 @@
   color: #333;
 }
 
-/* 同行优惠 */
+/* 优惠行 */
 .discount-row {
   background: #FFF8F0;
   margin: 8rpx -16rpx;
@@ -194,30 +296,115 @@
   padding: 20rpx 60rpx;
 }
 
-/* 通知提醒卡片 */
-.notify-card {
-  background: #FFF8E1;
-  border: 1rpx solid #FFE082;
+.btn-disabled {
+  opacity: 0.6;
 }
-.notify-row {
+
+/* ========== 优惠券弹窗 ========== */
+.coupon-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
-  align-items: center;
-  gap: 16rpx;
+  align-items: flex-end;
+  z-index: 1000;
 }
-.notify-icon {
-  font-size: 40rpx;
-}
-.notify-text {
+
+.coupon-modal-content {
+  background: #fff;
+  border-radius: 24rpx 24rpx 0 0;
+  width: 100%;
+  max-height: 70vh;
   display: flex;
   flex-direction: column;
 }
-.notify-title {
+
+.coupon-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 32rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.coupon-modal-title {
+  font-size: 32rpx;
+  font-weight: 700;
+}
+
+.coupon-modal-close {
+  font-size: 32rpx;
+  color: #999;
+  padding: 8rpx;
+}
+
+.coupon-scroll {
+  flex: 1;
+  max-height: 50vh;
+}
+
+.coupon-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24rpx 32rpx;
+  border-bottom: 1rpx solid #f5f5f5;
+}
+
+.coupon-option:active {
+  background: #f9f9f9;
+}
+
+.coupon-selected {
+  background: #F0F9F4;
+}
+
+.coupon-option-left {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+}
+
+.coupon-amount-tag {
+  background: linear-gradient(135deg, #E76F51, #F4845F);
+  color: #fff;
+  font-size: 28rpx;
+  font-weight: 700;
+  padding: 12rpx 20rpx;
+  border-radius: 12rpx;
+  min-width: 80rpx;
+  text-align: center;
+}
+
+.coupon-option-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.coupon-option-type {
   font-size: 28rpx;
   font-weight: 600;
   color: #333;
 }
-.notify-desc {
-  font-size: 24rpx;
+
+.coupon-option-desc {
+  font-size: 22rpx;
   color: #999;
   margin-top: 4rpx;
+}
+
+.coupon-check {
+  font-size: 32rpx;
+  color: #2D6A4F;
+  font-weight: 700;
+}
+
+.coupon-empty {
+  text-align: center;
+  padding: 48rpx;
+  color: #999;
+  font-size: 28rpx;
 }

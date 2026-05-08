@@ -56,7 +56,7 @@ function calcCompanionDiscount(totalPeople) {
 }
 
 // 创建订单
-async function createOrder({ activityId, scheduleId, adults, children, contactName, contactPhone, remark, totalFee }, openid) {
+async function createOrder({ activityId, scheduleId, adults, children, contactName, contactPhone, remark, totalFee, couponId, useBalance }, openid) {
   try {
     // 1. 校验团期
     const scheduleRes = await db.collection('schedules').doc(scheduleId).get()
@@ -100,17 +100,53 @@ async function createOrder({ activityId, scheduleId, adults, children, contactNa
     // 6. 同行优惠与会员折扣取最优惠（不叠加）
     const bestDiscount = Math.max(companionDiscount.totalDiscount, memberDiscount)
     const discountType = companionDiscount.totalDiscount >= memberDiscount ? 'companion' : 'member'
-    const expectedFee = Math.max(0, originalFee - bestDiscount)
+    const afterDiscount = Math.max(0, originalFee - bestDiscount)
 
+    // 7. 邀请立减（被邀请人首单 ¥15）
+    let inviteDiscount = 0
+    const userRes = await db.collection('users').where({ openid }).get()
+    if (userRes.data.length > 0 && userRes.data[0].invitedBy) {
+      const orderCount = await db.collection('orders')
+        .where({ openid, status: _.in(['paid', 'completed']) })
+        .count()
+      if (orderCount.total === 0) {
+        inviteDiscount = 15
+      }
+    }
+
+    // 8. 优惠券抵扣
+    let couponDiscount = 0
+    let usedCoupon = null
+    if (couponId) {
+      const couponRes = await db.collection('coupons').doc(couponId).get()
+      const coupon = couponRes.data
+      if (coupon.openid === openid && coupon.status === 'unused') {
+        const now = new Date()
+        if (!coupon.expireAt || new Date(coupon.expireAt) >= now) {
+          couponDiscount = coupon.amount || 0
+          usedCoupon = coupon
+        }
+      }
+    }
+
+    // 9. 余额抵扣
+    let balanceDeduction = 0
+    if (useBalance && userBalance > 0) {
+      const afterCoupon = Math.max(0, afterDiscount - inviteDiscount - couponDiscount)
+      balanceDeduction = Math.min(userBalance, afterCoupon)
+    }
+
+    // 10. 最终价格校验
+    const expectedFee = Math.max(0, afterDiscount - inviteDiscount - couponDiscount - balanceDeduction)
     if (Math.abs(expectedFee - totalFee) > 0.01) {
       return { code: -1, message: '费用不一致，请刷新重试' }
     }
 
-    // 7. 生成订单号和核销码
+    // 11. 生成订单号和核销码
     const orderNo = 'YL' + Date.now() + String(Math.random()).slice(2, 6)
     const checkinCode = String(Math.floor(100000 + Math.random() * 900000))
 
-    // 8. 创建订单
+    // 12. 创建订单
     const order = {
       orderNo,
       openid,
@@ -126,15 +162,22 @@ async function createOrder({ activityId, scheduleId, adults, children, contactNa
       remark: remark || '',
       originalFee,
       totalFee,
-      companionDiscount: companionDiscount.totalDiscount > 0 ? {
-        discountPerPerson: companionDiscount.discountPerPerson,
-        totalDiscount: companionDiscount.totalDiscount,
-        gift: companionDiscount.gift,
-        rule: companionDiscount.rule
-      } : null,
-      memberDiscount,
-      bestDiscount,
-      discountType,
+      discountDetail: {
+        companionDiscount: companionDiscount.totalDiscount > 0 ? {
+          discountPerPerson: companionDiscount.discountPerPerson,
+          totalDiscount: companionDiscount.totalDiscount,
+          gift: companionDiscount.gift,
+          rule: companionDiscount.rule
+        } : null,
+        memberDiscount,
+        inviteDiscount,
+        couponDiscount,
+        couponId: usedCoupon ? usedCoupon._id : '',
+        couponType: usedCoupon ? usedCoupon.type : '',
+        balanceDeduction,
+        bestDiscount,
+        discountType
+      },
       checkinCode,
       status: 'pending', // pending → paid → completed / cancelled
       createdAt: db.serverDate(),
@@ -143,7 +186,31 @@ async function createOrder({ activityId, scheduleId, adults, children, contactNa
 
     const orderRes = await db.collection('orders').add({ data: order })
 
-    // 6. 扣减名额
+    // 13. 使用优惠券
+    if (usedCoupon) {
+      await db.collection('coupons').doc(usedCoupon._id).update({
+        data: { status: 'used', orderId: orderRes._id, usedAt: db.serverDate() }
+      })
+    }
+
+    // 14. 扣减余额
+    if (balanceDeduction > 0) {
+      await db.collection('user_wallets').where({ openid }).update({
+        data: { balance: _.inc(-balanceDeduction), updatedAt: db.serverDate() }
+      })
+      await db.collection('wallet_logs').add({
+        data: {
+          openid,
+          type: 'order_pay',
+          amount: -balanceDeduction,
+          description: `订单抵扣（${orderNo}）`,
+          orderId: orderRes._id,
+          createdAt: db.serverDate()
+        }
+      })
+    }
+
+    // 15. 扣减名额
     await db.collection('schedules').doc(scheduleId).update({
       data: {
         bookedSlots: _.inc(totalPeople),
@@ -221,6 +288,40 @@ async function payCallback(event) {
         updatedAt: db.serverDate()
       }
     })
+
+    // 发放邀请奖励（被邀请人首单支付成功后）
+    const paidOrderRes = await db.collection('orders').where({ orderNo: outTradeNo }).get()
+    if (paidOrderRes.data.length > 0) {
+      const paidOrder = paidOrderRes.data[0]
+      try {
+        const referralRes = await db.collection('referrals')
+          .where({ inviteeOpenid: paidOrder.openid, status: 'pending' })
+          .get()
+        if (referralRes.data.length > 0) {
+          // 更新 referral 记录
+          await db.collection('referrals').doc(referralRes.data[0]._id).update({
+            data: { status: 'completed', orderId: paidOrder._id, updatedAt: db.serverDate() }
+          })
+          // 邀请人余额增加 ¥20
+          const inviterOpenid = referralRes.data[0].inviterOpenid
+          await db.collection('users').where({ openid: inviterOpenid }).update({
+            data: { balance: _.inc(20), updatedAt: db.serverDate() }
+          })
+          await db.collection('wallet_logs').add({
+            data: {
+              openid: inviterOpenid,
+              type: 'invite_reward',
+              amount: 20,
+              description: `邀请好友奖励（${paidOrder.openid}首单成功）`,
+              orderId: paidOrder._id,
+              createdAt: db.serverDate()
+            }
+          })
+        }
+      } catch (rewardErr) {
+        console.error('邀请奖励发放失败（不影响支付回调）:', rewardErr)
+      }
+    }
 
     // 记录用户门店关系（去过的店）
     const orderRes = await db.collection('orders').where({ orderNo: outTradeNo }).get()
@@ -564,8 +665,8 @@ async function isAdmin(openid) {
   return res.data.length > 0
 }
 
-// 预览优惠（下单前实时计算）
-async function calcDiscountPreview({ activityId, adults, children }, openid) {
+// 预览优惠（下单前实时计算，含券/余额/邀请立减）
+async function calcDiscountPreview({ activityId, adults, children, couponId, useBalance }, openid) {
   try {
     const totalPeople = adults + children
 
@@ -581,9 +682,11 @@ async function calcDiscountPreview({ activityId, adults, children }, openid) {
     let memberDiscount = 0
     let memberLevel = 0
     const walletRes = await db.collection('user_wallets').where({ openid }).get()
+    let userBalance = 0
     if (walletRes.data.length > 0) {
       const wallet = walletRes.data[0]
       memberLevel = wallet.memberLevel || 0
+      userBalance = wallet.balance || 0
       const MEMBER_LEVELS = [
         { level: 0, travelDiscount: 0 },
         { level: 1, travelDiscount: 10 },
@@ -594,10 +697,71 @@ async function calcDiscountPreview({ activityId, adults, children }, openid) {
       memberDiscount = levelInfo.travelDiscount || 0
     }
 
-    // 取最优惠
+    // 同行优惠与会员折扣取最优惠
     const bestDiscount = Math.max(companionDiscount.totalDiscount, memberDiscount)
     const discountType = companionDiscount.totalDiscount >= memberDiscount ? 'companion' : 'member'
-    const finalFee = Math.max(0, originalFee - bestDiscount)
+    const afterDiscount = Math.max(0, originalFee - bestDiscount)
+
+    // 邀请立减（被邀请人首单 ¥15）
+    let inviteDiscount = 0
+    let isFirstOrder = false
+    const userRes = await db.collection('users').where({ openid }).get()
+    if (userRes.data.length > 0 && userRes.data[0].invitedBy) {
+      // 查询是否为首单
+      const orderCount = await db.collection('orders')
+        .where({ openid, status: _.in(['paid', 'completed']) })
+        .count()
+      if (orderCount.total === 0) {
+        inviteDiscount = 15
+        isFirstOrder = true
+      }
+    }
+
+    // 优惠券
+    let couponDiscount = 0
+    let couponInfo = null
+    if (couponId) {
+      const couponRes = await db.collection('coupons').doc(couponId).get()
+      const coupon = couponRes.data
+      if (coupon.openid === openid && coupon.status === 'unused') {
+        const now = new Date()
+        if (!coupon.expireAt || new Date(coupon.expireAt) >= now) {
+          couponDiscount = coupon.amount || 0
+          couponInfo = {
+            _id: coupon._id,
+            type: coupon.type,
+            amount: coupon.amount,
+            typeName: coupon.typeName || coupon.type
+          }
+        }
+      }
+    }
+
+    // 可用优惠券列表
+    const now = new Date()
+    const couponsRes = await db.collection('coupons')
+      .where({ openid, status: 'unused', expireAt: _.gte(now) })
+      .get()
+    const availableCoupons = couponsRes.data
+      .filter(c => c.type !== 'equipment')
+      .map(c => ({
+        _id: c._id,
+        type: c.type,
+        amount: c.amount || 0,
+        typeName: (c.typeName) || c.type,
+        description: c.description || '',
+        expireAt: c.expireAt
+      }))
+
+    // 余额抵扣
+    let balanceDeduction = 0
+    if (useBalance && userBalance > 0) {
+      const afterCoupon = Math.max(0, afterDiscount - inviteDiscount - couponDiscount)
+      balanceDeduction = Math.min(userBalance, afterCoupon)
+    }
+
+    // 最终价格
+    const finalFee = Math.max(0, afterDiscount - inviteDiscount - couponDiscount - balanceDeduction)
 
     return {
       code: 0,
@@ -610,6 +774,13 @@ async function calcDiscountPreview({ activityId, adults, children }, openid) {
         memberLevel,
         bestDiscount,
         discountType,
+        inviteDiscount,
+        isFirstOrder,
+        couponDiscount,
+        couponInfo,
+        availableCoupons,
+        userBalance,
+        balanceDeduction,
         finalFee
       }
     }

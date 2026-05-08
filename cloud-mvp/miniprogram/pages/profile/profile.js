@@ -9,6 +9,7 @@ Page({
     userInfo: {},
     myShops: [],
     couponCount: 0,
+    totalBalance: 0,
     loading: true
   },
 
@@ -16,6 +17,7 @@ Page({
     this.loadUserInfo()
     this.loadMyShops()
     this.loadCouponCount()
+    this.loadTotalBalance()
   },
 
   // 从云端加载用户信息
@@ -81,6 +83,15 @@ Page({
     })
   },
 
+  // 加载总余额
+  loadTotalBalance() {
+    api.call('wallet', { action: 'getWallets' }, { showLoading: false }).then(data => {
+      const wallets = data || []
+      const total = wallets.reduce((sum, w) => sum + (w.balance || 0), 0)
+      this.setData({ totalBalance: Math.round(total * 100) / 100 })
+    }).catch(() => {})
+  },
+
   // 加载可用优惠券数量
   loadCouponCount() {
     api.call('coupons', { action: 'count' }, { showLoading: false }).then(data => {
@@ -108,6 +119,15 @@ Page({
   goRecharge(e) {
     const merchantId = e.currentTarget.dataset.shopid
     wx.navigateTo({ url: `/pages/member/recharge?merchantId=${merchantId}` })
+  },
+
+  // 充值（跳转第一个门店的充值页）
+  goRechargeAll() {
+    if (this.data.myShops.length > 0) {
+      wx.navigateTo({ url: `/pages/member/recharge?merchantId=${this.data.myShops[0]._id}` })
+    } else {
+      wx.showToast({ title: '请先到门店消费', icon: 'none' })
+    }
   },
 
   // 邀请好友

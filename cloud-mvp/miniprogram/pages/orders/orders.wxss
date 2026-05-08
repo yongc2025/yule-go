@@ -90,6 +90,29 @@
   margin-left: 8rpx;
 }
 
+.order-amount .original-fee {
+  font-size: 24rpx;
+  color: #bbb;
+  text-decoration: line-through;
+  margin-left: 8rpx;
+}
+
+/* 优惠摘要 */
+.order-discount {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8rpx;
+  margin-bottom: 8rpx;
+}
+
+.discount-summary {
+  font-size: 22rpx;
+  color: #E76F51;
+  background: #FFF8F0;
+  padding: 4rpx 12rpx;
+  border-radius: 6rpx;
+}
+
 .order-body {
   padding: 24rpx;
 }
