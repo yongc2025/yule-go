@@ -67,13 +67,11 @@ Page({
   // 请求订阅消息授权
   requestSubscribe() {
     // 模板 ID 需要在微信公众平台申请后填入
-    // 这里使用占位 ID，部署时替换为真实模板 ID
+    // TODO: 部署时替换为真实模板 ID
     const templateIds = [
-      // 团期变更通知模板 ID
-      process.env.TEMPLATE_SCHEDULE_CHANGE || 'your_template_id_1',
-      // 团期取消通知模板 ID
-      process.env.TEMPLATE_SCHEDULE_CANCEL || 'your_template_id_2'
-    ].filter(id => id && !id.startsWith('your_'))
+      // 'your_template_id_1',  // 团期变更通知
+      // 'your_template_id_2',  // 团期取消通知
+    ]
 
     if (templateIds.length === 0) {
       console.log('未配置订阅消息模板，跳过授权')
@@ -127,6 +125,10 @@ Page({
     // 先请求订阅消息授权（不阻塞）
     this.requestSubscribe().then(() => {
       return this._doCreateOrder()
+    }).catch(err => {
+      console.error('下单流程异常:', err)
+      this.setData({ submitting: false })
+      wx.showToast({ title: '下单失败，请重试', icon: 'none' })
     })
   },
 
