@@ -1,6 +1,6 @@
 # 0043 老带新裂变 — 待办
 
-- [ ] users 集合扩展字段（inviteCode/invitedBy）
+- [x] users 集合扩展字段（inviteCode/invitedBy）
 - [ ] 创建 referrals 集合
 - [ ] referral 云函数 getInviteInfo/bindInvite/grantReward
 - [ ] login 云函数：新用户生成邀请码 + 绑定邀请关系
