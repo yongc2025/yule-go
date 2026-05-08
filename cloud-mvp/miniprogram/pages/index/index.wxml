@@ -12,8 +12,29 @@
       </view>
     </view>
     <view class="shop-tags">
-      <view class="tag tag-blue">⭐ {{shopInfo.rating || '5.0'}}</view>
-      <view class="tag tag-green">已服务{{shopInfo.serviceCount || 0}}人</view>
+      <view class="tag tag-white">⭐ {{shopInfo.rating || '5.0'}}分</view>
+      <view class="tag tag-white">已服务{{shopInfo.serviceCount || 0}}人</view>
+      <view class="tag tag-white" wx:if="{{shopInfo.approvalRate}}">好评{{shopInfo.approvalRate}}</view>
+      <view class="tag tag-white" wx:if="{{shopInfo.businessYears}}">{{shopInfo.businessYears}}年老店</view>
+    </view>
+
+    <!-- 地址/电话/营业时间 -->
+    <view class="shop-contact">
+      <view class="contact-row" wx:if="{{shopInfo.address}}">
+        <text>📍 {{shopInfo.address}}</text>
+      </view>
+      <view class="contact-row" wx:if="{{shopInfo.phone}}">
+        <text>📞 {{shopInfo.phone}}</text>
+      </view>
+      <view class="contact-row" wx:if="{{shopInfo.businessHours}}">
+        <text>🕐 {{shopInfo.businessHours}}</text>
+      </view>
+    </view>
+
+    <!-- 操作按钮 -->
+    <view class="shop-actions">
+      <view class="action-btn" bindtap="openNavigation">🧭 导航</view>
+      <view class="action-btn" bindtap="callShop">📞 拨打</view>
     </view>
   </view>
 

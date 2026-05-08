@@ -105,6 +105,29 @@ Page({
     wx.navigateTo({ url: '/pages/admin/admin' })
   },
 
+  // 导航到门店
+  openNavigation() {
+    const shop = this.data.shopInfo
+    if (shop.latitude && shop.longitude) {
+      wx.openLocation({
+        latitude: shop.latitude,
+        longitude: shop.longitude,
+        name: shop.name || '门店',
+        address: shop.address || ''
+      })
+    } else if (shop.address) {
+      wx.showToast({ title: shop.address, icon: 'none', duration: 3000 })
+    }
+  },
+
+  // 拨打门店电话
+  callShop() {
+    const phone = this.data.shopInfo.phone
+    if (phone) {
+      wx.makePhoneCall({ phoneNumber: phone, fail: () => {} })
+    }
+  },
+
   // 下拉刷新
   onPullDownRefresh() {
     this.loadActivities()
