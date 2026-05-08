@@ -1,5 +1,6 @@
 const api = require('../../utils/api')
 const dateUtil = require('../../utils/date')
+const qr = require('../../utils/qrcode')
 
 const STATUS_MAP = {
   pending: '待支付',
@@ -14,7 +15,9 @@ Page({
   data: {
     orders: [],
     currentTab: 'all',
-    loading: true
+    loading: true,
+    showQR: false,
+    qrOrder: null
   },
 
   onShow() {
@@ -41,6 +44,17 @@ Page({
         scheduleDate: item.scheduleDate ? dateUtil.formatDate(item.scheduleDate) : ''
       }))
       this.setData({ orders, loading: false })
+
+      // 为已支付订单绘制二维码
+      orders.forEach(order => {
+        if (order.status === 'paid' && order.checkinCode) {
+          setTimeout(() => {
+            const ctx = wx.createCanvasContext('qr-' + order._id, this)
+            qr.drawQR(ctx, order.checkinCode, 0, 0, 3, '#2D6A4F', '#FFFFFF')
+            ctx.draw()
+          }, 200)
+        }
+      })
     }).catch(err => {
       console.error('加载订单失败:', err)
       this.setData({ loading: false })
@@ -76,11 +90,28 @@ Page({
     })
   },
 
-  // 显示核销码
+  // 显示核销码弹窗
   showCheckinCode(e) {
     const id = e.currentTarget.dataset.id
-    // TODO: 弹窗展示大号核销码 + 二维码
-    wx.showToast({ title: '请出示此码给领队', icon: 'none' })
+    const order = this.data.orders.find(o => o._id === id)
+    if (!order) return
+
+    this.setData({
+      showQR: true,
+      qrOrder: order
+    })
+
+    // 延迟绘制二维码
+    setTimeout(() => {
+      const ctx = wx.createCanvasContext('qrcode-popup', this)
+      qr.drawQR(ctx, order.checkinCode || order.orderNo, 0, 0, 6, '#2D6A4F', '#FFFFFF')
+      ctx.draw()
+    }, 100)
+  },
+
+  // 关闭弹窗
+  closeQR() {
+    this.setData({ showQR: false, qrOrder: null })
   },
 
   // 下拉刷新

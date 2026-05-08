@@ -34,7 +34,7 @@
         <!-- 核销码展示（已支付状态） -->
         <view class="checkin-section" wx:if="{{item.status === 'paid'}}">
           <view class="checkin-code">核销码：{{item.checkinCode}}</view>
-          <canvas canvas-id="qrcode-{{item._id}}" class="qrcode-canvas" />
+          <canvas canvas-id="qr-{{item._id}}" class="qrcode-canvas" />
         </view>
 
         <!-- 操作按钮 -->
@@ -55,4 +55,17 @@
 
   <!-- 加载中 -->
   <view class="loading" wx:if="{{loading}}">加载中...</view>
+
+  <!-- 二维码弹窗 -->
+  <view class="qr-modal" wx:if="{{showQR}}" bindtap="closeQR">
+    <view class="qr-modal-content" catchtap="">
+      <view class="qr-modal-title">出示核销码</view>
+      <view class="qr-modal-code">{{qrOrder.checkinCode}}</view>
+      <canvas canvas-id="qrcode-popup" class="qrcode-popup-canvas" />
+      <view class="qr-modal-activity">{{qrOrder.activityName}}</view>
+      <view class="qr-modal-date">📅 {{qrOrder.scheduleDate}}</view>
+      <view class="qr-modal-hint">请出示给领队/店主扫码核销</view>
+      <view class="qr-modal-close" bindtap="closeQR">关闭</view>
+    </view>
+  </view>
 </view>

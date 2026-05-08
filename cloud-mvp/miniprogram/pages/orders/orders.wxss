@@ -139,6 +139,75 @@
   gap: 16rpx;
 }
 
+/* 二维码弹窗 */
+.qr-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.qr-modal-content {
+  background: #fff;
+  border-radius: 24rpx;
+  padding: 48rpx;
+  width: 580rpx;
+  text-align: center;
+}
+
+.qr-modal-title {
+  font-size: 36rpx;
+  font-weight: 700;
+  color: #1B1B1B;
+  margin-bottom: 16rpx;
+}
+
+.qr-modal-code {
+  font-size: 72rpx;
+  font-weight: 700;
+  color: #2D6A4F;
+  letter-spacing: 12rpx;
+  margin-bottom: 24rpx;
+}
+
+.qrcode-popup-canvas {
+  width: 360rpx;
+  height: 360rpx;
+  margin: 0 auto 24rpx;
+}
+
+.qr-modal-activity {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8rpx;
+}
+
+.qr-modal-date {
+  font-size: 24rpx;
+  color: #6B7280;
+  margin-bottom: 20rpx;
+}
+
+.qr-modal-hint {
+  font-size: 22rpx;
+  color: #9CA3AF;
+  margin-bottom: 24rpx;
+}
+
+.qr-modal-close {
+  font-size: 28rpx;
+  color: #E76F51;
+  font-weight: 600;
+  padding: 16rpx 0;
+}
+
 .btn-outline {
   padding: 12rpx 32rpx;
   border: 2rpx solid #d9d9d9;
