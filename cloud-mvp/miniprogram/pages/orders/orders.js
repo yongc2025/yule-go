@@ -24,25 +24,26 @@ Page({
     this.loadOrders()
   },
 
-  // 加载订单列表
+  // 加载订单列表（通过云函数，避免数据库权限问题）
   loadOrders() {
     this.setData({ loading: true })
-    const db = wx.cloud.database()
-    const _ = db.command
 
-    let query = db.collection('orders').orderBy('createdAt', 'desc').limit(50)
-
-    // 状态筛选
-    if (this.data.currentTab !== 'all') {
-      query = query.where({ status: this.data.currentTab })
-    }
-
-    query.get().then(res => {
-      const orders = res.data.map(item => ({
+    api.call('orders', {
+      action: 'list',
+      page: 1,
+      pageSize: 50
+    }).then(data => {
+      let orders = (data.list || []).map(item => ({
         ...item,
         statusText: STATUS_MAP[item.status] || item.status,
         scheduleDate: item.scheduleDate ? dateUtil.formatDate(item.scheduleDate) : ''
       }))
+
+      // 前端状态筛选
+      if (this.data.currentTab !== 'all') {
+        orders = orders.filter(o => o.status === this.data.currentTab)
+      }
+
       this.setData({ orders, loading: false })
 
       // 为已支付订单绘制二维码
