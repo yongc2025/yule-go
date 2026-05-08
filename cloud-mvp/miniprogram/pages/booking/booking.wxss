@@ -152,3 +152,31 @@
 .btn-submit {
   padding: 20rpx 60rpx;
 }
+
+/* 通知提醒卡片 */
+.notify-card {
+  background: #FFF8E1;
+  border: 1rpx solid #FFE082;
+}
+.notify-row {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+.notify-icon {
+  font-size: 40rpx;
+}
+.notify-text {
+  display: flex;
+  flex-direction: column;
+}
+.notify-title {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #333;
+}
+.notify-desc {
+  font-size: 24rpx;
+  color: #999;
+  margin-top: 4rpx;
+}

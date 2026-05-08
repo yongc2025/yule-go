@@ -59,6 +59,17 @@
     <textarea class="remark-input" placeholder="有什么特殊需求可以写在这里" value="{{remark}}" bindinput="onInputRemark" maxlength="200" />
   </view>
 
+  <!-- 通知提醒 -->
+  <view class="card notify-card" wx:if="{{!subscribed}}">
+    <view class="notify-row">
+      <text class="notify-icon">🔔</text>
+      <view class="notify-text">
+        <text class="notify-title">开启活动通知</text>
+        <text class="notify-desc">团期变更或取消时第一时间通知您</text>
+      </view>
+    </view>
+  </view>
+
   <!-- 费用明细 -->
   <view class="card">
     <view class="section-title">💰 费用明细</view>

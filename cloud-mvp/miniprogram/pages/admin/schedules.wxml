@@ -1,10 +1,13 @@
 <!--pages/admin/schedules.wxml-->
-<!--团期管理 — 支持批量创建 + picker 防穿透-->
+<!--团期管理 — 支持批量创建 + 编辑(日期/名额/集合地点) + 取消退款-->
 
 <view class="page">
   <view class="top-bar">
     <view class="top-title">{{activityName}}</view>
-    <view class="btn-add" bindtap="showCreateForm">+ 新建团期</view>
+    <view class="top-actions">
+      <view class="btn-log" bindtap="showChangelog">📋 记录</view>
+      <view class="btn-add" bindtap="showCreateForm">+ 新建团期</view>
+    </view>
   </view>
 
   <!-- 团期列表 -->
@@ -18,6 +21,12 @@
         <view class="card-info">
           <text>👥 {{item.bookedSlots || 0}}/{{item.maxSlots}} 已报名</text>
           <text class="slots-left" wx:if="{{item.slotsLeft <= 3 && item.slotsLeft > 0}}">（仅剩 {{item.slotsLeft}} 位）</text>
+        </view>
+        <view class="card-location" wx:if="{{item.hasLocation}}">
+          <text>📍 {{item.location}}</text>
+        </view>
+        <view class="card-cancel-reason" wx:if="{{item.status === 'cancelled' && item.cancelReason}}">
+          <text>原因：{{item.cancelReason}}</text>
         </view>
         <view class="progress-bar">
           <view class="progress-fill" style="width: {{item.bookedSlots / item.maxSlots * 100}}%; background: {{item.slotsLeft <= 0 ? '#e74c3c' : item.slotsLeft <= 3 ? '#f39c12' : '#2D6A4F'}}"></view>
@@ -62,7 +71,6 @@
       <block wx:else>
         <view class="form-group">
           <view class="form-label">选择日期（可多选）</view>
-          <!-- 已选日期列表 -->
           <view class="date-tags" wx:if="{{form.dates.length > 0}}">
             <view class="date-tag" wx:for="{{form.dates}}" wx:key="*this">
               <text>{{item}}</text>
@@ -86,11 +94,41 @@
         <input class="form-input" type="number" placeholder="20" value="{{form.maxSlots}}" bindinput="onInputMaxSlots" />
       </view>
 
+      <view class="form-group">
+        <view class="form-label">集合地点（选填）</view>
+        <input class="form-input" placeholder="如：XX公园南门" value="{{form.location}}" bindinput="onInputLocation" />
+      </view>
+
       <view class="modal-actions">
         <view class="btn-cancel" bindtap="closeForm">取消</view>
         <view class="btn-confirm" bindtap="submitForm">
           {{editId ? '保存' : '创建 ' + form.dates.length + ' 个团期'}}
         </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 变更记录弹窗 -->
+  <view class="modal" wx:if="{{showChangelog}}" bindtap="closeChangelog">
+    <view class="modal-content modal-wide" catchtap="">
+      <view class="modal-title">📋 变更记录</view>
+      <view class="changelog-list" wx:if="{{changelog.length > 0}}">
+        <view class="changelog-item" wx:for="{{changelog}}" wx:key="_id">
+          <view class="changelog-header">
+            <text class="changelog-type">{{item.typeText}}</text>
+            <text class="changelog-time">{{item.timeFormatted}}</text>
+          </view>
+          <view class="changelog-activity">{{item.activityName}}</view>
+          <view class="changelog-changes" wx:for="{{item.changes}}" wx:for-item="change" wx:key="*this">
+            <text>• {{change}}</text>
+          </view>
+        </view>
+      </view>
+      <view class="changelog-empty" wx:else>
+        <text>暂无变更记录</text>
+      </view>
+      <view class="modal-actions">
+        <view class="btn-cancel" style="flex:1;" bindtap="closeChangelog">关闭</view>
       </view>
     </view>
   </view>
