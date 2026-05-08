@@ -1,0 +1,7 @@
+# 0027 — 待办清单
+
+- [ ] 创建 8 个 Tab 图标文件
+- [ ] 创建 discover 页面骨架（wxml/wxss/js/json）
+- [ ] 创建 profile 页面骨架（wxml/wxss/js/json）
+- [ ] app.json 注册页面 + 更新 tabBar
+- [ ] 验证 Tab 切换正常
