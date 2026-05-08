@@ -83,5 +83,10 @@ Page({
   // 发现新门店
   goDiscover() {
     wx.switchTab({ url: '/pages/discover/discover' })
+  },
+
+  // 店主管理后台
+  goAdmin() {
+    wx.navigateTo({ url: '/pages/admin/admin' })
   }
 })
