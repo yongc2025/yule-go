@@ -1,14 +1,29 @@
 <!--pages/profile/profile.wxml-->
-<!--我的 — 个人中心-->
+<!--我的 — 个人中心（云端数据 + 简介 + 相册预览）-->
 
 <view class="page">
-  <!-- 用户信息 -->
-  <view class="user-card">
+  <!-- 用户卡片 -->
+  <view class="user-card" bindtap="goEdit">
     <image class="user-avatar" src="{{userInfo.avatarUrl || '/images/default-avatar.png'}}" mode="aspectFill" />
     <view class="user-info">
       <view class="user-name">{{userInfo.nickName || '钓鱼爱好者'}}</view>
-      <view class="user-tag">🎣 渔乐会员</view>
+      <view class="user-bio" wx:if="{{userInfo.bio}}">{{userInfo.bio}}</view>
+      <view class="user-tag" wx:else>🎣 渔乐会员</view>
     </view>
+    <text class="edit-arrow">✏️</text>
+  </view>
+
+  <!-- 个人相册预览 -->
+  <view class="section" wx:if="{{userInfo.album && userInfo.album.length > 0}}">
+    <view class="section-header">
+      <text class="section-title">📷 个人相册</text>
+      <text class="section-link" bindtap="goEdit">查看全部 →</text>
+    </view>
+    <scroll-view class="album-scroll" scroll-x>
+      <view class="album-item" wx:for="{{userInfo.album}}" wx:key="*this">
+        <image src="{{item}}" mode="aspectFill" class="album-img" />
+      </view>
+    </scroll-view>
   </view>
 
   <!-- 我的门店 -->

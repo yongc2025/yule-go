@@ -6,6 +6,7 @@
     "pages/booking/booking",
     "pages/orders/orders",
     "pages/profile/profile",
+    "pages/profile/edit",
     "pages/admin/admin",
     "pages/admin/activities",
     "pages/admin/activity-edit",

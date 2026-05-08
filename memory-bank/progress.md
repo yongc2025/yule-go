@@ -379,3 +379,56 @@
   - 冒烟测试：全部 API 正常响应 ✅
 - 备注：`GenerateUniqueInviteCode` 需注入 UserRepository，待微信登录接入时调用
 - 踩坑：无
+
+### 2026-05-08 — Task 0037 ✅ 团期变更通知
+- 做了什么：
+  - 创建 `cloudfunctions/schedules/index.js`：团期 update/cancel action
+    - update：编辑日期/名额/集合地点，记录变更日志，异步通知已报名用户
+    - cancel：取消团期，自动查询已支付订单并退款，退还名额，发送取消通知
+  - 创建 `cloudfunctions/notify/index.js`：订阅消息授权管理
+    - saveSubscription：保存用户订阅授权状态
+    - getMySubscriptions：查询授权状态
+    - sendTest：管理员测试发送通知
+  - 增强 `pages/admin/schedules.js`：
+    - 编辑弹窗新增「集合地点」字段
+    - 取消团期二次确认（显示已报名人数 + 退款提示）
+    - 变更记录弹窗（查看所有团期变更历史）
+  - 增强 `pages/admin/schedules.wxml/wxss`：
+    - 卡片显示集合地点
+    - 取消原因展示
+    - 变更记录弹窗 UI
+  - 增强 `pages/booking/booking.js`：
+    - 下单时自动请求订阅消息授权
+    - 授权状态保存到云端 subscriptions 集合
+    - 通知提醒卡片 UI
+  - 新增文件：4 个（2 个云函数 × 2 文件）
+  - 修改文件：6 个（admin/schedules × 3 + booking × 3）
+  - 数据库新增集合：schedule_changelogs（变更记录）、subscriptions（订阅授权）
+- 验证：代码结构完整，待部署到微信云开发环境验证
+- 踩坑：无
+
+### 2026-05-08 — Task 0038 ✅ 用户个人信息
+- 做了什么：
+  - 扩展 `cloudfunctions/login/index.js`：返回完整用户信息，首次登录自动填充昵称/头像
+  - 创建 `cloudfunctions/users/index.js`：用户信息管理云函数
+    - getProfile：查询完整用户资料
+    - updateProfile：更新昵称/头像/简介
+    - updatePhone：绑定/更新手机号
+    - uploadAlbum：添加相册照片（最多9张）
+    - deleteAlbum：删除相册照片
+  - 创建 `pages/profile/edit.js/wxml/wxss`：用户资料编辑页
+    - 头像上传（云存储）
+    - 昵称编辑（20字限制）
+    - 个人简介（200字限制）
+    - 手机号绑定（getPhoneNumber + 手动输入双模式）
+    - 相册管理（上传/删除/预览，最多9张）
+  - 升级 `pages/profile/profile.js/wxml/wxss`：
+    - 从云端加载用户信息（替代本地缓存降级）
+    - 展示个人简介
+    - 相册横向滚动预览
+    - 点击头像区域跳转编辑页
+  - 更新 `app.json`：注册 profile/edit 页面路由
+  - 新增文件：4 个（users 云函数 × 2 + edit 页 × 3）
+  - 修改文件：5 个（login + profile × 3 + app.json）
+- 验证：代码结构完整，待部署验证
+- 踩坑：无

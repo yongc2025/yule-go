@@ -1,0 +1,76 @@
+<!--pages/profile/edit.wxml-->
+<!--用户资料编辑页-->
+
+<view class="page">
+  <!-- 头像 -->
+  <view class="section">
+    <view class="avatar-row" bindtap="chooseAvatar">
+      <text class="form-label">头像</text>
+      <view class="avatar-right">
+        <image class="avatar-preview" src="{{avatar || '/images/default-avatar.png'}}" mode="aspectFill" />
+        <text class="arrow">→</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 基本信息 -->
+  <view class="section">
+    <view class="form-item">
+      <text class="form-label">昵称</text>
+      <input class="form-input" placeholder="请输入昵称" value="{{nickname}}" bindinput="onInputNickname" maxlength="20" />
+    </view>
+    <view class="form-item">
+      <text class="form-label">简介</text>
+      <textarea class="form-textarea" placeholder="介绍一下自己吧~" value="{{bio}}" bindinput="onInputBio" maxlength="200" />
+      <view class="char-count">{{bio.length}}/200</view>
+    </view>
+  </view>
+
+  <!-- 手机号 -->
+  <view class="section">
+    <view class="section-title">📱 手机号</view>
+    <view class="phone-display" wx:if="{{phone}}">
+      <text class="phone-text">已绑定：{{phone}}</text>
+      <button class="btn-phone-mini" open-type="getPhoneNumber" bindgetphonenumber="getPhoneNumber">更换</button>
+    </view>
+    <view class="phone-bind" wx:else>
+      <button class="btn-phone" open-type="getPhoneNumber" bindgetphonenumber="getPhoneNumber">
+        微信快速绑定手机号
+      </button>
+      <view class="phone-divider">
+        <text class="divider-line"></text>
+        <text class="divider-text">或手动输入</text>
+        <text class="divider-line"></text>
+      </view>
+      <view class="phone-manual">
+        <input class="form-input flex1" type="number" maxlength="11" placeholder="输入手机号" value="{{phone}}" bindinput="onInputPhone" />
+        <view class="btn-bind" bindtap="bindPhoneManual">绑定</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 个人相册 -->
+  <view class="section">
+    <view class="section-title">📷 个人相册 <text class="section-hint">（最多9张）</text></view>
+    <view class="album-grid">
+      <view class="album-item" wx:for="{{album}}" wx:key="*this">
+        <image src="{{item}}" mode="aspectFill" class="album-img" bindtap="previewAlbum" data-index="{{index}}" />
+        <view class="album-delete" catchtap="deleteAlbumPhoto" data-index="{{index}}">✕</view>
+      </view>
+      <view class="album-add" wx:if="{{album.length < 9}}" bindtap="addAlbumPhoto">
+        <view class="add-icon">+</view>
+        <view class="add-text">添加照片</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部占位 -->
+  <view style="height: 160rpx;"></view>
+
+  <!-- 保存按钮 -->
+  <view class="bottom-bar">
+    <view class="btn-save {{saving ? 'disabled' : ''}}" bindtap="saveProfile">
+      {{saving ? '保存中...' : '保存'}}
+    </view>
+  </view>
+</view>
