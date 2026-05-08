@@ -4,6 +4,7 @@ Page({
   data: {
     isAdmin: false,
     password: '',
+    checkinCode: '',
     stats: {
       todayOrders: 0,
       todayRevenue: 0,
@@ -125,8 +126,78 @@ Page({
       })
   },
 
-  // 跳转核销页（TODO: 实现扫码核销）
+  // 跳转核销页（扫码）
   goCheckin() {
-    wx.showToast({ title: '核销功能开发中', icon: 'none' })
+    wx.scanCode({
+      onlyFromCamera: false,
+      success: (res) => {
+        const code = res.result
+        if (code) {
+          this._doCheckin(code)
+        }
+      },
+      fail: () => {
+        wx.showToast({ title: '扫码取消', icon: 'none' })
+      }
+    })
+  },
+
+  // 输入核销码
+  onInputCheckinCode(e) {
+    this.setData({ checkinCode: e.detail.value })
+  },
+
+  // 手动核销
+  manualCheckin() {
+    const code = this.data.checkinCode.trim()
+    if (!code || code.length !== 6) {
+      wx.showToast({ title: '请输入6位核销码', icon: 'none' })
+      return
+    }
+    this._doCheckin(code)
+  },
+
+  // 执行核销
+  _doCheckin(checkinCode) {
+    wx.showLoading({ title: '核销中...' })
+
+    if (wx.cloud) {
+      wx.cloud.callFunction({
+        name: 'checkin',
+        data: {
+          action: 'manual',
+          checkinCode: checkinCode
+        },
+        success: (res) => {
+          wx.hideLoading()
+          const result = res.result
+          if (result.code === 0) {
+            const d = result.data
+            wx.showModal({
+              title: '✅ 核销成功',
+              content: `订单号：${d.orderNo}\n活动：${d.activityName}\n联系人：${d.contactName}\n人数：${d.adults}成人${d.children > 0 ? ' + ' + d.children + '儿童' : ''}\n金额：¥${d.totalFee}`,
+              showCancel: false,
+              confirmText: '确定'
+            })
+            this.setData({ checkinCode: '' })
+            this.loadDashboard()
+          } else {
+            wx.showModal({
+              title: '核销失败',
+              content: result.message || '核销码无效',
+              showCancel: false
+            })
+          }
+        },
+        fail: (err) => {
+          wx.hideLoading()
+          console.error('核销调用失败:', err)
+          wx.showToast({ title: '核销失败，请重试', icon: 'none' })
+        }
+      })
+    } else {
+      wx.hideLoading()
+      wx.showToast({ title: '请使用支持云开发的环境', icon: 'none' })
+    }
   }
 })

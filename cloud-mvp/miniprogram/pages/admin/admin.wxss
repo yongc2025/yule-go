@@ -164,3 +164,53 @@
   text-align: center;
   padding: 24rpx 0;
 }
+
+/* 手动核销 */
+.checkin-manual {
+  padding-top: 20rpx;
+}
+
+.checkin-divider {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+
+.divider-line {
+  flex: 1;
+  height: 1rpx;
+  background: #e8e8e8;
+}
+
+.divider-text {
+  font-size: 22rpx;
+  color: #999;
+  padding: 0 16rpx;
+}
+
+.checkin-input-row {
+  display: flex;
+  gap: 16rpx;
+  align-items: center;
+}
+
+.checkin-input {
+  flex: 1;
+  padding: 16rpx 20rpx;
+  border: 2rpx solid #e8e8e8;
+  border-radius: 12rpx;
+  font-size: 32rpx;
+  text-align: center;
+  letter-spacing: 8rpx;
+  font-weight: 600;
+}
+
+.btn-checkin {
+  padding: 16rpx 40rpx;
+  background: linear-gradient(135deg, #2D6A4F, #40916C);
+  color: #fff;
+  border-radius: 12rpx;
+  font-size: 28rpx;
+  font-weight: 600;
+  white-space: nowrap;
+}

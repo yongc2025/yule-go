@@ -2,6 +2,9 @@
 <!--我的订单页-->
 
 <view class="page">
+  <!-- 离屏 canvas（用于生成二维码图片，不可见） -->
+  <canvas type="2d" id="qr-canvas" style="position:fixed;left:-9999px;top:-9999px;width:360px;height:360px;" />
+
   <!-- 状态筛选 -->
   <view class="status-tabs">
     <view class="tab-item {{currentTab === 'all' ? 'active' : ''}}" bindtap="switchTab" data-tab="all">全部</view>
@@ -34,7 +37,7 @@
         <!-- 核销码展示（已支付状态） -->
         <view class="checkin-section" wx:if="{{item.status === 'paid'}}">
           <view class="checkin-code">核销码：{{item.checkinCode}}</view>
-          <canvas canvas-id="qr-{{item._id}}" class="qrcode-canvas" />
+          <image wx:if="{{item.qrSrc}}" src="{{item.qrSrc}}" class="qrcode-img" mode="aspectFit" />
         </view>
 
         <!-- 操作按钮 -->
@@ -61,7 +64,7 @@
     <view class="qr-modal-content" catchtap="">
       <view class="qr-modal-title">出示核销码</view>
       <view class="qr-modal-code">{{qrOrder.checkinCode}}</view>
-      <canvas canvas-id="qrcode-popup" class="qrcode-popup-canvas" />
+      <image wx:if="{{qrPopupSrc}}" src="{{qrPopupSrc}}" class="qrcode-popup-img" mode="aspectFit" />
       <view class="qr-modal-activity">{{qrOrder.activityName}}</view>
       <view class="qr-modal-date">📅 {{qrOrder.scheduleDate}}</view>
       <view class="qr-modal-hint">请出示给领队/店主扫码核销</view>

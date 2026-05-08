@@ -17,7 +17,8 @@ Page({
     currentTab: 'all',
     loading: true,
     showQR: false,
-    qrOrder: null
+    qrOrder: null,
+    qrPopupSrc: ''
   },
 
   onShow() {
@@ -36,7 +37,8 @@ Page({
       let orders = (data.list || []).map(item => ({
         ...item,
         statusText: STATUS_MAP[item.status] || item.status,
-        scheduleDate: item.scheduleDate ? dateUtil.formatDate(item.scheduleDate) : ''
+        scheduleDate: item.scheduleDate ? dateUtil.formatDate(item.scheduleDate) : '',
+        qrSrc: ''
       }))
 
       // 前端状态筛选
@@ -46,20 +48,83 @@ Page({
 
       this.setData({ orders, loading: false })
 
-      // 为已支付订单绘制二维码
-      orders.forEach(order => {
-        if (order.status === 'paid' && order.checkinCode) {
-          setTimeout(() => {
-            const ctx = wx.createCanvasContext('qr-' + order._id, this)
-            qr.drawQR(ctx, order.checkinCode, 0, 0, 3, '#2D6A4F', '#FFFFFF')
-            ctx.draw()
-          }, 200)
-        }
-      })
+      // 为已支付订单生成二维码图片
+      this._generateOrderQRCodes(orders)
     }).catch(err => {
       console.error('加载订单失败:', err)
       this.setData({ loading: false })
     })
+  },
+
+  // 批量生成订单列表中的二维码（使用离屏 canvas）
+  _generateOrderQRCodes(orders) {
+    const paidOrders = orders.filter(o => o.status === 'paid' && o.checkinCode)
+    if (paidOrders.length === 0) return
+
+    // 使用第一个已支付订单的 canvas 作为复用的离屏绘制区
+    // 先逐个生成，每次用完转为图片再处理下一个
+    this._generateNextQR(paidOrders, 0)
+  },
+
+  // 递归生成二维码（避免并发 canvas 冲突）
+  _generateNextQR(orders, index) {
+    if (index >= orders.length) return
+
+    const order = orders[index]
+    const query = wx.createSelectorQuery()
+    query.select('#qr-canvas')
+      .fields({ node: true, size: true })
+      .exec((res) => {
+        if (!res || !res[0] || !res[0].node) {
+          // Canvas 2D 不可用，降级处理
+          console.warn('Canvas 2D 不可用，跳过二维码生成')
+          return
+        }
+
+        const canvas = res[0].node
+        const ctx = canvas.getContext('2d')
+        const dpr = wx.getSystemInfoSync().pixelRatio || 2
+        const size = 200
+
+        canvas.width = size * dpr
+        canvas.height = size * dpr
+        ctx.scale(dpr, dpr)
+
+        // 绘制二维码
+        qr.drawQRToCtx(ctx, order.checkinCode, 0, 0, 3, '#2D6A4F', '#FFFFFF', size)
+
+        // 导出为图片
+        wx.canvasToTempFilePath({
+          canvas: canvas,
+          x: 0,
+          y: 0,
+          width: size * dpr,
+          height: size * dpr,
+          destWidth: size * 2,
+          destHeight: size * 2,
+          success: (imgRes) => {
+            const qrSrc = imgRes.tempFilePath
+            // 更新对应订单的 qrSrc
+            const ordersCopy = this.data.orders.map(o => {
+              if (o._id === order._id) {
+                return { ...o, qrSrc }
+              }
+              return o
+            })
+            this.setData({ orders: ordersCopy })
+
+            // 生成下一个
+            setTimeout(() => {
+              this._generateNextQR(orders, index + 1)
+            }, 100)
+          },
+          fail: (err) => {
+            console.error('导出二维码图片失败:', err)
+            // 继续下一个
+            this._generateNextQR(orders, index + 1)
+          }
+        })
+      })
   },
 
   // 切换状态 tab
@@ -99,20 +164,59 @@ Page({
 
     this.setData({
       showQR: true,
-      qrOrder: order
+      qrOrder: order,
+      qrPopupSrc: ''
     })
 
-    // 延迟绘制二维码
+    // 延迟生成弹窗二维码
     setTimeout(() => {
-      const ctx = wx.createCanvasContext('qrcode-popup', this)
-      qr.drawQR(ctx, order.checkinCode || order.orderNo, 0, 0, 6, '#2D6A4F', '#FFFFFF')
-      ctx.draw()
-    }, 100)
+      this._generatePopupQR(order.checkinCode || order.orderNo)
+    }, 150)
+  },
+
+  // 生成弹窗大二维码
+  _generatePopupQR(text) {
+    const query = wx.createSelectorQuery()
+    query.select('#qr-canvas')
+      .fields({ node: true, size: true })
+      .exec((res) => {
+        if (!res || !res[0] || !res[0].node) {
+          console.warn('Canvas 2D 不可用')
+          return
+        }
+
+        const canvas = res[0].node
+        const ctx = canvas.getContext('2d')
+        const dpr = wx.getSystemInfoSync().pixelRatio || 2
+        const size = 360
+
+        canvas.width = size * dpr
+        canvas.height = size * dpr
+        ctx.scale(dpr, dpr)
+
+        qr.drawQRToCtx(ctx, text, 0, 0, 6, '#2D6A4F', '#FFFFFF', size)
+
+        wx.canvasToTempFilePath({
+          canvas: canvas,
+          x: 0,
+          y: 0,
+          width: size * dpr,
+          height: size * dpr,
+          destWidth: size * 2,
+          destHeight: size * 2,
+          success: (imgRes) => {
+            this.setData({ qrPopupSrc: imgRes.tempFilePath })
+          },
+          fail: (err) => {
+            console.error('导出弹窗二维码失败:', err)
+          }
+        })
+      })
   },
 
   // 关闭弹窗
   closeQR() {
-    this.setData({ showQR: false, qrOrder: null })
+    this.setData({ showQR: false, qrOrder: null, qrPopupSrc: '' })
   },
 
   // 下拉刷新

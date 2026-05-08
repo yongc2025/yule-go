@@ -284,8 +284,8 @@ function buildMatrix(text) {
 }
 
 /**
- * 在 Canvas 上绘制二维码
- * @param {CanvasContext} ctx - Canvas 上下文
+ * 在旧版 Canvas 上绘制二维码（兼容旧 API）
+ * @param {CanvasContext} ctx - 旧版 Canvas 上下文
  * @param {string} text - 要编码的文本
  * @param {number} x - 起始 x
  * @param {number} y - 起始 y
@@ -311,4 +311,42 @@ function drawQR(ctx, text, x, y, cellSize, fgColor = '#000000', bgColor = '#FFFF
   }
 }
 
-module.exports = { drawQR, buildMatrix }
+/**
+ * 在 Canvas 2D 上下文上绘制二维码（新版 API）
+ * @param {CanvasRenderingContext2D} ctx - Canvas 2D 上下文
+ * @param {string} text - 要编码的文本
+ * @param {number} x - 起始 x
+ * @param {number} y - 起始 y
+ * @param {number} cellSize - 每个单元像素大小
+ * @param {string} fgColor - 前景色
+ * @param {string} bgColor - 背景色
+ * @param {number} canvasSize - canvas 尺寸（用于居中绘制）
+ */
+function drawQRToCtx(ctx, text, x, y, cellSize, fgColor = '#000000', bgColor = '#FFFFFF', canvasSize) {
+  const { matrix, size } = buildMatrix(text)
+  const qrPixelSize = size * cellSize
+
+  // 如果指定了 canvasSize，居中绘制
+  let offsetX = x
+  let offsetY = y
+  if (canvasSize) {
+    offsetX = Math.max(x, Math.floor((canvasSize - qrPixelSize) / 2))
+    offsetY = Math.max(y, Math.floor((canvasSize - qrPixelSize) / 2))
+  }
+
+  // 背景
+  ctx.fillStyle = bgColor
+  ctx.fillRect(0, 0, canvasSize || (qrPixelSize + cellSize * 2), canvasSize || (qrPixelSize + cellSize * 2))
+
+  // 二维码
+  ctx.fillStyle = fgColor
+  for (let r = 0; r < size; r++) {
+    for (let c = 0; c < size; c++) {
+      if (matrix[r][c] === 1) {
+        ctx.fillRect(offsetX + c * cellSize, offsetY + r * cellSize, cellSize, cellSize)
+      }
+    }
+  }
+}
+
+module.exports = { drawQR, drawQRToCtx, buildMatrix }

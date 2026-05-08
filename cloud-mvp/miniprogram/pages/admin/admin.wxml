@@ -37,14 +37,27 @@
     </view>
 
     <!-- 核销入口 -->
-    <view class="card" bindtap="goCheckin">
-      <view class="menu-item">
+    <view class="card">
+      <view class="menu-item" bindtap="goCheckin">
         <view class="menu-icon">📱</view>
         <view class="menu-text">
           <view class="menu-title">扫码核销</view>
           <view class="menu-desc">扫描用户核销码，确认到场</view>
         </view>
         <view class="menu-arrow">▶</view>
+      </view>
+
+      <!-- 手动输入核销码 -->
+      <view class="checkin-manual">
+        <view class="checkin-divider">
+          <view class="divider-line"></view>
+          <text class="divider-text">或手动输入核销码</text>
+          <view class="divider-line"></view>
+        </view>
+        <view class="checkin-input-row">
+          <input class="checkin-input" type="number" maxlength="6" placeholder="输入6位核销码" value="{{checkinCode}}" bindinput="onInputCheckinCode" />
+          <view class="btn-checkin" bindtap="manualCheckin">核销</view>
+        </view>
       </view>
     </view>
 

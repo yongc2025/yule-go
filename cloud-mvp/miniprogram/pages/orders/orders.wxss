@@ -133,6 +133,13 @@
   margin: 0 auto;
 }
 
+.qrcode-img {
+  width: 200rpx;
+  height: 200rpx;
+  margin: 0 auto;
+  display: block;
+}
+
 .order-actions {
   display: flex;
   justify-content: flex-end;
@@ -180,6 +187,13 @@
   width: 360rpx;
   height: 360rpx;
   margin: 0 auto 24rpx;
+}
+
+.qrcode-popup-img {
+  width: 360rpx;
+  height: 360rpx;
+  margin: 0 auto 24rpx;
+  display: block;
 }
 
 .qr-modal-activity {
