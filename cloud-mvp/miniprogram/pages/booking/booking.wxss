@@ -120,6 +120,47 @@
   color: #333;
 }
 
+/* 同行优惠 */
+.discount-row {
+  background: #FFF8F0;
+  margin: 8rpx -16rpx;
+  padding: 12rpx 16rpx;
+  border-radius: 8rpx;
+}
+
+.discount-label {
+  display: flex;
+  flex-direction: column;
+}
+
+.discount-tag {
+  font-size: 26rpx;
+  color: #E76F51;
+  font-weight: 600;
+}
+
+.discount-rule {
+  font-size: 22rpx;
+  color: #999;
+  margin-top: 4rpx;
+}
+
+.discount-amount {
+  color: #E76F51;
+  font-weight: 600;
+  font-size: 28rpx;
+}
+
+.gift-row {
+  padding: 4rpx 0;
+}
+
+.gift-text {
+  font-size: 24rpx;
+  color: #2D6A4F;
+  font-weight: 500;
+}
+
 /* 底部操作栏 */
 .bottom-bar {
   position: fixed;

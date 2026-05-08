@@ -27,9 +27,32 @@ exports.main = async (event, context) => {
       return await getOrderStats(event, openid)
     case 'refundList':
       return await getRefundList(event, openid)
+    case 'calcDiscount':
+      return await calcDiscountPreview(event, openid)
     default:
       return { code: -1, message: '未知操作' }
   }
+}
+
+// 同行优惠规则
+const COMPANION_DISCOUNTS = [
+  { minPeople: 3, discountPerPerson: 15, gift: '鱼饵礼包' },
+  { minPeople: 2, discountPerPerson: 10, gift: '' }
+]
+
+// 计算同行优惠
+function calcCompanionDiscount(totalPeople) {
+  for (const rule of COMPANION_DISCOUNTS) {
+    if (totalPeople >= rule.minPeople) {
+      return {
+        discountPerPerson: rule.discountPerPerson,
+        totalDiscount: rule.discountPerPerson * totalPeople,
+        gift: rule.gift,
+        rule: `${totalPeople}人同行，每人立减¥${rule.discountPerPerson}${rule.gift ? ' + 赠' + rule.gift : ''}`
+      }
+    }
+  }
+  return { discountPerPerson: 0, totalDiscount: 0, gift: '', rule: '' }
 }
 
 // 创建订单
@@ -53,17 +76,41 @@ async function createOrder({ activityId, scheduleId, adults, children, contactNa
     const activityRes = await db.collection('activities').doc(activityId).get()
     const activity = activityRes.data
 
-    // 3. 校验费用
-    const expectedFee = (activity.price || 0) * adults + (activity.childPrice || 0) * children
+    // 3. 计算原价
+    const originalFee = (activity.price || 0) * adults + (activity.childPrice || 0) * children
+
+    // 4. 计算同行优惠
+    const companionDiscount = calcCompanionDiscount(totalPeople)
+
+    // 5. 获取会员折扣（travelDiscount 是每次出行立减金额）
+    let memberDiscount = 0
+    const walletRes = await db.collection('user_wallets').where({ openid }).get()
+    if (walletRes.data.length > 0) {
+      const wallet = walletRes.data[0]
+      const MEMBER_LEVELS = [
+        { level: 0, travelDiscount: 0 },
+        { level: 1, travelDiscount: 10 },
+        { level: 2, travelDiscount: 20 },
+        { level: 3, travelDiscount: 30 }
+      ]
+      const levelInfo = MEMBER_LEVELS.find(l => l.level === wallet.memberLevel) || MEMBER_LEVELS[0]
+      memberDiscount = levelInfo.travelDiscount || 0
+    }
+
+    // 6. 同行优惠与会员折扣取最优惠（不叠加）
+    const bestDiscount = Math.max(companionDiscount.totalDiscount, memberDiscount)
+    const discountType = companionDiscount.totalDiscount >= memberDiscount ? 'companion' : 'member'
+    const expectedFee = Math.max(0, originalFee - bestDiscount)
+
     if (Math.abs(expectedFee - totalFee) > 0.01) {
       return { code: -1, message: '费用不一致，请刷新重试' }
     }
 
-    // 4. 生成订单号和核销码
+    // 7. 生成订单号和核销码
     const orderNo = 'YL' + Date.now() + String(Math.random()).slice(2, 6)
     const checkinCode = String(Math.floor(100000 + Math.random() * 900000))
 
-    // 5. 创建订单
+    // 8. 创建订单
     const order = {
       orderNo,
       openid,
@@ -73,10 +120,21 @@ async function createOrder({ activityId, scheduleId, adults, children, contactNa
       scheduleDate: schedule.date,
       adults,
       children,
+      totalPeople,
       contactName,
       contactPhone,
       remark: remark || '',
+      originalFee,
       totalFee,
+      companionDiscount: companionDiscount.totalDiscount > 0 ? {
+        discountPerPerson: companionDiscount.discountPerPerson,
+        totalDiscount: companionDiscount.totalDiscount,
+        gift: companionDiscount.gift,
+        rule: companionDiscount.rule
+      } : null,
+      memberDiscount,
+      bestDiscount,
+      discountType,
       checkinCode,
       status: 'pending', // pending → paid → completed / cancelled
       createdAt: db.serverDate(),
@@ -504,6 +562,60 @@ async function getRefundList({ page = 1, pageSize = 20 }, openid) {
 async function isAdmin(openid) {
   const res = await db.collection('admins').where({ openid }).get()
   return res.data.length > 0
+}
+
+// 预览优惠（下单前实时计算）
+async function calcDiscountPreview({ activityId, adults, children }, openid) {
+  try {
+    const totalPeople = adults + children
+
+    // 活动价格
+    const activityRes = await db.collection('activities').doc(activityId).get()
+    const activity = activityRes.data
+    const originalFee = (activity.price || 0) * adults + (activity.childPrice || 0) * children
+
+    // 同行优惠
+    const companionDiscount = calcCompanionDiscount(totalPeople)
+
+    // 会员折扣
+    let memberDiscount = 0
+    let memberLevel = 0
+    const walletRes = await db.collection('user_wallets').where({ openid }).get()
+    if (walletRes.data.length > 0) {
+      const wallet = walletRes.data[0]
+      memberLevel = wallet.memberLevel || 0
+      const MEMBER_LEVELS = [
+        { level: 0, travelDiscount: 0 },
+        { level: 1, travelDiscount: 10 },
+        { level: 2, travelDiscount: 20 },
+        { level: 3, travelDiscount: 30 }
+      ]
+      const levelInfo = MEMBER_LEVELS.find(l => l.level === memberLevel) || MEMBER_LEVELS[0]
+      memberDiscount = levelInfo.travelDiscount || 0
+    }
+
+    // 取最优惠
+    const bestDiscount = Math.max(companionDiscount.totalDiscount, memberDiscount)
+    const discountType = companionDiscount.totalDiscount >= memberDiscount ? 'companion' : 'member'
+    const finalFee = Math.max(0, originalFee - bestDiscount)
+
+    return {
+      code: 0,
+      data: {
+        originalFee,
+        companionDiscount: companionDiscount.totalDiscount,
+        companionRule: companionDiscount.rule,
+        companionGift: companionDiscount.gift,
+        memberDiscount,
+        memberLevel,
+        bestDiscount,
+        discountType,
+        finalFee
+      }
+    }
+  } catch (err) {
+    return { code: -1, message: '计算失败: ' + err.message }
+  }
 }
 
 // 生成随机字符串

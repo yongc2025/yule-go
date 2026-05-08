@@ -81,6 +81,31 @@
       <text>团费（儿童 × {{children}}）</text>
       <text>¥{{childFee}}</text>
     </view>
+    <view class="fee-row" wx:if="{{originalFee !== totalFee}}">
+      <text>原价小计</text>
+      <text>¥{{originalFee}}</text>
+    </view>
+
+    <!-- 同行优惠 -->
+    <view class="fee-row discount-row" wx:if="{{companionDiscount > 0}}">
+      <view class="discount-label">
+        <text class="discount-tag">🎁 同行优惠</text>
+        <text class="discount-rule" wx:if="{{companionRule}}">{{companionRule}}</text>
+      </view>
+      <text class="discount-amount">-¥{{companionDiscount}}</text>
+    </view>
+    <view class="fee-row gift-row" wx:if="{{companionGift}}">
+      <text class="gift-text">🎉 赠送：{{companionGift}}</text>
+    </view>
+
+    <!-- 会员折扣（仅当会员折扣更优时显示） -->
+    <view class="fee-row discount-row" wx:if="{{memberDiscount > 0 && discountType === 'member'}}">
+      <view class="discount-label">
+        <text class="discount-tag">👑 会员立减</text>
+      </view>
+      <text class="discount-amount">-¥{{memberDiscount}}</text>
+    </view>
+
     <view class="fee-row total">
       <text>合计</text>
       <text class="price">¥{{totalFee}}</text>

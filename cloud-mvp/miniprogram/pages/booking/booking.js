@@ -10,6 +10,13 @@ Page({
     remark: '',
     adultFee: 0,
     childFee: 0,
+    originalFee: 0,
+    companionDiscount: 0,
+    companionRule: '',
+    companionGift: '',
+    memberDiscount: 0,
+    bestDiscount: 0,
+    discountType: '',
     totalFee: 0,
     submitting: false,
     subscribed: false  // 是否已授权订阅消息
@@ -39,16 +46,67 @@ Page({
     this.calcFee()
   },
 
-  // 计算费用
+  // 计算费用（含优惠预览）
   calcFee() {
     const { info, adults, children } = this.data
     const adultFee = (info.price || 0) * adults
     const childFee = (info.childPrice || 0) * children
+    const originalFee = adultFee + childFee
+
+    // 先用本地规则快速预览同行优惠
+    const totalPeople = adults + children
+    let companionDiscount = 0
+    let companionRule = ''
+    let companionGift = ''
+    if (totalPeople >= 3) {
+      companionDiscount = 15 * totalPeople
+      companionRule = `${totalPeople}人同行，每人立减¥15`
+      companionGift = '鱼饵礼包'
+    } else if (totalPeople >= 2) {
+      companionDiscount = 10 * totalPeople
+      companionRule = `${totalPeople}人同行，每人立减¥10`
+    }
+
+    // 本地先算一个预估总价，异步获取精确值（含会员折扣）
     this.setData({
       adultFee,
       childFee,
-      totalFee: adultFee + childFee
+      originalFee,
+      companionDiscount,
+      companionRule,
+      companionGift,
+      totalFee: Math.max(0, originalFee - companionDiscount)
     })
+
+    // 异步获取精确优惠（含会员折扣）
+    this._fetchDiscountPreview()
+  },
+
+  // 异步获取优惠预览
+  _fetchDiscountPreview() {
+    const { info, adults, children } = this.data
+    if (!info.activityId) return
+
+    api.call('orders', {
+      action: 'calcDiscount',
+      activityId: info.activityId,
+      adults,
+      children
+    }, { showLoading: false }).then(res => {
+      if (res.code === 0) {
+        const d = res.data
+        this.setData({
+          originalFee: d.originalFee,
+          companionDiscount: d.companionDiscount,
+          companionRule: d.companionRule,
+          companionGift: d.companionGift,
+          memberDiscount: d.memberDiscount,
+          bestDiscount: d.bestDiscount,
+          discountType: d.discountType,
+          totalFee: d.finalFee
+        })
+      }
+    }).catch(() => {})
   },
 
   // 输入联系人
