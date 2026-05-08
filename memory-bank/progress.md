@@ -432,3 +432,22 @@
   - 修改文件：5 个（login + profile × 3 + app.json）
 - 验证：代码结构完整，待部署验证
 - 踩坑：无
+
+### 2026-05-08 — Task 0039 ✅ 退款资金对账
+- 做了什么：
+  - 扩展 `cloudfunctions/orders/index.js`：
+    - 新增 `stats` action：按日/周/月统计支付收入、退款支出、净收入，支持按团期维度拆分
+    - 新增 `refundList` action：退款订单分页查询（管理员权限）
+  - 创建 `pages/admin/finance.js/wxml/wxss`：财务统计页
+    - 时间范围切换（今日/本周/本月）
+    - 收支概览卡片（支付收入 vs 退款支出 vs 净收入）
+    - 按团期对账明细（每个团期的收入/退款/净收入）
+    - 退款订单列表（展开/收起 + 分页加载）
+  - 更新 `pages/admin/admin.js/wxml`：
+    - 面板新增「💰 财务统计」入口
+    - 新增 goFinance 跳转方法
+  - 更新 `app.json`：注册 finance 页面路由
+  - 新增文件：4 个（finance 页 × 4）
+  - 修改文件：3 个（orders 云函数 + admin 面板 × 2 + app.json）
+- 验证：代码结构完整，待部署验证
+- 踩坑：无

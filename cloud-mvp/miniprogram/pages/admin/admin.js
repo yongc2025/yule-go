@@ -136,6 +136,11 @@ Page({
     wx.navigateTo({ url: '/pages/admin/activities' })
   },
 
+  // 跳转财务统计
+  goFinance() {
+    wx.navigateTo({ url: '/pages/admin/finance' })
+  },
+
   // 跳转核销页（扫码）
   goCheckin() {
     wx.scanCode({

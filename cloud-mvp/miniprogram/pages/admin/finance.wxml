@@ -1,0 +1,100 @@
+<!--pages/admin/finance.wxml-->
+<!--财务统计 — 收支概览 + 退款对账-->
+
+<view class="page">
+  <!-- 时间范围切换 -->
+  <view class="range-tabs">
+    <view class="range-tab {{currentRange === 'today' ? 'active' : ''}}" bindtap="switchRange" data-range="today">今日</view>
+    <view class="range-tab {{currentRange === 'week' ? 'active' : ''}}" bindtap="switchRange" data-range="week">本周</view>
+    <view class="range-tab {{currentRange === 'month' ? 'active' : ''}}" bindtap="switchRange" data-range="month">本月</view>
+  </view>
+
+  <!-- 收支概览 -->
+  <view class="card summary-card" wx:if="{{!loading}}">
+    <view class="summary-grid">
+      <view class="summary-item income">
+        <view class="summary-label">支付收入</view>
+        <view class="summary-num">¥{{summary.paidTotalStr}}</view>
+        <view class="summary-count">{{summary.paidCount}} 笔</view>
+      </view>
+      <view class="summary-item refund">
+        <view class="summary-label">退款支出</view>
+        <view class="summary-num">¥{{summary.refundedTotalStr}}</view>
+        <view class="summary-count">{{summary.refundedCount}} 笔</view>
+      </view>
+    </view>
+    <view class="net-income">
+      <text class="net-label">净收入</text>
+      <text class="net-num {{summary.netIncome >= 0 ? 'positive' : 'negative'}}">¥{{summary.netIncomeStr}}</text>
+    </view>
+    <view class="summary-footer">
+      <text class="footer-item">总订单 {{summary.totalOrders}}</text>
+      <text class="footer-item">待支付 {{summary.pendingCount}}</text>
+      <text class="footer-item">已取消 {{summary.cancelledCount}}</text>
+    </view>
+  </view>
+
+  <view class="loading" wx:if="{{loading}}">加载中...</view>
+
+  <!-- 按团期对账 -->
+  <view class="card" wx:if="{{!loading && bySchedule.length > 0}}">
+    <view class="section-title">📅 按团期对账</view>
+    <view class="schedule-stats">
+      <view class="schedule-stat-item" wx:for="{{bySchedule}}" wx:key="scheduleId">
+        <view class="stat-header">
+          <text class="stat-name">{{item.activityName || '未知活动'}}</text>
+          <text class="stat-date">{{item.scheduleDate}}</text>
+        </view>
+        <view class="stat-row">
+          <text class="stat-label">收入</text>
+          <text class="stat-value income-text">+¥{{item.paidTotalStr}}（{{item.paidCount}}笔）</text>
+        </view>
+        <view class="stat-row" wx:if="{{item.refundedCount > 0}}">
+          <text class="stat-label">退款</text>
+          <text class="stat-value refund-text">-¥{{item.refundedTotalStr}}（{{item.refundedCount}}笔）</text>
+        </view>
+        <view class="stat-row net-row">
+          <text class="stat-label">净收入</text>
+          <text class="stat-value {{item.netIncome >= 0 ? 'income-text' : 'refund-text'}}">¥{{item.netIncomeStr}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 退款订单入口 -->
+  <view class="card">
+    <view class="refund-entry" bindtap="toggleRefundList">
+      <view class="refund-entry-left">
+        <text class="refund-icon">💸</text>
+        <text class="refund-title">退款订单</text>
+        <text class="refund-count" wx:if="{{refundTotal > 0}}">{{refundTotal}}笔</text>
+      </view>
+      <text class="refund-arrow">{{showRefundList ? '▲' : '▼'}}</text>
+    </view>
+
+    <!-- 退款列表 -->
+    <view class="refund-list" wx:if="{{showRefundList}}">
+      <view class="refund-item" wx:for="{{refundList}}" wx:key="_id">
+        <view class="refund-header">
+          <text class="refund-order-no">{{item.orderNo}}</text>
+          <text class="refund-amount">-¥{{item.refundAmountStr}}</text>
+        </view>
+        <view class="refund-body">
+          <text class="refund-activity">{{item.activityName}}</text>
+          <text class="refund-time">{{item.refundTimeStr}}</text>
+        </view>
+        <view class="refund-footer" wx:if="{{item.refundReason}}">
+          <text class="refund-reason">{{item.refundReason}}</text>
+        </view>
+      </view>
+
+      <view class="load-more" wx:if="{{refundList.length < refundTotal}}" bindtap="loadMoreRefunds">
+        {{refundLoading ? '加载中...' : '加载更多'}}
+      </view>
+
+      <view class="empty-sub" wx:if="{{!refundLoading && refundList.length === 0}}">
+        暂无退款记录
+      </view>
+    </view>
+  </view>
+</view>

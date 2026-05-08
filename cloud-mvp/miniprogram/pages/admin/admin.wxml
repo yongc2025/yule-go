@@ -59,6 +59,17 @@
       </view>
     </view>
 
+    <view class="card">
+      <view class="menu-item" bindtap="goFinance">
+        <view class="menu-icon">💰</view>
+        <view class="menu-text">
+          <view class="menu-title">财务统计</view>
+          <view class="menu-desc">收支概览、退款对账</view>
+        </view>
+        <view class="menu-arrow">▶</view>
+      </view>
+    </view>
+
     <!-- 核销入口 -->
     <view class="card">
       <view class="menu-item" bindtap="goCheckin">

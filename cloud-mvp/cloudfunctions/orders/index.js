@@ -23,6 +23,10 @@ exports.main = async (event, context) => {
       return await getOrderDetail(event, openid)
     case 'payCallback':
       return await payCallback(event)
+    case 'stats':
+      return await getOrderStats(event, openid)
+    case 'refundList':
+      return await getRefundList(event, openid)
     default:
       return { code: -1, message: '未知操作' }
   }
@@ -341,6 +345,165 @@ async function getOrderDetail({ orderId }, openid) {
   } catch (err) {
     return { code: -1, message: '订单不存在' }
   }
+}
+
+// 订单统计（按日/按团期）
+async function getOrderStats({ range, scheduleId }, openid) {
+  if (!await isAdmin(openid)) {
+    return { code: -1, message: '无权限' }
+  }
+
+  try {
+    const now = new Date()
+    let startDate, endDate
+
+    if (range === 'week') {
+      const weekStart = new Date(now)
+      weekStart.setDate(now.getDate() - (now.getDay() || 7) + 1)
+      weekStart.setHours(0, 0, 0, 0)
+      startDate = weekStart.toISOString()
+      endDate = now.toISOString()
+    } else if (range === 'month') {
+      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1)
+      startDate = monthStart.toISOString()
+      endDate = now.toISOString()
+    } else {
+      // 默认今日
+      const todayStart = new Date(now)
+      todayStart.setHours(0, 0, 0, 0)
+      startDate = todayStart.toISOString()
+      endDate = now.toISOString()
+    }
+
+    // 查询时间范围内的所有订单
+    let query = {
+      createdAt: _.gte(startDate).and(_.lte(endDate))
+    }
+    if (scheduleId) {
+      query.scheduleId = scheduleId
+    }
+
+    const ordersRes = await db.collection('orders')
+      .where(query)
+      .limit(1000)
+      .get()
+
+    const orders = ordersRes.data
+
+    // 统计
+    let paidCount = 0, paidTotal = 0
+    let refundedCount = 0, refundedTotal = 0
+    let cancelledCount = 0
+    let pendingCount = 0
+
+    const bySchedule = {}
+
+    for (const order of orders) {
+      const fee = order.totalFee || 0
+      const sid = order.scheduleId || 'unknown'
+
+      if (!bySchedule[sid]) {
+        bySchedule[sid] = {
+          scheduleId: sid,
+          activityName: order.activityName || '',
+          scheduleDate: order.scheduleDate || '',
+          paidCount: 0, paidTotal: 0,
+          refundedCount: 0, refundedTotal: 0,
+          netIncome: 0
+        }
+      }
+
+      switch (order.status) {
+        case 'paid':
+        case 'completed':
+          paidCount++
+          paidTotal += fee
+          bySchedule[sid].paidCount++
+          bySchedule[sid].paidTotal += fee
+          break
+        case 'refunded':
+          refundedCount++
+          refundedTotal += (order.refundAmount || fee)
+          bySchedule[sid].refundedCount++
+          bySchedule[sid].refundedTotal += (order.refundAmount || fee)
+          break
+        case 'cancelled':
+          cancelledCount++
+          break
+        case 'pending':
+          pendingCount++
+          break
+      }
+    }
+
+    // 计算每个团期的净收入
+    for (const sid of Object.keys(bySchedule)) {
+      const s = bySchedule[sid]
+      s.netIncome = s.paidTotal - s.refundedTotal
+    }
+
+    return {
+      code: 0,
+      data: {
+        summary: {
+          totalOrders: orders.length,
+          paidCount,
+          paidTotal: Math.round(paidTotal * 100) / 100,
+          refundedCount,
+          refundedTotal: Math.round(refundedTotal * 100) / 100,
+          netIncome: Math.round((paidTotal - refundedTotal) * 100) / 100,
+          cancelledCount,
+          pendingCount
+        },
+        bySchedule: Object.values(bySchedule).sort((a, b) =>
+          (b.scheduleDate || '').localeCompare(a.scheduleDate || '')
+        ),
+        range,
+        startDate,
+        endDate
+      }
+    }
+  } catch (err) {
+    return { code: -1, message: '统计失败: ' + err.message }
+  }
+}
+
+// 退款订单列表
+async function getRefundList({ page = 1, pageSize = 20 }, openid) {
+  if (!await isAdmin(openid)) {
+    return { code: -1, message: '无权限' }
+  }
+
+  try {
+    const countRes = await db.collection('orders')
+      .where({ status: 'refunded' })
+      .count()
+
+    const dataRes = await db.collection('orders')
+      .where({ status: 'refunded' })
+      .orderBy('refundAt', 'desc')
+      .skip((page - 1) * pageSize)
+      .limit(pageSize)
+      .get()
+
+    return {
+      code: 0,
+      data: {
+        list: dataRes.data,
+        total: countRes.total,
+        page,
+        pageSize
+      }
+    }
+  } catch (err) {
+    return { code: -1, message: '查询失败: ' + err.message }
+  }
+}
+
+// 检查是否是管理员
+async function isAdmin(openid) {
+  const res = await db.collection('admins').where({ openid }).get()
+  return res.data.length > 0
 }
 
 // 生成随机字符串

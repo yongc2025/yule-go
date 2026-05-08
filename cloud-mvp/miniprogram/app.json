@@ -11,6 +11,7 @@
     "pages/admin/activities",
     "pages/admin/activity-edit",
     "pages/admin/shop-edit",
+    "pages/admin/finance",
     "pages/admin/schedules"
   ],
   "window": {
