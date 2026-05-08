@@ -109,6 +109,8 @@
 
 ## MVP 闭环任务（0035 ~ 0039）
 
+> **分支：cloud-mvp**（微信云开发，非自研版 yule-go）
+> **需求源：`cloud-mvp/REQUIREMENTS.md`**（不是 memory-bank/requirements.md）
 > QR 码修复 + 活动团期管理已完成（0035 前置），以下为闭环剩余功能
 
 | ID | 名称 | 状态 | 预估 | 依赖 |

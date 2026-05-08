@@ -1,5 +1,8 @@
 # 0038 用户个人信息
 
+> **分支**：cloud-mvp（微信云开发）
+> **需求源**：`cloud-mvp/REQUIREMENTS.md` §5.1 users 集合
+
 ## 用户故事
 作为用户，我希望能编辑和展示我的个人资料，包括昵称、头像、手机号、个人简介和相册。这些信息也为 v2 领队人设做铺垫。
 
@@ -12,15 +15,19 @@
 - AC-06: 信息存储在云端（users 集合），非仅本地缓存
 
 ## 数据模型（users 集合扩展）
+
+> 基础字段定义见 `cloud-mvp/REQUIREMENTS.md` §5.1 users 集合
+> 以下为 0038 新增/扩展字段：
+
 | 字段 | 类型 | 说明 |
 |---|---|---|
-| nickname | string | 昵称 |
-| avatar | string | 头像 URL |
-| phone | string | 手机号 |
-| bio | string | 个人简介 |
-| album | array[string] | 相册照片 URL 列表 |
+| nickname | string | 昵称（已有，可编辑） |
+| avatar | string | 头像 URL（已有，可更换） |
+| phone | string | 手机号（已有，可绑定） |
+| bio | string | 个人简介（新增） |
+| album | array[string] | 相册照片 URL 列表（新增） |
 
 ## 约束
-- 头像和相册图片上传到云存储
+- 头像和相册图片上传到微信云存储
 - 手机号可通过微信 getPhoneNumber 获取
 - 为 v2 领队功能预留 isGuide 字段（暂不启用）
