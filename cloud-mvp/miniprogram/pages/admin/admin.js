@@ -126,6 +126,11 @@ Page({
       })
   },
 
+  // 跳转店铺设置
+  goShopEdit() {
+    wx.navigateTo({ url: '/pages/admin/shop-edit' })
+  },
+
   // 跳转活动管理
   goActivities() {
     wx.navigateTo({ url: '/pages/admin/activities' })

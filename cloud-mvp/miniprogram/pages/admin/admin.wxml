@@ -38,6 +38,17 @@
 
     <!-- 管理入口 -->
     <view class="card">
+      <view class="menu-item" bindtap="goShopEdit">
+        <view class="menu-icon">🏪</view>
+        <view class="menu-text">
+          <view class="menu-title">店铺设置</view>
+          <view class="menu-desc">编辑店铺信息、老板资料、相册</view>
+        </view>
+        <view class="menu-arrow">▶</view>
+      </view>
+    </view>
+
+    <view class="card">
       <view class="menu-item" bindtap="goActivities">
         <view class="menu-icon">📋</view>
         <view class="menu-text">

@@ -9,6 +9,7 @@
     "pages/admin/admin",
     "pages/admin/activities",
     "pages/admin/activity-edit",
+    "pages/admin/shop-edit",
     "pages/admin/schedules"
   ],
   "window": {

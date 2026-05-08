@@ -1,0 +1,125 @@
+<!--pages/admin/shop-edit.wxml-->
+<!--店铺设置 — 编辑门店信息-->
+
+<view class="page">
+  <!-- 基本信息 -->
+  <view class="section">
+    <view class="section-title">📌 基本信息</view>
+
+    <view class="form-group">
+      <view class="form-label">店铺名称 <text class="required">*</text></view>
+      <input class="form-input" placeholder="如：渔乐渔具" value="{{form.name}}" bindinput="onInput" data-field="name" />
+    </view>
+
+    <view class="form-group">
+      <view class="form-label">店铺口号</view>
+      <input class="form-input" placeholder="如：周末去哪？跟我走！" value="{{form.slogan}}" bindinput="onInput" data-field="slogan" />
+    </view>
+
+    <view class="form-group">
+      <view class="form-label">封面图</view>
+      <view class="cover-row">
+        <image wx:if="{{form.coverImage}}" src="{{form.coverImage}}" mode="aspectFill" class="cover-preview" bindtap="previewCover" />
+        <view class="cover-upload" bindtap="uploadCover">
+          <text class="upload-icon">{{form.coverImage ? '🔄' : '+'}}</text>
+          <text class="upload-text">{{form.coverImage ? '更换' : '上传封面'}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="form-group">
+      <view class="form-label">详细地址</view>
+      <input class="form-input" placeholder="如：长沙市岳麓区枫林三路88号" value="{{form.address}}" bindinput="onInput" data-field="address" />
+    </view>
+
+    <view class="form-group">
+      <view class="form-label">联系电话</view>
+      <input class="form-input" type="number" placeholder="如：13800138000" value="{{form.phone}}" bindinput="onInput" data-field="phone" />
+    </view>
+
+    <view class="form-group">
+      <view class="form-label">营业时间</view>
+      <input class="form-input" placeholder="如：08:00-18:00" value="{{form.businessHours}}" bindinput="onInput" data-field="businessHours" />
+    </view>
+  </view>
+
+  <!-- 老板信息 -->
+  <view class="section">
+    <view class="section-title">👤 老板信息</view>
+
+    <view class="form-group">
+      <view class="form-label">老板头像</view>
+      <view class="avatar-row">
+        <image wx:if="{{form.ownerAvatar}}" src="{{form.ownerAvatar}}" mode="aspectFill" class="avatar-preview" />
+        <view class="avatar-upload" bindtap="uploadAvatar">
+          <text class="upload-icon">{{form.ownerAvatar ? '🔄' : '+'}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="form-group">
+      <view class="form-label">老板姓名</view>
+      <input class="form-input" placeholder="如：老王" value="{{form.ownerName}}" bindinput="onInput" data-field="ownerName" />
+    </view>
+
+    <view class="form-group">
+      <view class="form-label">头衔/称号</view>
+      <input class="form-input" placeholder="如：金牌领队" value="{{form.ownerTitle}}" bindinput="onInput" data-field="ownerTitle" />
+    </view>
+  </view>
+
+  <!-- 特色标签 -->
+  <view class="section">
+    <view class="section-title">🏷️ 特色标签</view>
+    <view class="section-hint">展示在门店头部，让顾客快速了解店铺特色</view>
+
+    <view class="tag-list" wx:if="{{form.tags.length > 0}}">
+      <view class="tag-item" wx:for="{{form.tags}}" wx:key="*this">
+        <text>{{item}}</text>
+        <view class="tag-remove" catchtap="removeTag" data-index="{{index}}">✕</view>
+      </view>
+    </view>
+
+    <view class="preset-tags">
+      <view class="preset-label">推荐标签（点击添加）：</view>
+      <view class="preset-list">
+        <view class="preset-tag {{item.added ? 'added' : ''}}"
+              wx:for="{{presetTags}}" wx:key="name"
+              catchtap="addPresetTag" data-index="{{index}}">
+          {{item.name}}
+        </view>
+      </view>
+    </view>
+
+    <view class="custom-input-row">
+      <input class="form-input flex1" placeholder="输入自定义标签" value="{{customTag}}" bindinput="onInputCustomTag" />
+      <view class="btn-add-tag" bindtap="addCustomTag">添加</view>
+    </view>
+  </view>
+
+  <!-- 店铺相册 -->
+  <view class="section">
+    <view class="section-title">🖼️ 店铺相册 <text class="section-hint">（环境、装备、活动照片，最多9张）</text></view>
+
+    <view class="image-grid">
+      <view class="image-item" wx:for="{{form.images}}" wx:key="*this">
+        <image src="{{item}}" mode="aspectFill" class="preview-img" bindtap="previewImage" data-index="{{index}}" />
+        <view class="img-delete" catchtap="deleteImage" data-index="{{index}}">✕</view>
+      </view>
+      <view class="image-add" wx:if="{{form.images.length < 9}}" bindtap="chooseImage">
+        <view class="add-icon">+</view>
+        <view class="add-text">添加照片</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部占位 -->
+  <view style="height: 160rpx;"></view>
+
+  <!-- 底部保存按钮 -->
+  <view class="bottom-bar">
+    <view class="btn-save {{saving ? 'disabled' : ''}}" bindtap="saveShop">
+      {{saving ? '保存中...' : '保存店铺信息'}}
+    </view>
+  </view>
+</view>
