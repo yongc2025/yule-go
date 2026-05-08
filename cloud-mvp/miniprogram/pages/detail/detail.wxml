@@ -3,7 +3,7 @@
 
 <view class="page" wx:if="{{activity}}">
   <!-- 封面图轮播 -->
-  <swiper class="cover-swiper" indicator-dots autoplay circular>
+  <swiper class="cover-swiper" indicator-dots autoplay circular wx:if="{{activity.images && activity.images.length > 0}}">
     <swiper-item wx:for="{{activity.images}}" wx:key="*this">
       <image src="{{item}}" mode="aspectFill" class="cover-img" />
     </swiper-item>
@@ -43,17 +43,19 @@
   </view>
 
   <!-- 费用包含/不包含 -->
-  <view class="card">
-    <view class="section-title">✅ 费用包含</view>
-    <view class="include-list">
-      <view class="include-item" wx:for="{{activity.includes}}" wx:key="*this">
-        <text class="include-icon">✓</text>
-        <text>{{item}}</text>
+  <view class="card" wx:if="{{(activity.includes && activity.includes.length > 0) || (activity.excludes && activity.excludes.length > 0)}}">
+    <block wx:if="{{activity.includes && activity.includes.length > 0}}">
+      <view class="section-title">✅ 费用包含</view>
+      <view class="include-list">
+        <view class="include-item" wx:for="{{activity.includes}}" wx:key="*this">
+          <text class="include-icon">✓</text>
+          <text>{{item}}</text>
+        </view>
       </view>
-    </view>
+    </block>
 
-    <view class="section-title" wx:if="{{activity.excludes && activity.excludes.length > 0}}" style="margin-top: 24rpx;">❌ 费用不含</view>
-    <view class="include-list">
+    <view class="section-title" wx:if="{{activity.excludes && activity.excludes.length > 0}}" style="{{activity.includes && activity.includes.length > 0 ? 'margin-top: 24rpx;' : ''}}">❌ 费用不含</view>
+    <view class="include-list" wx:if="{{activity.excludes && activity.excludes.length > 0}}">
       <view class="include-item" wx:for="{{activity.excludes}}" wx:key="*this">
         <text class="include-icon exclude">✗</text>
         <text>{{item}}</text>

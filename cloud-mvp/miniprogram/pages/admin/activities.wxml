@@ -1,5 +1,5 @@
 <!--pages/admin/activities.wxml-->
-<!--活动管理-->
+<!--活动管理 — 列表页-->
 
 <view class="page">
   <!-- 顶部操作栏 -->
@@ -21,6 +21,12 @@
           <text wx:if="{{item.childPrice > 0}}"> / 儿童 ¥{{item.childPrice}}</text>
         </view>
         <view class="card-info">👥 名额 {{item.maxSlots}} 人</view>
+        <!-- 显示已配置的内容数量 -->
+        <view class="card-meta" wx:if="{{item.images.length > 0 || item.highlights.length > 0 || item.itinerary.length > 0}}">
+          <text class="meta-item" wx:if="{{item.images.length > 0}}">🖼️ {{item.images.length}}张图</text>
+          <text class="meta-item" wx:if="{{item.highlights.length > 0}}">✨ {{item.highlights.length}}个亮点</text>
+          <text class="meta-item" wx:if="{{item.itinerary.length > 0}}">📋 {{item.itinerary.length}}个行程</text>
+        </view>
       </view>
       <view class="card-actions">
         <view class="btn-sm" bindtap="goSchedules" data-id="{{item._id}}" data-name="{{item.name}}">📅 团期</view>
@@ -38,44 +44,4 @@
   </view>
 
   <view class="loading" wx:if="{{loading}}">加载中...</view>
-
-  <!-- 新建/编辑弹窗 -->
-  <view class="modal" wx:if="{{showForm}}" bindtap="closeForm">
-    <view class="modal-content" catchtap="">
-      <view class="modal-title">{{editId ? '编辑活动' : '新建活动'}}</view>
-
-      <view class="form-group">
-        <view class="form-label">活动名称</view>
-        <input class="form-input" placeholder="如：周末野钓之旅" value="{{form.name}}" bindinput="onInputName" />
-      </view>
-
-      <view class="form-group">
-        <view class="form-label">活动类型</view>
-        <picker range="{{typeOptions}}" range-key="label" bindchange="changeType">
-          <view class="form-input picker-value">{{form.type === 'fishing' ? '🎣 钓鱼' : form.type === 'camping' ? '⛺ 露营' : form.type === 'family' ? '👨‍👩‍👧 亲子' : form.type === 'senior' ? '👴 慢游' : '🎣 野钓'}}</view>
-        </picker>
-      </view>
-
-      <view class="form-row">
-        <view class="form-group flex1">
-          <view class="form-label">成人价(元)</view>
-          <input class="form-input" type="digit" placeholder="158" value="{{form.price}}" bindinput="onInputPrice" />
-        </view>
-        <view class="form-group flex1">
-          <view class="form-label">儿童价(元)</view>
-          <input class="form-input" type="digit" placeholder="0" value="{{form.childPrice}}" bindinput="onInputChildPrice" />
-        </view>
-      </view>
-
-      <view class="form-group">
-        <view class="form-label">每期名额</view>
-        <input class="form-input" type="number" placeholder="20" value="{{form.maxSlots}}" bindinput="onInputMaxSlots" />
-      </view>
-
-      <view class="modal-actions">
-        <view class="btn-cancel" bindtap="closeForm">取消</view>
-        <view class="btn-confirm" bindtap="submitForm">{{editId ? '保存' : '创建'}}</view>
-      </view>
-    </view>
-  </view>
 </view>

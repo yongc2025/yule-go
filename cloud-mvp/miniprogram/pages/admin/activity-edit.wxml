@@ -1,0 +1,161 @@
+<!--pages/admin/activity-edit.wxml-->
+<!--活动编辑页 — 分区块表单-->
+
+<view class="page">
+  <!-- 基本信息 -->
+  <view class="section">
+    <view class="section-title">📌 基本信息</view>
+
+    <view class="form-group">
+      <view class="form-label">活动名称 <text class="required">*</text></view>
+      <input class="form-input" placeholder="如：周末野钓之旅" value="{{form.name}}" bindinput="onInput" data-field="name" />
+    </view>
+
+    <view class="form-group">
+      <view class="form-label">活动类型</view>
+      <picker range="{{typeOptions}}" range-key="label" bindchange="onTypeChange">
+        <view class="form-input picker-value">
+          {{typeOptions[typeIndex].label}}
+          <text class="picker-arrow">▾</text>
+        </view>
+      </picker>
+    </view>
+
+    <view class="form-row">
+      <view class="form-group flex1">
+        <view class="form-label">成人价(元) <text class="required">*</text></view>
+        <input class="form-input" type="digit" placeholder="158" value="{{form.price}}" bindinput="onInput" data-field="price" />
+      </view>
+      <view class="form-group flex1">
+        <view class="form-label">儿童价(元)</view>
+        <input class="form-input" type="digit" placeholder="0" value="{{form.childPrice}}" bindinput="onInput" data-field="childPrice" />
+      </view>
+    </view>
+
+    <view class="form-group">
+      <view class="form-label">每期名额</view>
+      <input class="form-input" type="number" placeholder="20" value="{{form.maxSlots}}" bindinput="onInput" data-field="maxSlots" />
+    </view>
+  </view>
+
+  <!-- 封面图片 -->
+  <view class="section">
+    <view class="section-title">🖼️ 封面图片 <text class="section-hint">（最多9张，第一张为封面）</text></view>
+
+    <view class="image-grid">
+      <view class="image-item" wx:for="{{form.images}}" wx:key="*this">
+        <image src="{{item}}" mode="aspectFill" class="preview-img" bindtap="previewImage" data-index="{{index}}" />
+        <view class="img-delete" catchtap="deleteImage" data-index="{{index}}">✕</view>
+      </view>
+      <view class="image-add" wx:if="{{form.images.length < 9}}" bindtap="chooseImage">
+        <view class="add-icon">+</view>
+        <view class="add-text">添加图片</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 亮点标签 -->
+  <view class="section">
+    <view class="section-title">✨ 亮点标签</view>
+
+    <!-- 已选标签 -->
+    <view class="tag-list" wx:if="{{form.highlights.length > 0}}">
+      <view class="tag-item" wx:for="{{form.highlights}}" wx:key="*this">
+        <text>{{item}}</text>
+        <view class="tag-remove" catchtap="removeHighlight" data-index="{{index}}">✕</view>
+      </view>
+    </view>
+
+    <!-- 预设标签 -->
+    <view class="preset-tags">
+      <view class="preset-label">预设标签（点击添加）：</view>
+      <view class="preset-list">
+        <view class="preset-tag {{item.added ? 'added' : ''}}"
+              wx:for="{{presetHighlights}}" wx:key="name"
+              catchtap="addPresetHighlight" data-index="{{index}}">
+          {{item.name}}
+        </view>
+      </view>
+    </view>
+
+    <!-- 自定义输入 -->
+    <view class="custom-input-row">
+      <input class="form-input flex1" placeholder="输入自定义亮点" value="{{customHighlight}}" bindinput="onInputCustomHighlight" />
+      <view class="btn-add-tag" bindtap="addCustomHighlight">添加</view>
+    </view>
+  </view>
+
+  <!-- 行程安排 -->
+  <view class="section">
+    <view class="section-title">📋 行程安排 <text class="section-hint">（时间线）</text></view>
+
+    <view class="itinerary-list">
+      <view class="itinerary-item" wx:for="{{form.itinerary}}" wx:key="index">
+        <view class="itinerary-index">{{index + 1}}</view>
+        <picker mode="time" value="{{item.time}}" bindchange="onItineraryTime" data-index="{{index}}">
+          <view class="itinerary-time-picker">
+            {{item.time || '选择时间'}}
+          </view>
+        </picker>
+        <input class="form-input itinerary-desc" placeholder="行程描述" value="{{item.desc}}" bindinput="onItineraryDesc" data-index="{{index}}" />
+        <view class="itinerary-delete" catchtap="deleteItinerary" data-index="{{index}}">✕</view>
+      </view>
+    </view>
+
+    <view class="btn-add-row" bindtap="addItinerary">
+      <text class="add-icon-sm">+</text> 添加行程
+    </view>
+  </view>
+
+  <!-- 费用包含 -->
+  <view class="section">
+    <view class="section-title">✅ 费用包含</view>
+
+    <view class="list-editor">
+      <view class="list-item" wx:for="{{form.includes}}" wx:key="index">
+        <view class="list-index">{{index + 1}}</view>
+        <input class="form-input flex1" placeholder="如：往返车费" value="{{item}}" bindinput="onIncludeInput" data-index="{{index}}" />
+        <view class="list-delete" catchtap="deleteInclude" data-index="{{index}}">✕</view>
+      </view>
+    </view>
+
+    <view class="btn-add-row" bindtap="addInclude">
+      <text class="add-icon-sm">+</text> 添加包含项
+    </view>
+  </view>
+
+  <!-- 费用不含 -->
+  <view class="section">
+    <view class="section-title">❌ 费用不含</view>
+
+    <view class="list-editor">
+      <view class="list-item" wx:for="{{form.excludes}}" wx:key="index">
+        <view class="list-index">{{index + 1}}</view>
+        <input class="form-input flex1" placeholder="如：个人消费" value="{{item}}" bindinput="onExcludeInput" data-index="{{index}}" />
+        <view class="list-delete" catchtap="deleteExclude" data-index="{{index}}">✕</view>
+      </view>
+    </view>
+
+    <view class="btn-add-row" bindtap="addExclude">
+      <text class="add-icon-sm">+</text> 添加不含项
+    </view>
+  </view>
+
+  <!-- 出行须知 -->
+  <view class="section">
+    <view class="section-title">📝 出行须知</view>
+    <textarea class="form-textarea" placeholder="填写出行注意事项，如天气、着装、安全提示等..."
+              value="{{form.notes}}" bindinput="onInput" data-field="notes" maxlength="1000" />
+    <view class="char-count">{{form.notes.length}}/1000</view>
+  </view>
+
+  <!-- 底部占位 -->
+  <view style="height: 160rpx;"></view>
+
+  <!-- 底部保存按钮 -->
+  <view class="bottom-bar">
+    <view class="btn-save {{saving ? 'disabled' : ''}}" bindtap="saveActivity">
+      {{saving ? '保存中...' : '保存活动'}}
+    </view>
+  </view>
+</view>
