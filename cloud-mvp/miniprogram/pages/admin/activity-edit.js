@@ -28,18 +28,24 @@ Page({
       itinerary: [],
       includes: [],
       excludes: [],
-      notes: ''
+      notes: '',
+      merchantId: ''
     },
     typeOptions: TYPE_OPTIONS,
     typeIndex: 0,
     presetHighlights: [],
     customHighlight: '',
+    merchants: [],
+    merchantIndex: 0,
+    selectedMerchant: {},
     saving: false
   },
 
   onLoad(options) {
     // 初始化预设标签状态
     this.refreshPresetTags([])
+    // 加载门店列表
+    this.loadMerchants()
 
     if (options.id) {
       this.setData({ editId: options.id })
@@ -70,7 +76,8 @@ Page({
         itinerary: a.itinerary || [],
         includes: a.includes || [],
         excludes: a.excludes || [],
-        notes: a.notes || ''
+        notes: a.notes || '',
+        merchantId: a.merchantId || ''
       }
 
       // 如果有 coverImage 且 images 为空，迁移旧数据
@@ -83,12 +90,54 @@ Page({
         typeIndex: typeIndex >= 0 ? typeIndex : 0
       })
       this.refreshPresetTags(form.highlights)
+      // 设置门店选中状态
+      this.matchMerchant(form.merchantId)
       wx.hideLoading()
     }).catch(err => {
       wx.hideLoading()
       console.error('加载活动失败:', err)
       wx.showToast({ title: '加载失败', icon: 'none' })
       setTimeout(() => wx.navigateBack(), 1500)
+    })
+  },
+
+  // ===== 门店/集合地点 =====
+
+  loadMerchants() {
+    const db = wx.cloud.database()
+    db.collection('merchants').limit(10).get().then(res => {
+      const merchants = res.data || []
+      this.setData({ merchants })
+      // 新建模式：只有一个门店时自动选中
+      if (!this.data.editId && merchants.length > 0) {
+        this.setData({
+          merchantIndex: 0,
+          selectedMerchant: merchants[0],
+          'form.merchantId': merchants[0]._id
+        })
+      }
+    }).catch(err => {
+      console.error('加载门店失败:', err)
+    })
+  },
+
+  matchMerchant(merchantId) {
+    if (!merchantId || this.data.merchants.length === 0) return
+    const idx = this.data.merchants.findIndex(m => m._id === merchantId)
+    if (idx >= 0) {
+      this.setData({
+        merchantIndex: idx,
+        selectedMerchant: this.data.merchants[idx]
+      })
+    }
+  },
+
+  onMerchantChange(e) {
+    const idx = e.detail.value
+    this.setData({
+      merchantIndex: idx,
+      selectedMerchant: this.data.merchants[idx],
+      'form.merchantId': this.data.merchants[idx]._id
     })
   },
 
@@ -313,14 +362,15 @@ Page({
       itinerary: form.itinerary.filter(item => item.time || item.desc),
       includes: form.includes.filter(item => item.trim()),
       excludes: form.excludes.filter(item => item.trim()),
-      notes: form.notes
+      notes: form.notes,
+      merchantId: form.merchantId || ''
     }
 
     console.log('[activity-edit] 保存数据:', JSON.stringify(data, null, 2))
 
     // 统一走云函数（确保权限校验 + 数据完整性）
     const action = editId ? 'update' : 'create'
-    const callData = editId ? { id: editId, ...data } : { ...data, merchantId: '' }
+    const callData = editId ? { id: editId, ...data } : data
 
     wx.cloud.callFunction({
       name: 'activities',

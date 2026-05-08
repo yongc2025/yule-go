@@ -342,6 +342,49 @@
   color: #2D6A4F;
 }
 
+/* 门店信息 */
+.merchant-info {
+  background: #f9f9f9;
+  border-radius: 12rpx;
+  padding: 20rpx;
+}
+
+.merchant-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8rpx 0;
+}
+
+.merchant-row + .merchant-row {
+  border-top: 1rpx solid #f0f0f0;
+  margin-top: 8rpx;
+  padding-top: 12rpx;
+}
+
+.merchant-label {
+  font-size: 24rpx;
+  color: #999;
+  flex-shrink: 0;
+}
+
+.merchant-value {
+  font-size: 26rpx;
+  color: #333;
+  text-align: right;
+  margin-left: 20rpx;
+}
+
+.merchant-empty {
+  padding: 20rpx;
+  text-align: center;
+}
+
+.empty-hint {
+  font-size: 24rpx;
+  color: #bbb;
+}
+
 /* 底部保存栏 */
 .bottom-bar {
   position: fixed;
