@@ -66,6 +66,12 @@
       <text class="menu-text">店主管理</text>
       <text class="menu-arrow">→</text>
     </view>
+    <view class="menu-item" bindtap="goInvite">
+      <text class="menu-icon">🎁</text>
+      <text class="menu-text">邀请好友</text>
+      <view class="menu-tag">赚¥20</view>
+      <text class="menu-arrow">→</text>
+    </view>
     <view class="menu-item" bindtap="goOrders">
       <text class="menu-icon">📋</text>
       <text class="menu-text">我的订单</text>

@@ -110,6 +110,11 @@ Page({
     wx.navigateTo({ url: `/pages/member/recharge?merchantId=${merchantId}` })
   },
 
+  // 邀请好友
+  goInvite() {
+    wx.navigateTo({ url: '/pages/invite/invite' })
+  },
+
   // 跳转订单页
   goOrders() {
     wx.switchTab({ url: '/pages/orders/orders' })

@@ -235,6 +235,16 @@
   font-size: 28rpx;
 }
 
+.menu-tag {
+  background: linear-gradient(135deg, #E76F51, #F4845F);
+  color: #fff;
+  font-size: 20rpx;
+  padding: 4rpx 12rpx;
+  border-radius: 999rpx;
+  margin-right: 12rpx;
+  font-weight: 600;
+}
+
 .empty-sub {
   color: #999;
   font-size: 26rpx;
