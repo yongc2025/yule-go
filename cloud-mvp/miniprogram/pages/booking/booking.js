@@ -125,12 +125,16 @@ Page({
     }).catch(() => null)
 
     Promise.all([couponPromise, discountPromise]).then(([coupons, d]) => {
+      console.log('[DEBUG] coupons count:', coupons.length)
+      console.log('[DEBUG] calcDiscount result:', JSON.stringify(d))
+      console.log('[DEBUG] selectedCoupon:', JSON.stringify(this.data.selectedCoupon))
       const update = {}
       // 优先用 coupons 云函数的列表（更可靠）
       if (coupons.length > 0) {
         update.availableCoupons = coupons
       }
       if (d) {
+        console.log('[DEBUG] couponDiscount from server:', d.couponDiscount)
         update.originalFee = d.originalFee
         update.companionDiscount = d.companionDiscount
         update.companionRule = d.companionRule
@@ -147,6 +151,12 @@ Page({
         // 如果 orders 也返回了券列表且 coupons 没有，用 orders 的
         if (coupons.length === 0 && d.availableCoupons) {
           update.availableCoupons = d.availableCoupons
+        }
+      } else {
+        console.log('[DEBUG] calcDiscount returned null, using local coupon amount')
+        // 降级：直接用选中券的金额
+        if (this.data.selectedCoupon) {
+          update.couponDiscount = this.data.selectedCoupon.amount || 0
         }
       }
       this.setData(update)
@@ -172,6 +182,7 @@ Page({
   // 选择优惠券
   selectCoupon(e) {
     const coupon = e.currentTarget.dataset.coupon
+    console.log('[DEBUG] selectCoupon:', JSON.stringify(coupon))
     const current = this.data.selectedCoupon
     // 点击已选中的券则取消选择
     if (current && current._id === coupon._id) {
