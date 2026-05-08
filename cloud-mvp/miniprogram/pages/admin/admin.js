@@ -145,13 +145,18 @@ Page({
   goCheckin() {
     wx.scanCode({
       onlyFromCamera: false,
+      scanType: ['barCode', 'qrCode'],
       success: (res) => {
-        const code = res.result
+        console.log('[scanCode] result:', res.result, 'type:', typeof res.result)
+        const code = String(res.result || '').trim()
         if (code) {
           this._doCheckin(code)
+        } else {
+          wx.showToast({ title: '未识别到内容', icon: 'none' })
         }
       },
-      fail: () => {
+      fail: (err) => {
+        console.warn('[scanCode] fail:', err)
         wx.showToast({ title: '扫码取消', icon: 'none' })
       }
     })
@@ -165,8 +170,8 @@ Page({
   // 手动核销
   manualCheckin() {
     const code = this.data.checkinCode.trim()
-    if (!code || code.length !== 6) {
-      wx.showToast({ title: '请输入6位核销码', icon: 'none' })
+    if (!code) {
+      wx.showToast({ title: '请输入核销码', icon: 'none' })
       return
     }
     this._doCheckin(code)
@@ -174,6 +179,10 @@ Page({
 
   // 执行核销
   _doCheckin(checkinCode) {
+    // 确保核销码是字符串
+    checkinCode = String(checkinCode).trim()
+    console.log('[_doCheckin] checkinCode:', checkinCode, 'length:', checkinCode.length)
+
     wx.showLoading({ title: '核销中...' })
 
     if (wx.cloud) {

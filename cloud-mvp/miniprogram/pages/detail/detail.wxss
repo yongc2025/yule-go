@@ -137,6 +137,11 @@
   color: #999;
 }
 
+.schedule-item.full .schedule-slots {
+  color: #e74c3c;
+  font-weight: 600;
+}
+
 /* 出行须知 */
 .notes-text {
   font-size: 26rpx;
@@ -215,6 +220,12 @@
 
 .btn-bottom {
   padding: 20rpx 80rpx;
+}
+
+.btn-disabled {
+  background: #ccc !important;
+  color: #999 !important;
+  pointer-events: none;
 }
 
 .empty-sub {

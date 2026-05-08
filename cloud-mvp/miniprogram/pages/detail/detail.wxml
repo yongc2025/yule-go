@@ -116,8 +116,8 @@
       <text class="price">¥{{activity.price}}</text>
       <text class="price-unit">/人</text>
     </view>
-    <view class="btn-primary btn-bottom" bindtap="goBooking">
-      立即报名
+    <view class="btn-primary btn-bottom {{allFull ? 'btn-disabled' : ''}}" bindtap="goBooking">
+      {{allFull ? '已满' : '立即报名'}}
     </view>
   </view>
 </view>

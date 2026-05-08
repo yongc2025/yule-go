@@ -90,8 +90,8 @@ Page({
         canvas.height = size * dpr
         ctx.scale(dpr, dpr)
 
-        // 绘制二维码
-        qr.drawQRToCtx(ctx, order.checkinCode, 0, 0, 3, '#2D6A4F', '#FFFFFF', size)
+        // 绘制二维码（确保传入字符串）
+        qr.drawQRToCtx(ctx, String(order.checkinCode), 0, 0, 3, '#2D6A4F', '#FFFFFF', size)
 
         // 导出为图片
         wx.canvasToTempFilePath({
@@ -217,7 +217,7 @@ Page({
         canvas.height = size * dpr
         ctx.scale(dpr, dpr)
 
-        qr.drawQRToCtx(ctx, text, 0, 0, 6, '#2D6A4F', '#FFFFFF', size)
+        qr.drawQRToCtx(ctx, String(text), 0, 0, 6, '#2D6A4F', '#FFFFFF', size)
 
         wx.canvasToTempFilePath({
           canvas: canvas,

@@ -6,7 +6,8 @@ Page({
     shopInfo: {},
     schedules: [],
     selectedSchedule: null,
-    loading: true
+    loading: true,
+    allFull: false
   },
 
   onLoad(options) {
@@ -66,7 +67,9 @@ Page({
           slotsLeft: (item.maxSlots || 0) - (item.bookedSlots || 0),
           selected: false
         }))
-        this.setData({ schedules })
+        // 判断是否所有档期都已满
+        const allFull = schedules.length > 0 && schedules.every(s => s.slotsLeft <= 0)
+        this.setData({ schedules, allFull })
       })
   },
 
@@ -109,6 +112,10 @@ Page({
 
   // 跳转预约
   goBooking() {
+    if (this.data.allFull) {
+      wx.showToast({ title: '所有档期已满', icon: 'none' })
+      return
+    }
     if (!this.data.selectedSchedule) {
       wx.showToast({ title: '请先选择档期', icon: 'none' })
       return
