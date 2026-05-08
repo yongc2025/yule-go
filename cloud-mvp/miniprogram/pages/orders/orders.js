@@ -136,20 +136,43 @@ Page({
     }
   },
 
-  // 取消订单
+  // 取消/退款订单
   cancelOrder(e) {
     const id = e.currentTarget.dataset.id
+    const status = e.currentTarget.dataset.status
+    const order = this.data.orders.find(o => o._id === id)
+
+    const isRefund = status === 'paid'
+    const title = isRefund ? '申请退款' : '确认取消'
+    const content = isRefund
+      ? `确定要取消并退款吗？\n退款金额：¥${order ? order.totalFee : ''}\n退款将原路返回微信钱包`
+      : '确定要取消这个订单吗？'
+
     wx.showModal({
-      title: '确认取消',
-      content: '确定要取消这个订单吗？',
+      title,
+      content,
+      confirmColor: '#e74c3c',
       success: (res) => {
         if (res.confirm) {
+          wx.showLoading({ title: isRefund ? '退款中...' : '取消中...' })
           api.call('orders', {
             action: 'cancel',
             orderId: id
-          }).then(() => {
-            wx.showToast({ title: '已取消', icon: 'success' })
+          }).then(data => {
+            wx.hideLoading()
+            if (isRefund && data.refundAmount > 0) {
+              wx.showModal({
+                title: '✅ 退款成功',
+                content: `退款金额：¥${data.refundAmount}\n退款将原路返回微信钱包`,
+                showCancel: false
+              })
+            } else {
+              wx.showToast({ title: '已取消', icon: 'success' })
+            }
             this.loadOrders()
+          }).catch(err => {
+            wx.hideLoading()
+            wx.showToast({ title: err.message || '操作失败', icon: 'none' })
           })
         }
       }

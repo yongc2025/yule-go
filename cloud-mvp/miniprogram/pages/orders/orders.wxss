@@ -80,6 +80,16 @@
   color: #fa541c;
 }
 
+.status-refunded {
+  color: #999;
+}
+
+.order-amount .refund-amount {
+  font-size: 24rpx;
+  color: #999;
+  margin-left: 8rpx;
+}
+
 .order-body {
   padding: 24rpx;
 }
@@ -228,6 +238,11 @@
   border-radius: 8rpx;
   font-size: 26rpx;
   color: #666;
+}
+
+.btn-refund {
+  border-color: #e74c3c;
+  color: #e74c3c;
 }
 
 .btn-primary-sm {

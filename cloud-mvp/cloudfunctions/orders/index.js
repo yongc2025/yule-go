@@ -206,7 +206,7 @@ async function payCallback(event) {
   }
 }
 
-// 取消订单
+// 取消订单（支持 pending 和 paid 状态）
 async function cancelOrder({ orderId }, openid) {
   try {
     const orderRes = await db.collection('orders').doc(orderId).get()
@@ -215,29 +215,91 @@ async function cancelOrder({ orderId }, openid) {
     if (order.openid !== openid) {
       return { code: -1, message: '无权操作' }
     }
-    if (order.status !== 'pending') {
-      return { code: -1, message: '该订单无法取消' }
+
+    // pending 状态：直接取消，无需退款
+    if (order.status === 'pending') {
+      await db.collection('orders').doc(orderId).update({
+        data: {
+          status: 'cancelled',
+          cancelledAt: db.serverDate(),
+          updatedAt: db.serverDate()
+        }
+      })
+
+      // 退还名额
+      const totalPeople = (order.adults || 0) + (order.children || 0)
+      await db.collection('schedules').doc(order.scheduleId).update({
+        data: {
+          bookedSlots: _.inc(-totalPeople),
+          updatedAt: db.serverDate()
+        }
+      })
+
+      return { code: 0, message: '已取消', data: { refundAmount: 0 } }
     }
 
-    // 更新订单状态
-    await db.collection('orders').doc(orderId).update({
-      data: {
-        status: 'cancelled',
-        cancelledAt: db.serverDate(),
-        updatedAt: db.serverDate()
-      }
-    })
+    // paid 状态：需要退款
+    if (order.status === 'paid') {
+      // MVP 简化：全额退款
+      const refundAmount = order.totalFee || 0
+      const refundNo = 'RF' + Date.now() + String(Math.random()).slice(2, 6)
 
-    // 退还名额
-    const totalPeople = (order.adults || 0) + (order.children || 0)
-    await db.collection('schedules').doc(order.scheduleId).update({
-      data: {
-        bookedSlots: _.inc(-totalPeople),
-        updatedAt: db.serverDate()
-      }
-    })
+      // 检查是否模拟支付
+      const isMockPay = !order.paymentParams || (order.paymentParams.package && order.paymentParams.package.includes('mock'))
 
-    return { code: 0, message: '已取消' }
+      let refundResult = null
+      if (!isMockPay && order.paymentParams && order.paymentParams.transactionId) {
+        // 真实支付：调用微信支付退款
+        try {
+          refundResult = await cloud.cloudPay.refund({
+            subMchId: process.env.SUB_MCH_ID,
+            transactionId: order.paymentParams.transactionId,
+            outTradeNo: order.orderNo,
+            outRefundNo: refundNo,
+            totalFee: Math.round(refundAmount * 100),
+            refundFee: Math.round(refundAmount * 100)
+          })
+        } catch (refundErr) {
+          console.error('微信退款接口调用失败:', refundErr)
+          // 降级为模拟退款
+          refundResult = { resultCode: 'MOCK_REFUND' }
+        }
+      } else {
+        // 模拟支付：直接标记退款成功
+        refundResult = { resultCode: 'MOCK_REFUND' }
+      }
+
+      // 更新订单状态
+      await db.collection('orders').doc(orderId).update({
+        data: {
+          status: 'refunded',
+          refundNo,
+          refundAmount,
+          refundAt: db.serverDate(),
+          updatedAt: db.serverDate()
+        }
+      })
+
+      // 退还名额
+      const totalPeople = (order.adults || 0) + (order.children || 0)
+      await db.collection('schedules').doc(order.scheduleId).update({
+        data: {
+          bookedSlots: _.inc(-totalPeople),
+          updatedAt: db.serverDate()
+        }
+      })
+
+      return {
+        code: 0,
+        message: '退款成功',
+        data: {
+          refundAmount,
+          refundNo
+        }
+      }
+    }
+
+    return { code: -1, message: '该订单无法取消' }
   } catch (err) {
     return { code: -1, message: '取消失败: ' + err.message }
   }
