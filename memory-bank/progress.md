@@ -433,6 +433,14 @@
 - 验证：代码结构完整，待部署验证
 - 踩坑：无
 
+### 2026-05-08 — Bug fix: orders createOrder 余额变量未定义
+- 做了什么：
+  - `cloudfunctions/orders/index.js` → `createOrder` 中 `userBalance` 变量未定义就引用
+  - 当用户开启余额抵扣时会报错
+  - 修复：在获取会员折扣时同时从 wallet 取出 `userBalance`
+- 验证：代码修复完成，待部署验证
+- 踩坑：`calcDiscountPreview` 里是正确的（取了 wallet），但 `createOrder` 漏了
+
 ### 2026-05-08 — Task 0042 ✅ 优惠券体系（cloud-mvp）
 - 做了什么：
   - 创建 coupons 云函数：list/available/grant/use/count 5 个 action

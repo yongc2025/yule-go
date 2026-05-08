@@ -82,11 +82,13 @@ async function createOrder({ activityId, scheduleId, adults, children, contactNa
     // 4. 计算同行优惠
     const companionDiscount = calcCompanionDiscount(totalPeople)
 
-    // 5. 获取会员折扣（travelDiscount 是每次出行立减金额）
+    // 5. 获取会员折扣（travelDiscount 是每次出行立减金额）+ 余额
     let memberDiscount = 0
+    let userBalance = 0
     const walletRes = await db.collection('user_wallets').where({ openid }).get()
     if (walletRes.data.length > 0) {
       const wallet = walletRes.data[0]
+      userBalance = wallet.balance || 0
       const MEMBER_LEVELS = [
         { level: 0, travelDiscount: 0 },
         { level: 1, travelDiscount: 10 },

@@ -56,27 +56,27 @@ const RECHARGE_TIERS = [
 ]
 
 exports.main = async (event, context) => {
-  const { action, data } = event
+  const { action } = event
   const wxContext = cloud.getWXContext()
   const openid = wxContext.OPENID
 
   switch (action) {
     case 'getWallet':
-      return await getWallet(openid, data.merchantId)
+      return await getWallet(openid, event.merchantId)
     case 'getWallets':
       return await getWallets(openid)
     case 'recharge':
-      return await recharge(openid, data)
+      return await recharge(openid, event)
     case 'rechargeList':
-      return await rechargeList(openid, data)
+      return await rechargeList(openid, event)
     case 'walletLogs':
-      return await walletLogs(openid, data)
+      return await walletLogs(openid, event)
     case 'getTiers':
       return { code: 0, data: RECHARGE_TIERS }
     case 'refundBalance':
-      return await refundBalance(openid, data)
+      return await refundBalance(openid, event)
     case 'adminRefund':
-      return await adminRefund(openid, data)
+      return await adminRefund(openid, event)
     default:
       return { code: -1, message: '未知操作' }
   }
