@@ -12,7 +12,8 @@
     "pages/admin/activity-edit",
     "pages/admin/shop-edit",
     "pages/admin/finance",
-    "pages/admin/schedules"
+    "pages/admin/schedules",
+    "pages/shop/detail"
   ],
   "window": {
     "backgroundTextStyle": "light",

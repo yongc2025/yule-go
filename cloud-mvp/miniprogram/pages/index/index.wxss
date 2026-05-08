@@ -12,17 +12,6 @@
   position: relative;
 }
 
-.admin-btn {
-  position: absolute;
-  top: 24rpx;
-  right: 24rpx;
-  background: rgba(255,255,255,0.2);
-  padding: 8rpx 20rpx;
-  border-radius: 24rpx;
-  font-size: 24rpx;
-  color: #fff;
-}
-
 .shop-info {
   display: flex;
   align-items: center;
@@ -39,6 +28,13 @@
 
 .shop-text {
   flex: 1;
+}
+
+.shop-arrow {
+  font-size: 48rpx;
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 300;
+  margin-left: 12rpx;
 }
 
 .shop-name {

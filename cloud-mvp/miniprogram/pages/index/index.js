@@ -23,14 +23,10 @@ Page({
     activities: [],
     loading: true,
     weekOffset: 0, // 0=本周, 1=下周, -1=上周
-    weekLabel: '本周',
-    isAdmin: false
+    weekLabel: '本周'
   },
 
   onShow() {
-    // 检查管理员身份
-    const app = getApp()
-    this.setData({ isAdmin: app.globalData.isAdmin })
     this.loadShopInfo()
     this.loadActivities()
   },
@@ -142,9 +138,9 @@ Page({
     })
   },
 
-  // 跳转管理页
-  goAdmin() {
-    wx.navigateTo({ url: '/pages/admin/admin' })
+  // 跳转店铺详情
+  goShopDetail() {
+    wx.navigateTo({ url: '/pages/shop/detail' })
   },
 
   // 导航到门店

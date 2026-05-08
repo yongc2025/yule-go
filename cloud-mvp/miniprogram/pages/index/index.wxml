@@ -3,15 +3,14 @@
 
 <view class="page">
   <!-- 门店头部 -->
-  <view class="shop-header">
-    <!-- 管理入口（仅管理员可见，右上角） -->
-    <view class="admin-btn" wx:if="{{isAdmin}}" bindtap="goAdmin">🔧 管理</view>
+  <view class="shop-header" bindtap="goShopDetail">
     <view class="shop-info">
       <image class="shop-avatar" src="{{shopInfo.ownerAvatar || '/images/default-avatar.png'}}" mode="aspectFill" />
       <view class="shop-text">
         <view class="shop-name">{{shopInfo.name || '渔乐出行'}}</view>
         <view class="shop-slogan">{{shopInfo.slogan || '周末去哪？跟我走！'}}</view>
       </view>
+      <view class="shop-arrow">›</view>
     </view>
     <view class="shop-tags">
       <view class="tag tag-white">⭐ {{shopInfo.rating || '5.0'}}分</view>
@@ -33,10 +32,10 @@
       </view>
     </view>
 
-    <!-- 操作按钮 -->
+    <!-- 操作按钮（catchtap 阻止冒泡到头部） -->
     <view class="shop-actions">
-      <view class="action-btn" bindtap="openNavigation">🧭 导航</view>
-      <view class="action-btn" bindtap="callShop">📞 拨打</view>
+      <view class="action-btn" catchtap="openNavigation">🧭 导航</view>
+      <view class="action-btn" catchtap="callShop">📞 拨打</view>
     </view>
   </view>
 

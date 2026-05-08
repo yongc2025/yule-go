@@ -1,0 +1,280 @@
+/* pages/shop/detail.wxss */
+
+.page {
+  padding-bottom: 0;
+}
+
+/* 封面轮播 */
+.cover-swiper {
+  width: 100%;
+  height: 400rpx;
+}
+
+.cover-single {
+  width: 100%;
+  height: 400rpx;
+}
+
+.cover-img {
+  width: 100%;
+  height: 100%;
+}
+
+/* 卡片 */
+.card {
+  background: #fff;
+  margin: 24rpx;
+  border-radius: 16rpx;
+  padding: 32rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.05);
+}
+
+/* 店铺基本信息 */
+.shop-basic {
+  text-align: center;
+  margin-top: -40rpx;
+  position: relative;
+  z-index: 1;
+}
+
+.shop-name {
+  font-size: 40rpx;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 8rpx;
+}
+
+.shop-slogan {
+  font-size: 26rpx;
+  color: #888;
+  margin-bottom: 24rpx;
+}
+
+.shop-stats {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 32rpx;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.stat-value {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #2D6A4F;
+}
+
+.stat-label {
+  font-size: 22rpx;
+  color: #999;
+  margin-top: 4rpx;
+}
+
+.stat-divider {
+  width: 1rpx;
+  height: 48rpx;
+  background: #eee;
+}
+
+/* 标签 */
+.section-title {
+  font-size: 30rpx;
+  font-weight: 600;
+  margin-bottom: 20rpx;
+}
+
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+}
+
+.tag-green {
+  background: #E8F5E9;
+  color: #2D6A4F;
+  font-size: 24rpx;
+  padding: 8rpx 24rpx;
+  border-radius: 999rpx;
+}
+
+/* 老板信息 */
+.owner-card {
+  padding: 24rpx 32rpx;
+}
+
+.owner-row {
+  display: flex;
+  align-items: center;
+}
+
+.owner-avatar {
+  width: 88rpx;
+  height: 88rpx;
+  border-radius: 50%;
+  margin-right: 24rpx;
+  border: 3rpx solid #E8F5E9;
+}
+
+.owner-info {
+  flex: 1;
+}
+
+.owner-name {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.owner-title {
+  font-size: 24rpx;
+  color: #2D6A4F;
+  margin-top: 4rpx;
+}
+
+/* 门店信息列表 */
+.info-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+
+.info-row {
+  display: flex;
+  align-items: flex-start;
+}
+
+.info-label {
+  font-size: 26rpx;
+  color: #999;
+  width: 80rpx;
+  flex-shrink: 0;
+}
+
+.info-value {
+  font-size: 26rpx;
+  color: #333;
+  flex: 1;
+}
+
+/* 相册网格 */
+.image-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12rpx;
+}
+
+.grid-img {
+  width: 100%;
+  height: 200rpx;
+  border-radius: 12rpx;
+}
+
+/* 活动列表 */
+.activity-mini {
+  display: flex;
+  align-items: center;
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid #f5f5f5;
+}
+
+.activity-mini:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.activity-thumb {
+  width: 120rpx;
+  height: 90rpx;
+  border-radius: 10rpx;
+  margin-right: 20rpx;
+  flex-shrink: 0;
+}
+
+.activity-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.activity-name {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 6rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.activity-meta {
+  font-size: 24rpx;
+  color: #888;
+  display: flex;
+  gap: 16rpx;
+}
+
+.slots-warning {
+  color: #E76F51;
+  font-weight: 600;
+}
+
+.activity-price {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #E76F51;
+  flex-shrink: 0;
+  margin-left: 16rpx;
+}
+
+.price-unit {
+  font-size: 20rpx;
+  font-weight: 400;
+  color: #999;
+}
+
+/* 底部操作栏 */
+.bottom-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #fff;
+  padding: 16rpx 32rpx;
+  padding-bottom: calc(16rpx + env(safe-area-inset-bottom));
+  display: flex;
+  gap: 20rpx;
+  box-shadow: 0 -4rpx 16rpx rgba(0, 0, 0, 0.06);
+}
+
+.btn-secondary {
+  flex: 1;
+  text-align: center;
+  padding: 24rpx 0;
+  border-radius: 999rpx;
+  font-size: 28rpx;
+  font-weight: 600;
+  background: #f5f5f5;
+  color: #333;
+}
+
+.btn-primary {
+  flex: 2;
+  text-align: center;
+  padding: 24rpx 0;
+  border-radius: 999rpx;
+  font-size: 28rpx;
+  font-weight: 600;
+  background: linear-gradient(135deg, #2D6A4F, #40916C);
+  color: #fff;
+}
+
+.loading {
+  text-align: center;
+  padding: 120rpx 0;
+  color: #999;
+  font-size: 28rpx;
+}

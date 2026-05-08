@@ -1,0 +1,115 @@
+<!--pages/shop/detail.wxml-->
+<!--店铺详情页 — 用户端只读展示-->
+
+<view class="page" wx:if="{{shop}}">
+  <!-- 封面图轮播 -->
+  <swiper class="cover-swiper" indicator-dots autoplay circular
+          wx:if="{{shop.images && shop.images.length > 0}}">
+    <swiper-item wx:for="{{shop.images}}" wx:key="*this">
+      <image src="{{item}}" mode="aspectFill" class="cover-img" />
+    </swiper-item>
+  </swiper>
+  <view class="cover-single" wx:elif="{{shop.coverImage}}">
+    <image src="{{shop.coverImage}}" mode="aspectFill" class="cover-img" />
+  </view>
+
+  <!-- 店铺基本信息 -->
+  <view class="card shop-basic">
+    <view class="shop-name">{{shop.name}}</view>
+    <view class="shop-slogan" wx:if="{{shop.slogan}}">{{shop.slogan}}</view>
+    <view class="shop-stats">
+      <view class="stat-item">
+        <text class="stat-value">⭐ {{shop.rating || '5.0'}}</text>
+        <text class="stat-label">评分</text>
+      </view>
+      <view class="stat-divider"></view>
+      <view class="stat-item">
+        <text class="stat-value">{{shop.serviceCount || 0}}</text>
+        <text class="stat-label">已服务</text>
+      </view>
+      <view class="stat-divider"></view>
+      <view class="stat-item" wx:if="{{shop.ratingCount}}">
+        <text class="stat-value">{{shop.ratingCount}}</text>
+        <text class="stat-label">评价</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 特色标签 -->
+  <view class="card" wx:if="{{shop.tags && shop.tags.length > 0}}">
+    <view class="section-title">🏷️ 店铺特色</view>
+    <view class="tag-list">
+      <view class="tag tag-green" wx:for="{{shop.tags}}" wx:key="*this">{{item}}</view>
+    </view>
+  </view>
+
+  <!-- 老板信息 -->
+  <view class="card owner-card" wx:if="{{shop.ownerName}}">
+    <view class="owner-row">
+      <image class="owner-avatar" src="{{shop.ownerAvatar || '/images/default-avatar.png'}}" mode="aspectFill" />
+      <view class="owner-info">
+        <view class="owner-name">{{shop.ownerName}}</view>
+        <view class="owner-title" wx:if="{{shop.ownerTitle}}">{{shop.ownerTitle}}</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 门店信息 -->
+  <view class="card">
+    <view class="section-title">📍 门店信息</view>
+    <view class="info-list">
+      <view class="info-row" wx:if="{{shop.address}}">
+        <text class="info-label">地址</text>
+        <text class="info-value">{{shop.address}}</text>
+      </view>
+      <view class="info-row" wx:if="{{shop.phone}}">
+        <text class="info-label">电话</text>
+        <text class="info-value">{{shop.phone}}</text>
+      </view>
+      <view class="info-row" wx:if="{{shop.businessHours}}">
+        <text class="info-label">营业</text>
+        <text class="info-value">{{shop.businessHours}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 店铺相册 -->
+  <view class="card" wx:if="{{shop.images && shop.images.length > 0}}">
+    <view class="section-title">🖼️ 店铺相册</view>
+    <view class="image-grid">
+      <image wx:for="{{shop.images}}" wx:key="*this" src="{{item}}" mode="aspectFill"
+             class="grid-img" bindtap="previewImage" data-index="{{index}}" />
+    </view>
+  </view>
+
+  <!-- 本周活动 -->
+  <view class="card" wx:if="{{activities.length > 0}}">
+    <view class="section-title">🎣 本周活动</view>
+    <view class="activity-mini" wx:for="{{activities}}" wx:key="scheduleId"
+          bindtap="goDetail" data-id="{{item._id}}" data-scheduleid="{{item.scheduleId}}">
+      <image class="activity-thumb" src="{{item.coverImage || '/images/default-cover.png'}}" mode="aspectFill" />
+      <view class="activity-info">
+        <view class="activity-name">{{item.name}}</view>
+        <view class="activity-meta">
+          <text>📅 {{item.dateFormatted}}</text>
+          <text class="{{item.slotsLeft <= 3 ? 'slots-warning' : ''}}">
+            {{item.slotsLeft <= 0 ? '已满' : '余' + item.slotsLeft + '位'}}
+          </text>
+        </view>
+      </view>
+      <view class="activity-price">¥{{item.price}}<text class="price-unit">/人</text></view>
+    </view>
+  </view>
+
+  <!-- 底部占位 -->
+  <view style="height: 140rpx;"></view>
+
+  <!-- 底部操作栏 -->
+  <view class="bottom-bar">
+    <view class="btn-secondary" bindtap="callShop">📞 拨打</view>
+    <view class="btn-primary" bindtap="openNavigation">🧭 导航到店</view>
+  </view>
+</view>
+
+<!-- 加载中 -->
+<view class="loading" wx:if="{{loading}}">加载中...</view>
