@@ -70,7 +70,32 @@
     </view>
 
     <view class="merchant-empty" wx:if="{{merchants.length === 0}}">
-      <text class="empty-hint">暂无门店信息，请先在门店管理中添加</text>
+      <text class="empty-hint">暂无门店信息</text>
+      <view class="btn-quick-merchant" bindtap="showMerchantForm">+ 快捷创建门店</view>
+    </view>
+
+    <!-- 快捷创建门店表单 -->
+    <view class="merchant-form" wx:if="{{showMerchant}}">
+      <view class="form-group">
+        <view class="form-label">门店名称 <text class="required">*</text></view>
+        <input class="form-input" placeholder="如：渔乐渔具" value="{{merchantForm.name}}" bindinput="onMerchantInput" data-field="name" />
+      </view>
+      <view class="form-group">
+        <view class="form-label">门店地址</view>
+        <input class="form-input" placeholder="如：长沙市岳麓区枫林三路88号" value="{{merchantForm.address}}" bindinput="onMerchantInput" data-field="address" />
+      </view>
+      <view class="form-group">
+        <view class="form-label">联系电话</view>
+        <input class="form-input" type="number" placeholder="如：13800138000" value="{{merchantForm.phone}}" bindinput="onMerchantInput" data-field="phone" />
+      </view>
+      <view class="form-group">
+        <view class="form-label">门店口号</view>
+        <input class="form-input" placeholder="如：周末去哪？跟我走！" value="{{merchantForm.slogan}}" bindinput="onMerchantInput" data-field="slogan" />
+      </view>
+      <view class="merchant-form-actions">
+        <view class="btn-cancel-sm" bindtap="hideMerchantForm">取消</view>
+        <view class="btn-confirm-sm" bindtap="createMerchant">创建门店</view>
+      </view>
     </view>
   </view>
 

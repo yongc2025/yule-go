@@ -38,6 +38,8 @@ Page({
     merchants: [],
     merchantIndex: 0,
     selectedMerchant: {},
+    showMerchant: false,
+    merchantForm: { name: '', address: '', phone: '', slogan: '' },
     saving: false
   },
 
@@ -103,13 +105,20 @@ Page({
 
   // ===== 门店/集合地点 =====
 
-  loadMerchants() {
+  loadMerchants(selectId) {
     const db = wx.cloud.database()
     db.collection('merchants').limit(10).get().then(res => {
       const merchants = res.data || []
       this.setData({ merchants })
-      // 新建模式：只有一个门店时自动选中
-      if (!this.data.editId && merchants.length > 0) {
+      if (merchants.length === 0) return
+
+      // 编辑模式：匹配已有 merchantId
+      // 新建模式或指定 selectId：自动选中
+      const targetId = selectId || this.data.form.merchantId
+      if (targetId) {
+        this.matchMerchant(targetId)
+      } else if (!this.data.editId) {
+        // 新建且无 merchantId → 选第一个
         this.setData({
           merchantIndex: 0,
           selectedMerchant: merchants[0],
