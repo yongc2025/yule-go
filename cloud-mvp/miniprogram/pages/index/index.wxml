@@ -4,6 +4,8 @@
 <view class="page">
   <!-- 门店头部 -->
   <view class="shop-header">
+    <!-- 管理入口（仅管理员可见，右上角） -->
+    <view class="admin-btn" wx:if="{{isAdmin}}" bindtap="goAdmin">🔧 管理</view>
     <view class="shop-info">
       <image class="shop-avatar" src="{{shopInfo.ownerAvatar || '/images/default-avatar.png'}}" mode="aspectFill" />
       <view class="shop-text">
@@ -78,11 +80,6 @@
     <view class="empty-icon">🎣</view>
     <view>本周暂无活动安排</view>
     <view class="empty-sub">下来看看吧~</view>
-  </view>
-
-  <!-- 管理入口 -->
-  <view class="admin-entry" bindtap="goAdmin">
-    <text>🔧 店主管理</text>
   </view>
 
   <!-- 加载中 -->

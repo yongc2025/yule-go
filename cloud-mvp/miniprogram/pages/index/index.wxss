@@ -9,6 +9,18 @@
   background: linear-gradient(135deg, #2D6A4F, #40916C);
   padding: 40rpx 32rpx 32rpx;
   color: #fff;
+  position: relative;
+}
+
+.admin-btn {
+  position: absolute;
+  top: 24rpx;
+  right: 24rpx;
+  background: rgba(255,255,255,0.2);
+  padding: 8rpx 20rpx;
+  border-radius: 24rpx;
+  font-size: 24rpx;
+  color: #fff;
 }
 
 .shop-info {
@@ -183,16 +195,7 @@
 }
 
 /* 管理入口 */
-.admin-entry {
-  text-align: center;
-  padding: 24rpx;
-  margin: 24rpx;
-  background: #fff;
-  border-radius: 12rpx;
-  font-size: 26rpx;
-  color: #6B7280;
-  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
-}
+
 
 .empty-sub {
   font-size: 24rpx;

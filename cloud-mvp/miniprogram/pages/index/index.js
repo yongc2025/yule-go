@@ -23,10 +23,14 @@ Page({
     activities: [],
     loading: true,
     weekOffset: 0, // 0=本周, 1=下周, -1=上周
-    weekLabel: '本周'
+    weekLabel: '本周',
+    isAdmin: false
   },
 
   onShow() {
+    // 检查管理员身份
+    const app = getApp()
+    this.setData({ isAdmin: app.globalData.isAdmin })
     this.loadShopInfo()
     this.loadActivities()
   },
