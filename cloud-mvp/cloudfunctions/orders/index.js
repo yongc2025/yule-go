@@ -361,21 +361,21 @@ async function getOrderStats({ range, scheduleId }, openid) {
       const weekStart = new Date(now)
       weekStart.setDate(now.getDate() - (now.getDay() || 7) + 1)
       weekStart.setHours(0, 0, 0, 0)
-      startDate = weekStart.toISOString()
-      endDate = now.toISOString()
+      startDate = weekStart
+      endDate = now
     } else if (range === 'month') {
       const monthStart = new Date(now.getFullYear(), now.getMonth(), 1)
-      startDate = monthStart.toISOString()
-      endDate = now.toISOString()
+      startDate = monthStart
+      endDate = now
     } else {
       // 默认今日
-      const todayStart = new Date(now)
-      todayStart.setHours(0, 0, 0, 0)
-      startDate = todayStart.toISOString()
-      endDate = now.toISOString()
+      const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+      startDate = todayStart
+      endDate = now
     }
 
     // 查询时间范围内的所有订单
+    // createdAt 存的是 db.serverDate()，用 Date 对象查询
     let query = {
       createdAt: _.gte(startDate).and(_.lte(endDate))
     }
