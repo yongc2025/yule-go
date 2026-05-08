@@ -55,34 +55,36 @@ Page({
     const db = wx.cloud.database()
     const _ = db.command
     const now = new Date()
-    const todayStart = new Date(now)
-    todayStart.setHours(0, 0, 0, 0)
-    const todayEnd = new Date(now)
-    todayEnd.setHours(23, 59, 59, 999)
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+    const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999)
 
     // 今日订单数 + 营收
+    // createdAt 存的是 db.serverDate()，用 Date 对象查询
     db.collection('orders')
       .where({
-        createdAt: _.gte(todayStart.toISOString()).and(_.lte(todayEnd.toISOString())),
-        status: _.in(['paid', 'completed'])
+        createdAt: _.gte(todayStart).and(_.lte(todayEnd)),
+        status: _.in(['paid', 'completed', 'refunded'])
       })
       .get()
       .then(res => {
-        const todayOrders = res.data.length
-        const todayRevenue = res.data.reduce((sum, o) => sum + (o.totalFee || 0), 0)
+        const paidOrders = res.data.filter(o => o.status === 'paid' || o.status === 'completed')
+        const todayOrders = paidOrders.length
+        const todayRevenue = paidOrders.reduce((sum, o) => sum + (o.totalFee || 0), 0)
         this.setData({
           'stats.todayOrders': todayOrders,
           'stats.todayRevenue': todayRevenue
         })
       })
+      .catch(err => console.error('今日订单查询失败:', err))
 
-    // 待核销数
+    // 待核销数（已支付未核销）
     db.collection('orders')
       .where({ status: 'paid' })
       .count()
       .then(res => {
         this.setData({ 'stats.pendingCheckin': res.total })
       })
+      .catch(err => console.error('待核销查询失败:', err))
 
     // 本周团期
     const weekStart = new Date(now)
@@ -107,6 +109,7 @@ Page({
           })
         })
       })
+      .catch(err => console.error('团期查询失败:', err))
 
     // 最近 5 笔订单
     db.collection('orders')
@@ -124,6 +127,7 @@ Page({
         }))
         this.setData({ recentOrders })
       })
+      .catch(err => console.error('最近订单查询失败:', err))
   },
 
   // 跳转店铺设置
