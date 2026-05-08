@@ -722,20 +722,31 @@ async function calcDiscountPreview({ activityId, adults, children, couponId, use
     // 优惠券
     let couponDiscount = 0
     let couponInfo = null
+    console.log('[DEBUG calcDiscount] couponId:', couponId, 'type:', typeof couponId)
     if (couponId) {
-      const couponRes = await db.collection('coupons').doc(couponId).get()
-      const coupon = couponRes.data
-      if (coupon.openid === openid && coupon.status === 'unused') {
-        const now = new Date()
-        if (!coupon.expireAt || new Date(coupon.expireAt) >= now) {
-          couponDiscount = coupon.amount || 0
-          couponInfo = {
-            _id: coupon._id,
-            type: coupon.type,
-            amount: coupon.amount,
-            typeName: coupon.typeName || coupon.type
+      try {
+        const couponRes = await db.collection('coupons').doc(couponId).get()
+        const coupon = couponRes.data
+        console.log('[DEBUG calcDiscount] coupon found:', JSON.stringify({ _id: coupon._id, amount: coupon.amount, status: coupon.status, openid: coupon.openid, expireAt: coupon.expireAt }))
+        if (coupon.openid === openid && coupon.status === 'unused') {
+          const now = new Date()
+          if (!coupon.expireAt || new Date(coupon.expireAt) >= now) {
+            couponDiscount = coupon.amount || 0
+            console.log('[DEBUG calcDiscount] couponDiscount set to:', couponDiscount)
+            couponInfo = {
+              _id: coupon._id,
+              type: coupon.type,
+              amount: coupon.amount,
+              typeName: coupon.typeName || coupon.type
+            }
+          } else {
+            console.log('[DEBUG calcDiscount] coupon expired, expireAt:', coupon.expireAt)
           }
+        } else {
+          console.log('[DEBUG calcDiscount] coupon validation failed, openid match:', coupon.openid === openid, 'status:', coupon.status)
         }
+      } catch (couponErr) {
+        console.error('[DEBUG calcDiscount] coupon fetch error:', couponErr)
       }
     }
 
