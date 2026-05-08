@@ -16,7 +16,8 @@
     "pages/shop/detail",
     "pages/member/recharge",
     "pages/member/records",
-    "pages/coupons/list"
+    "pages/coupons/list",
+    "pages/invite/invite"
   ],
   "window": {
     "backgroundTextStyle": "light",
