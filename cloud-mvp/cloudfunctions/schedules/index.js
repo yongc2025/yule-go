@@ -12,15 +12,18 @@ exports.main = async (event, context) => {
   const wxContext = cloud.getWXContext()
   const openid = wxContext.OPENID
 
+  // 兼容：参数可能嵌套在 data 里，也可能平铺在 event 里
+  const params = data || event
+
   switch (action) {
     case 'update':
-      return await updateSchedule(data, openid)
+      return await updateSchedule(params, openid)
     case 'cancel':
-      return await cancelSchedule(data, openid)
+      return await cancelSchedule(params, openid)
     case 'detail':
-      return await getScheduleDetail(data)
+      return await getScheduleDetail(params)
     case 'changelog':
-      return await getChangelog(data, openid)
+      return await getChangelog(params, openid)
     default:
       return { code: -1, message: '未知操作' }
   }
