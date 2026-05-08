@@ -73,6 +73,11 @@ Page({
     this.setData({ selectedTier: id })
   },
 
+  // 跳转充值记录
+  goRecords() {
+    wx.navigateTo({ url: `/pages/member/records?merchantId=${this.data.merchantId}` })
+  },
+
   // 执行充值
   doRecharge() {
     if (!this.data.selectedTier) {

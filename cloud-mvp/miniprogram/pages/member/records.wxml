@@ -1,0 +1,46 @@
+<!--pages/member/records.wxml-->
+<!--充值记录 — 充值历史列表-->
+
+<view class="page">
+  <!-- 统计摘要 -->
+  <view class="summary" wx:if="{{total > 0}}">
+    <text class="summary-text">共 {{total}} 条充值记录</text>
+  </view>
+
+  <!-- 记录列表 -->
+  <view class="record-list" wx:if="{{list.length > 0}}">
+    <view class="record-item" wx:for="{{list}}" wx:key="_id">
+      <view class="record-left">
+        <view class="record-icon">{{item.levelName === '钻石' ? '💎' : item.levelName === '金卡' ? '🥇' : item.levelName === '银卡' ? '🥈' : '💰'}}</view>
+      </view>
+      <view class="record-center">
+        <view class="record-title">充值 ¥{{item.amount}} · {{item.levelName}}会员</view>
+        <view class="record-gifts" wx:if="{{item.gifts && item.gifts.length > 0}}">
+          <text class="gift-tag" wx:for="{{item.gifts}}" wx:for-item="gift" wx:key="*this">🎁 {{gift}}</text>
+        </view>
+        <view class="record-time">{{item.createdAt}}</view>
+      </view>
+      <view class="record-right">
+        <view class="record-amount">+¥{{item.amount}}</view>
+        <view class="record-status {{item.status === 'paid' ? 'status-paid' : 'status-refunded'}}">
+          {{item.status === 'paid' ? '已到账' : '已退款'}}
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty" wx:if="{{!loading && list.length === 0}}">
+    <text class="empty-icon">📭</text>
+    <text class="empty-text">暂无充值记录</text>
+    <view class="empty-btn" bindtap="goRecharge">去充值</view>
+  </view>
+
+  <!-- 加载状态 -->
+  <view class="loading-more" wx:if="{{loading}}">
+    <text>加载中...</text>
+  </view>
+  <view class="no-more" wx:if="{{noMore && list.length > 0}}">
+    <text>— 没有更多了 —</text>
+  </view>
+</view>

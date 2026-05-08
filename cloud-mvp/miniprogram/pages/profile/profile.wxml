@@ -44,7 +44,10 @@
           </view>
           <view class="shop-meta" wx:if="{{item.wallet.travelDiscount > 0}}">每次出行立减 ¥{{item.wallet.travelDiscount}}</view>
         </view>
-        <view class="btn-recharge-sm" catchtap="goRecharge" data-shopid="{{item._id}}">充值</view>
+        <view class="shop-actions">
+          <view class="btn-records-sm" catchtap="goRecords" data-shopid="{{item._id}}">记录</view>
+          <view class="btn-recharge-sm" catchtap="goRecharge" data-shopid="{{item._id}}">充值</view>
+        </view>
       </view>
     </view>
     <view class="empty-sub" wx:else>还没有去过任何门店~</view>

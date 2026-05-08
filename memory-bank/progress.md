@@ -433,6 +433,18 @@
 - 验证：代码结构完整，待部署验证
 - 踩坑：无
 
+### 2026-05-08 — Task 0041 ✅ 会员充值（cloud-mvp）
+- 做了什么：
+  - wallet 云函数已有 8 个 action（getWallet/getWallets/recharge/rechargeList/walletLogs/getTiers/refundBalance/adminRefund）
+  - 充值中心页面：三档充值卡片（银卡¥200/金卡¥500/钻石¥1000）+ 权益展示 + 钱包状态
+  - 充值记录页面（新增）：充值历史列表 + 下拉刷新 + 触底加载 + 空状态
+  - 我的页集成：每店余额/等级展示 + 充值入口 + 记录入口
+  - app.json 注册 records 路由，recharge/profile 页增加导航
+- 新增文件：4 个（records.js/wxml/wxss/json）
+- 修改文件：5 个（app.json + recharge.js/wxml/wxss + profile.js/wxml/wxss）
+- 验收标准：AC-01/02/04/05/06 ✅，AC-03 属于 0045 下单流程改造
+- 踩坑：无
+
 ### 2026-05-08 — Task 0039 ✅ 退款资金对账
 - 做了什么：
   - 扩展 `cloudfunctions/orders/index.js`：

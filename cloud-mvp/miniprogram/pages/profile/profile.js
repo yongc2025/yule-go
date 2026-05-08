@@ -84,6 +84,12 @@ Page({
     wx.navigateTo({ url: '/pages/profile/edit' })
   },
 
+  // 跳转充值记录
+  goRecords(e) {
+    const merchantId = e.currentTarget.dataset.shopid
+    wx.navigateTo({ url: `/pages/member/records?merchantId=${merchantId}` })
+  },
+
   // 跳转充值中心
   goRecharge(e) {
     const merchantId = e.currentTarget.dataset.shopid
