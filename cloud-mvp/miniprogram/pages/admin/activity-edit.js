@@ -300,7 +300,7 @@ Page({
     this.setData({ saving: true })
     wx.showLoading({ title: '保存中...' })
 
-    // 构建保存数据
+    // 构建保存数据（过滤空值）
     const data = {
       name: form.name.trim(),
       type: form.type,
@@ -316,45 +316,30 @@ Page({
       notes: form.notes
     }
 
-    const db = wx.cloud.database()
+    console.log('[activity-edit] 保存数据:', JSON.stringify(data, null, 2))
 
-    if (editId) {
-      // 更新
-      db.collection('activities').doc(editId).update({
-        data: { ...data, updatedAt: db.serverDate() }
-      }).then(() => {
-        wx.hideLoading()
-        wx.showToast({ title: '已更新', icon: 'success' })
+    // 统一走云函数（确保权限校验 + 数据完整性）
+    const action = editId ? 'update' : 'create'
+    const callData = editId ? { id: editId, ...data } : { ...data, merchantId: '' }
+
+    wx.cloud.callFunction({
+      name: 'activities',
+      data: { action, data: callData }
+    }).then(res => {
+      wx.hideLoading()
+      console.log('[activity-edit] 云函数返回:', res.result)
+      if (res.result.code === 0) {
+        wx.showToast({ title: editId ? '已更新' : '已创建', icon: 'success' })
         setTimeout(() => wx.navigateBack(), 800)
-      }).catch(err => {
-        wx.hideLoading()
+      } else {
         this.setData({ saving: false })
-        console.error('更新失败:', err)
-        wx.showToast({ title: '保存失败', icon: 'none' })
-      })
-    } else {
-      // 创建 — 通过云函数（需要管理员权限校验）
-      wx.cloud.callFunction({
-        name: 'activities',
-        data: {
-          action: 'create',
-          data: { ...data, merchantId: '' }
-        }
-      }).then(res => {
-        wx.hideLoading()
-        if (res.result.code === 0) {
-          wx.showToast({ title: '已创建', icon: 'success' })
-          setTimeout(() => wx.navigateBack(), 800)
-        } else {
-          this.setData({ saving: false })
-          wx.showToast({ title: res.result.message || '创建失败', icon: 'none' })
-        }
-      }).catch(err => {
-        wx.hideLoading()
-        this.setData({ saving: false })
-        console.error('创建失败:', err)
-        wx.showToast({ title: '创建失败', icon: 'none' })
-      })
-    }
+        wx.showToast({ title: res.result.message || '保存失败', icon: 'none' })
+      }
+    }).catch(err => {
+      wx.hideLoading()
+      this.setData({ saving: false })
+      console.error('[activity-edit] 保存失败:', err)
+      wx.showToast({ title: '保存失败', icon: 'none' })
+    })
   }
 })

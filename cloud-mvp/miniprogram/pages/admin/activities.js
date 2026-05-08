@@ -48,7 +48,7 @@ Page({
     wx.navigateTo({ url: `/pages/admin/activity-edit?id=${id}` })
   },
 
-  // 删除
+  // 删除（走云函数，确保权限）
   deleteActivity(e) {
     const id = e.currentTarget.dataset.id
     wx.showModal({
@@ -56,12 +56,18 @@ Page({
       content: '删除后不可恢复，确定吗？',
       success: (res) => {
         if (res.confirm) {
-          const db = wx.cloud.database()
-          db.collection('activities').doc(id).update({
-            data: { status: 'deleted', updatedAt: db.serverDate() }
+          wx.showLoading({ title: '删除中...' })
+          wx.cloud.callFunction({
+            name: 'activities',
+            data: { action: 'update', data: { id, status: 'deleted' } }
           }).then(() => {
+            wx.hideLoading()
             wx.showToast({ title: '已删除', icon: 'success' })
             this.loadActivities()
+          }).catch(err => {
+            wx.hideLoading()
+            console.error('删除失败:', err)
+            wx.showToast({ title: '删除失败', icon: 'none' })
           })
         }
       }
