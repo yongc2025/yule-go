@@ -1,0 +1,72 @@
+<!--pages/coupons/list.wxml-->
+<!--我的优惠券 — 可用/已用/过期-->
+
+<view class="page">
+  <!-- Tab 栏 -->
+  <view class="tab-bar">
+    <view class="tab-item {{activeTab === item.key ? 'tab-active' : ''}}"
+          wx:for="{{tabs}}" wx:key="key"
+          bindtap="switchTab" data-tab="{{item.key}}">
+      <text>{{item.name}}</text>
+      <view class="tab-line" wx:if="{{activeTab === item.key}}"></view>
+    </view>
+  </view>
+
+  <!-- 券列表 -->
+  <view class="coupon-list" wx:if="{{list.length > 0}}">
+    <view class="coupon-card {{item.expired || item.status === 'used' ? 'coupon-disabled' : ''}}"
+          wx:for="{{list}}" wx:key="_id">
+
+      <!-- 左侧面额 -->
+      <view class="coupon-left">
+        <view class="coupon-amount" wx:if="{{item.amount > 0}}">
+          <text class="coupon-yen">¥</text>
+          <text class="coupon-num">{{item.amount}}</text>
+        </view>
+        <view class="coupon-amount coupon-special" wx:else>
+          <text class="coupon-num-sm">{{item.typeName}}</text>
+        </view>
+        <view class="coupon-condition" wx:if="{{item.minAmount > 0}}">满{{item.minAmount}}可用</view>
+        <view class="coupon-condition" wx:else>无门槛</view>
+      </view>
+
+      <!-- 分割线 -->
+      <view class="coupon-divider">
+        <view class="coupon-notch top"></view>
+        <view class="coupon-dots"></view>
+        <view class="coupon-notch bottom"></view>
+      </view>
+
+      <!-- 右侧信息 -->
+      <view class="coupon-right">
+        <view class="coupon-type-tag">{{item.typeName}}</view>
+        <view class="coupon-desc">{{item.desc}}</view>
+        <view class="coupon-expire">
+          <text wx:if="{{item.status === 'used'}}">已使用</text>
+          <text wx:elif="{{item.expired}}">已过期</text>
+          <text wx:else>有效期至 {{item.expireAt}}</text>
+        </view>
+      </view>
+
+      <!-- 状态角标 -->
+      <view class="coupon-badge badge-used" wx:if="{{item.status === 'used'}}">已用</view>
+      <view class="coupon-badge badge-expired" wx:elif="{{item.expired}}">过期</view>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty" wx:if="{{!loading && list.length === 0}}">
+    <text class="empty-icon">🎫</text>
+    <text class="empty-text" wx:if="{{activeTab === 'unused'}}">暂无可用优惠券</text>
+    <text class="empty-text" wx:elif="{{activeTab === 'used'}}">还没有使用过优惠券</text>
+    <text class="empty-text" wx:else>没有过期的优惠券</text>
+  </view>
+
+  <!-- 加载状态 -->
+  <view class="loading-more" wx:if="{{loading}}">
+    <text>加载中...</text>
+  </view>
+  <view class="no-more" wx:if="{{noMore && list.length > 0}}">
+    <text>— 没有更多了 —</text>
+  </view>
+</view>

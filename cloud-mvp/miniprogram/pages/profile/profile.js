@@ -8,12 +8,14 @@ Page({
   data: {
     userInfo: {},
     myShops: [],
+    couponCount: 0,
     loading: true
   },
 
   onShow() {
     this.loadUserInfo()
     this.loadMyShops()
+    this.loadCouponCount()
   },
 
   // 从云端加载用户信息
@@ -77,6 +79,18 @@ Page({
     }).catch(err => {
       console.error('加载门店失败:', err)
     })
+  },
+
+  // 加载可用优惠券数量
+  loadCouponCount() {
+    api.call('coupons', { action: 'count' }, { showLoading: false }).then(data => {
+      this.setData({ couponCount: data.count || 0 })
+    }).catch(() => {})
+  },
+
+  // 跳转优惠券列表
+  goCoupons() {
+    wx.navigateTo({ url: '/pages/coupons/list' })
   },
 
   // 跳转编辑资料

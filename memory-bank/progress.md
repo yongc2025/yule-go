@@ -433,6 +433,19 @@
 - 验证：代码结构完整，待部署验证
 - 踩坑：无
 
+### 2026-05-08 — Task 0042 ✅ 优惠券体系（cloud-mvp）
+- 做了什么：
+  - 创建 coupons 云函数：list/available/grant/use/count 5 个 action
+  - login 云函数：新用户注册自动发放新人券(¥10, 30天)
+  - checkin 云函数：核销完成自动发放复购券(¥15, 30天)
+  - 创建优惠券列表页：Tab 切换(可用/已用/过期) + 券卡片 + 分页
+  - 我的页集成：优惠券入口 + 可用数量角标
+  - app.json 注册 coupons/list 路由
+- 新增文件：6 个（coupons 云函数 ×2 + list 页 ×4）
+- 修改文件：4 个（login + checkin + profile.js/wxml/wxss + app.json）
+- 验收标准：AC-01~AC-06 全部 ✅
+- 踩坑：无
+
 ### 2026-05-08 — Task 0041 ✅ 会员充值（cloud-mvp）
 - 做了什么：
   - wallet 云函数已有 8 个 action（getWallet/getWallets/recharge/rechargeList/walletLogs/getTiers/refundBalance/adminRefund）

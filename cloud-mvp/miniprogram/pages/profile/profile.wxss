@@ -217,6 +217,19 @@
   font-size: 28rpx;
 }
 
+.menu-badge {
+  background: #E76F51;
+  color: #fff;
+  font-size: 20rpx;
+  min-width: 32rpx;
+  height: 32rpx;
+  line-height: 32rpx;
+  text-align: center;
+  border-radius: 999rpx;
+  padding: 0 8rpx;
+  margin-right: 12rpx;
+}
+
 .menu-arrow {
   color: #ccc;
   font-size: 28rpx;

@@ -32,6 +32,26 @@ exports.main = async (event, context) => {
       }
       const addRes = await db.collection('users').add({ data: newUser })
       user = { _id: addRes._id, ...newUser }
+
+      // 新用户自动发放新人券
+      try {
+        const expireAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+        await db.collection('coupons').add({
+          data: {
+            openid,
+            type: 'newuser',
+            amount: 10,
+            minAmount: 0,
+            source: 'register',
+            status: 'unused',
+            description: '新注册专享',
+            expireAt,
+            createdAt: db.serverDate()
+          }
+        })
+      } catch (couponErr) {
+        console.error('新人券发放失败（不影响登录）:', couponErr)
+      }
     } else {
       user = userRes.data[0]
 

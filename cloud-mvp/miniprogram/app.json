@@ -15,7 +15,8 @@
     "pages/admin/schedules",
     "pages/shop/detail",
     "pages/member/recharge",
-    "pages/member/records"
+    "pages/member/records",
+    "pages/coupons/list"
   ],
   "window": {
     "backgroundTextStyle": "light",

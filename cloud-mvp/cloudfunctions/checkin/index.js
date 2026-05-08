@@ -59,6 +59,22 @@ async function checkinByCode({ checkinCode, scheduleId }, openid) {
       }
     })
 
+    // 5. 核销成功后自动发放复购券（异步，不影响核销结果）
+    const expireAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+    db.collection('coupons').add({
+      data: {
+        openid: order.openid,
+        type: 'repurchase',
+        amount: 15,
+        minAmount: 0,
+        source: 'checkin',
+        status: 'unused',
+        description: '完成出行赠送',
+        expireAt,
+        createdAt: db.serverDate()
+      }
+    }).catch(err => console.error('复购券发放失败:', err))
+
     return {
       code: 0,
       data: {
