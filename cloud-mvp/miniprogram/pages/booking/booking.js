@@ -104,7 +104,15 @@ Page({
     const { info, adults, children, selectedCoupon, useBalance } = this.data
     if (!info.activityId) return
 
-    api.call('orders', {
+    // 同时获取优惠券列表和费用预览
+    const couponPromise = api.call('coupons', {
+      action: 'available',
+      orderType: 'travel'
+    }, { showLoading: false }).then(data => {
+      return data || []
+    }).catch(() => [])
+
+    const discountPromise = api.call('orders', {
       action: 'calcDiscount',
       activityId: info.activityId,
       adults,
@@ -112,26 +120,37 @@ Page({
       couponId: selectedCoupon ? selectedCoupon._id : '',
       useBalance
     }, { showLoading: false }).then(res => {
-      if (res.code === 0) {
-        const d = res.data
-        this.setData({
-          originalFee: d.originalFee,
-          companionDiscount: d.companionDiscount,
-          companionRule: d.companionRule,
-          companionGift: d.companionGift,
-          memberDiscount: d.memberDiscount,
-          inviteDiscount: d.inviteDiscount,
-          isFirstOrder: d.isFirstOrder,
-          couponDiscount: d.couponDiscount,
-          availableCoupons: d.availableCoupons || [],
-          userBalance: d.userBalance,
-          balanceDeduction: d.balanceDeduction,
-          bestDiscount: d.bestDiscount,
-          discountType: d.discountType,
-          finalFee: d.finalFee
-        })
+      if (res.code === 0) return res.data
+      return null
+    }).catch(() => null)
+
+    Promise.all([couponPromise, discountPromise]).then(([coupons, d]) => {
+      const update = {}
+      // 优先用 coupons 云函数的列表（更可靠）
+      if (coupons.length > 0) {
+        update.availableCoupons = coupons
       }
-    }).catch(() => {})
+      if (d) {
+        update.originalFee = d.originalFee
+        update.companionDiscount = d.companionDiscount
+        update.companionRule = d.companionRule
+        update.companionGift = d.companionGift
+        update.memberDiscount = d.memberDiscount
+        update.inviteDiscount = d.inviteDiscount
+        update.isFirstOrder = d.isFirstOrder
+        update.couponDiscount = d.couponDiscount
+        update.userBalance = d.userBalance
+        update.balanceDeduction = d.balanceDeduction
+        update.bestDiscount = d.bestDiscount
+        update.discountType = d.discountType
+        update.finalFee = d.finalFee
+        // 如果 orders 也返回了券列表且 coupons 没有，用 orders 的
+        if (coupons.length === 0 && d.availableCoupons) {
+          update.availableCoupons = d.availableCoupons
+        }
+      }
+      this.setData(update)
+    })
   },
 
   // 切换余额抵扣
