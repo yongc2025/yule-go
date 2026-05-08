@@ -358,6 +358,12 @@ Page({
     this.setData({ saving: true })
     wx.showLoading({ title: '保存中...' })
 
+    // 保底：如果没选门店，自动用第一个
+    let merchantId = form.merchantId || ''
+    if (!merchantId && this.data.merchants.length > 0) {
+      merchantId = this.data.merchants[0]._id
+    }
+
     // 构建保存数据（过滤空值）
     const data = {
       name: form.name.trim(),
@@ -372,7 +378,7 @@ Page({
       includes: form.includes.filter(item => item.trim()),
       excludes: form.excludes.filter(item => item.trim()),
       notes: form.notes,
-      merchantId: form.merchantId || ''
+      merchantId: merchantId
     }
 
     console.log('[activity-edit] 保存数据:', JSON.stringify(data, null, 2))
