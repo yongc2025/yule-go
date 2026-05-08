@@ -44,7 +44,7 @@
 }
 
 .overview-item {
-  background: #f6ffed;
+  background: #D8F3DC;
   border-radius: 12rpx;
   padding: 24rpx;
   text-align: center;
@@ -53,7 +53,7 @@
 .overview-num {
   font-size: 40rpx;
   font-weight: 700;
-  color: #1890ff;
+  color: #2D6A4F;
   margin-bottom: 4rpx;
 }
 
@@ -118,7 +118,7 @@
 }
 
 .checkin-progress {
-  color: #52c41a;
+  color: #2D6A4F;
 }
 
 /* 订单迷你列表 */

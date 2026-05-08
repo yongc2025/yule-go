@@ -20,7 +20,7 @@
 }
 
 .tab-item.active {
-  color: #1890ff;
+  color: #2D6A4F;
   font-weight: 600;
 }
 
@@ -31,7 +31,7 @@
   left: 25%;
   right: 25%;
   height: 4rpx;
-  background: #1890ff;
+  background: #2D6A4F;
   border-radius: 2rpx;
 }
 
@@ -61,15 +61,15 @@
 }
 
 .status-pending {
-  color: #fa8c16;
+  color: #E76F51;
 }
 
 .status-paid {
-  color: #1890ff;
+  color: #2D6A4F;
 }
 
 .status-completed {
-  color: #52c41a;
+  color: #2D6A4F;
 }
 
 .status-cancelled {
@@ -112,7 +112,7 @@
 
 /* 核销码 */
 .checkin-section {
-  background: #f6ffed;
+  background: #D8F3DC;
   border-radius: 12rpx;
   padding: 20rpx;
   margin-bottom: 16rpx;
@@ -122,7 +122,7 @@
 .checkin-code {
   font-size: 32rpx;
   font-weight: 700;
-  color: #52c41a;
+  color: #2D6A4F;
   letter-spacing: 4rpx;
   margin-bottom: 12rpx;
 }
@@ -149,9 +149,9 @@
 
 .btn-primary-sm {
   padding: 12rpx 32rpx;
-  background: linear-gradient(135deg, #52c41a, #389e0d);
+  background: linear-gradient(135deg, #2D6A4F, #40916C);
   color: #fff;
-  border-radius: 8rpx;
+  border-radius: 999rpx;
   font-size: 26rpx;
   font-weight: 600;
 }

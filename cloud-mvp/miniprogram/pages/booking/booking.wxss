@@ -1,7 +1,7 @@
 /* pages/booking/booking.wxss */
 
 .summary-card {
-  background: linear-gradient(135deg, #e6f7ff, #bae7ff);
+  background: linear-gradient(135deg, #D8F3DC, #EDF7EF);
 }
 
 .summary-name {
