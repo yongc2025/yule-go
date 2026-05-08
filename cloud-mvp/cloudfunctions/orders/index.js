@@ -90,24 +90,50 @@ async function createOrder({ activityId, scheduleId, adults, children, contactNa
     })
 
     // 7. 调用微信支付统一下单
-    const payRes = await cloud.cloudPay.unifiedOrder({
-      body: `渔乐出行-${activity.name}`,
-      outTradeNo: orderNo,
-      spbillCreateIp: '127.0.0.1',
-      subMchId: '', // TODO: 填入子商户号（如有）
-      totalFee: Math.round(totalFee * 100), // 单位：分
-      envId: cloud.DYNAMIC_CURRENT_ENV,
-      functionName: 'orders', // 支付回调云函数
-      nonceStr: generateNonceStr(),
-      tradeType: 'JSAPI'
-    })
+    // ⚠️ 测试阶段：如未配置商户号，自动降级为模拟支付
+    const USE_MOCK_PAY = !process.env.SUB_MCH_ID // 未配置环境变量时启用模拟
+
+    let payment = null
+    if (USE_MOCK_PAY) {
+      // 模拟支付：直接标记订单为已支付，返回模拟 payment 参数
+      console.log('[MOCK_PAY] 测试模式，跳过真实支付，订单号:', orderNo)
+      await db.collection('orders').doc(orderRes._id).update({
+        data: {
+          status: 'paid',
+          paidAt: db.serverDate(),
+          updatedAt: db.serverDate()
+        }
+      })
+      // 返回空 payment，前端会直接调用 wx.requestPayment（开发工具自动模拟）
+      payment = {
+        timeStamp: String(Math.floor(Date.now() / 1000)),
+        nonceStr: generateNonceStr(),
+        package: 'prepay_id=mock_' + orderNo,
+        signType: 'MD5',
+        paySign: 'MOCK_SIGN'
+      }
+    } else {
+      const payRes = await cloud.cloudPay.unifiedOrder({
+        body: `渔乐出行-${activity.name}`,
+        outTradeNo: orderNo,
+        spbillCreateIp: '127.0.0.1',
+        subMchId: process.env.SUB_MCH_ID,
+        totalFee: Math.round(totalFee * 100), // 单位：分
+        envId: cloud.DYNAMIC_CURRENT_ENV,
+        functionName: 'orders', // 支付回调云函数
+        nonceStr: generateNonceStr(),
+        tradeType: 'JSAPI'
+      })
+      payment = payRes.payment
+    }
 
     return {
       code: 0,
       data: {
         orderId: orderRes._id,
         orderNo,
-        payment: payRes.payment // 前端用这个参数调用 wx.requestPayment
+        payment, // 前端用这个参数调用 wx.requestPayment
+        mockPay: USE_MOCK_PAY // 告知前端是否为模拟支付
       }
     }
   } catch (err) {

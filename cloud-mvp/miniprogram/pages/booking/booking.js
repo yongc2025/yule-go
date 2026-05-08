@@ -92,7 +92,12 @@ Page({
       remark,
       totalFee
     }).then(orderInfo => {
-      // 发起微信支付
+      if (orderInfo.mockPay) {
+        // 测试模式：云函数已直接标记为已支付，跳过微信支付
+        console.log('[MOCK_PAY] 模拟支付成功，订单号:', orderInfo.orderNo)
+        return Promise.resolve()
+      }
+      // 正式模式：发起微信支付
       return this.wxPay(orderInfo)
     }).then(() => {
       wx.showToast({ title: '支付成功！', icon: 'success' })
@@ -112,10 +117,16 @@ Page({
         ...orderInfo.payment,
         success: resolve,
         fail: (err) => {
+          // 支付取消/失败 → 回滚名额
+          api.callSilent('orders', {
+            action: 'cancel',
+            orderId: orderInfo.orderId
+          })
+
           if (err.errMsg.includes('cancel')) {
             wx.showToast({ title: '已取消支付', icon: 'none' })
           } else {
-            wx.showToast({ title: '支付失败', icon: 'none' })
+            wx.showToast({ title: '支付失败，请重试', icon: 'none' })
           }
           reject(err)
         }
