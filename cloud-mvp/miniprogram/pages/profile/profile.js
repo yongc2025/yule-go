@@ -25,18 +25,14 @@ Page({
         avatarUrl: user.avatar || '/images/default-avatar.png',
         phone: user.phone || '',
         bio: user.bio || '',
-        album: user.album || [],
-        memberLevel: user.memberLevel || 0,
-        balance: user.balance || 0
+        album: user.album || []
       }
       this.setData({ userInfo, loading: false })
-      // 同步缓存
       wx.setStorageSync('userInfo', {
         nickName: userInfo.nickName,
         avatarUrl: userInfo.avatarUrl
       })
     }).catch(() => {
-      // 降级：缓存
       const cached = wx.getStorageSync('userInfo') || {}
       this.setData({
         userInfo: {
@@ -48,49 +44,50 @@ Page({
     })
   },
 
-  // 加载我的门店
+  // 加载我的门店（含钱包信息）
   loadMyShops() {
-    const openid = app.globalData.openid
-    if (!openid) return
-
     const db = wx.cloud.database()
-    db.collection('user_shops')
-      .where({ openid })
-      .orderBy('lastVisit', 'desc')
-      .limit(10)
-      .get()
-      .then(res => {
-        const relations = res.data
-        if (relations.length === 0) {
-          this.setData({ myShops: [] })
-          return
-        }
 
-        const promises = relations.map(rel =>
-          db.collection('merchants').doc(rel.merchantId).get()
-            .then(r => ({
-              ...r.data,
-              isPrimary: rel.isPrimary,
-              visitCount: rel.visitCount,
-              lastVisit: rel.lastVisit
-            }))
-            .catch(() => null)
-        )
-        return Promise.all(promises)
-      })
-      .then(shops => {
-        if (shops) {
-          this.setData({ myShops: shops.filter(Boolean) })
-        }
-      })
-      .catch(err => {
-        console.error('加载我的门店失败:', err)
-      })
+    // 先加载所有门店
+    db.collection('merchants').limit(20).get().then(merchRes => {
+      const merchants = merchRes.data
+      if (merchants.length === 0) {
+        this.setData({ myShops: [] })
+        return
+      }
+
+      // 查询每个门店的钱包
+      const promises = merchants.map(shop =>
+        api.call('wallet', {
+          action: 'getWallet',
+          merchantId: shop._id
+        }, { showLoading: false }).then(wallet => ({
+          ...shop,
+          wallet: wallet
+        })).catch(() => ({
+          ...shop,
+          wallet: { balance: 0, memberLevel: 0, memberName: '普通用户', travelDiscount: 0 }
+        }))
+      )
+      return Promise.all(promises)
+    }).then(shops => {
+      if (shops) {
+        this.setData({ myShops: shops })
+      }
+    }).catch(err => {
+      console.error('加载门店失败:', err)
+    })
   },
 
   // 跳转编辑资料
   goEdit() {
     wx.navigateTo({ url: '/pages/profile/edit' })
+  },
+
+  // 跳转充值中心
+  goRecharge(e) {
+    const merchantId = e.currentTarget.dataset.shopid
+    wx.navigateTo({ url: `/pages/member/recharge?merchantId=${merchantId}` })
   },
 
   // 跳转订单页

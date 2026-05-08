@@ -13,7 +13,8 @@
     "pages/admin/shop-edit",
     "pages/admin/finance",
     "pages/admin/schedules",
-    "pages/shop/detail"
+    "pages/shop/detail",
+    "pages/member/recharge"
   ],
   "window": {
     "backgroundTextStyle": "light",

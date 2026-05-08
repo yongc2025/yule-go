@@ -1,0 +1,9 @@
+{
+  "name": "wallet",
+  "version": "1.0.0",
+  "description": "用户钱包管理（余额/会员等级/充值）",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

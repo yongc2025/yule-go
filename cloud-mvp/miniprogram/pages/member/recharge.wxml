@@ -1,0 +1,75 @@
+<!--pages/member/recharge.wxml-->
+<!--充值中心 — 三档充值方案-->
+
+<view class="page">
+  <!-- 当前钱包状态 -->
+  <view class="wallet-card">
+    <view class="wallet-header">
+      <view class="wallet-level">
+        <text class="level-icon">{{wallet.memberLevel >= 3 ? '💎' : wallet.memberLevel >= 2 ? '🥇' : wallet.memberLevel >= 1 ? '🥈' : '👤'}}</text>
+        <text class="level-name">{{wallet.memberName}}</text>
+      </view>
+    </view>
+    <view class="wallet-balance">
+      <text class="balance-label">账户余额</text>
+      <text class="balance-amount">¥{{wallet.balance}}</text>
+    </view>
+    <view class="wallet-meta">
+      <text>累计充值 ¥{{wallet.totalRecharge}}</text>
+      <text wx:if="{{wallet.travelDiscount > 0}}">每次出行立减 ¥{{wallet.travelDiscount}}</text>
+    </view>
+  </view>
+
+  <!-- 充值方案 -->
+  <view class="section-title">💰 选择充值方案</view>
+
+  <view class="tier-list">
+    <view class="tier-card {{item.recommended ? 'tier-recommended' : ''}} {{selectedTier === item.id ? 'tier-selected' : ''}}"
+          wx:for="{{tiers}}" wx:key="id" bindtap="selectTier" data-id="{{item.id}}">
+      <!-- 推荐标签 -->
+      <view class="tier-badge" wx:if="{{item.recommended}}">🔥 主推</view>
+
+      <!-- 金额 -->
+      <view class="tier-amount">
+        <text class="tier-currency">¥</text>
+        <text class="tier-price">{{item.amount}}</text>
+      </view>
+
+      <!-- 等级名称 -->
+      <view class="tier-level">{{item.levelName}}会员</view>
+
+      <!-- 权益列表 -->
+      <view class="tier-benefits">
+        <view class="benefit-item">
+          <text class="benefit-icon">🏷️</text>
+          <text>渔具 {{item.equipDiscount}}</text>
+        </view>
+        <view class="benefit-item">
+          <text class="benefit-icon">🎫</text>
+          <text>每次出行立减 ¥{{item.travelDiscount}}</text>
+        </view>
+        <view class="benefit-item" wx:for="{{item.gifts}}" wx:for-item="gift" wx:key="*this">
+          <text class="benefit-icon">🎁</text>
+          <text>{{gift}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部操作 -->
+  <view style="height: 160rpx;"></view>
+  <view class="bottom-bar">
+    <view class="btn-recharge {{!selectedTier ? 'btn-disabled' : ''}}" bindtap="doRecharge">
+      {{submitting ? '充值中...' : '立即充值'}}
+    </view>
+  </view>
+
+  <!-- 温馨提示 -->
+  <view class="tips">
+    <view class="tips-title">💡 温馨提示</view>
+    <view class="tips-item">• 余额仅限本店消费使用，不可跨店</view>
+    <view class="tips-item">• 余额不可提现，可到门店办理退还</view>
+    <view class="tips-item">• 赠送优惠券有效期 90 天</view>
+    <view class="tips-item">• 会员等级按累计充值自动升级</view>
+  </view>
+</view>

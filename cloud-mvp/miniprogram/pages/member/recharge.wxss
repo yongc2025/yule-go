@@ -1,0 +1,194 @@
+/* pages/member/recharge.wxss */
+
+.page {
+  padding-bottom: 0;
+}
+
+/* 钱包卡片 */
+.wallet-card {
+  background: linear-gradient(135deg, #2D6A4F, #52B788);
+  margin: 24rpx;
+  border-radius: 20rpx;
+  padding: 36rpx;
+  color: #fff;
+}
+
+.wallet-header {
+  margin-bottom: 20rpx;
+}
+
+.wallet-level {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+}
+
+.level-icon {
+  font-size: 36rpx;
+}
+
+.level-name {
+  font-size: 28rpx;
+  font-weight: 600;
+  background: rgba(255,255,255,0.2);
+  padding: 4rpx 20rpx;
+  border-radius: 999rpx;
+}
+
+.wallet-balance {
+  display: flex;
+  align-items: baseline;
+  gap: 12rpx;
+  margin-bottom: 12rpx;
+}
+
+.balance-label {
+  font-size: 26rpx;
+  opacity: 0.8;
+}
+
+.balance-amount {
+  font-size: 56rpx;
+  font-weight: 700;
+}
+
+.wallet-meta {
+  display: flex;
+  gap: 24rpx;
+  font-size: 24rpx;
+  opacity: 0.8;
+}
+
+/* 区块标题 */
+.section-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  padding: 32rpx 24rpx 16rpx;
+}
+
+/* 充值档位 */
+.tier-list {
+  padding: 0 24rpx;
+}
+
+.tier-card {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 32rpx;
+  margin-bottom: 20rpx;
+  border: 3rpx solid #eee;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4rpx 16rpx rgba(0,0,0,0.04);
+}
+
+.tier-recommended {
+  border-color: #2D6A4F;
+}
+
+.tier-selected {
+  border-color: #2D6A4F;
+  background: #F0FFF4;
+}
+
+.tier-badge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: #E76F51;
+  color: #fff;
+  font-size: 22rpx;
+  padding: 6rpx 20rpx;
+  border-radius: 0 16rpx 0 16rpx;
+}
+
+.tier-amount {
+  display: flex;
+  align-items: baseline;
+  margin-bottom: 8rpx;
+}
+
+.tier-currency {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #E76F51;
+}
+
+.tier-price {
+  font-size: 56rpx;
+  font-weight: 700;
+  color: #E76F51;
+}
+
+.tier-level {
+  font-size: 26rpx;
+  color: #2D6A4F;
+  font-weight: 600;
+  margin-bottom: 16rpx;
+}
+
+.tier-benefits {
+  display: flex;
+  flex-direction: column;
+  gap: 10rpx;
+}
+
+.benefit-item {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  font-size: 26rpx;
+  color: #555;
+}
+
+.benefit-icon {
+  font-size: 24rpx;
+}
+
+/* 底部按钮 */
+.bottom-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #fff;
+  padding: 16rpx 32rpx;
+  padding-bottom: calc(16rpx + env(safe-area-inset-bottom));
+  box-shadow: 0 -4rpx 16rpx rgba(0,0,0,0.06);
+}
+
+.btn-recharge {
+  background: linear-gradient(135deg, #E76F51, #F4845F);
+  color: #fff;
+  text-align: center;
+  padding: 24rpx 0;
+  border-radius: 999rpx;
+  font-size: 32rpx;
+  font-weight: 700;
+}
+
+.btn-disabled {
+  background: #d9d9d9;
+  color: #999;
+}
+
+/* 温馨提示 */
+.tips {
+  margin: 32rpx 24rpx;
+  padding: 24rpx;
+  background: #FFF8F0;
+  border-radius: 12rpx;
+}
+
+.tips-title {
+  font-size: 26rpx;
+  font-weight: 600;
+  margin-bottom: 12rpx;
+  color: #333;
+}
+
+.tips-item {
+  font-size: 24rpx;
+  color: #888;
+  line-height: 1.8;
+}

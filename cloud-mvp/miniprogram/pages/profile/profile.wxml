@@ -35,13 +35,16 @@
       <view class="shop-item" wx:for="{{myShops}}" wx:key="_id">
         <image class="shop-avatar" src="{{item.ownerAvatar || '/images/default-avatar.png'}}" mode="aspectFill" />
         <view class="shop-info">
-          <view class="shop-name">
-            {{item.name}}
-            <text class="shop-primary" wx:if="{{item.isPrimary}}">⭐ 主场店</text>
+          <view class="shop-name">{{item.name}}</view>
+          <view class="shop-wallet">
+            <text class="wallet-level" wx:if="{{item.wallet.memberLevel > 0}}">
+              {{item.wallet.memberLevel >= 3 ? '💎' : item.wallet.memberLevel >= 2 ? '🥇' : '🥈'}} {{item.wallet.memberName}}
+            </text>
+            <text class="wallet-balance">余额 ¥{{item.wallet.balance}}</text>
           </view>
-          <view class="shop-meta">本周{{item.activityCount || 0}}个活动</view>
+          <view class="shop-meta" wx:if="{{item.wallet.travelDiscount > 0}}">每次出行立减 ¥{{item.wallet.travelDiscount}}</view>
         </view>
-        <view class="shop-arrow">→</view>
+        <view class="btn-recharge-sm" catchtap="goRecharge" data-shopid="{{item._id}}">充值</view>
       </view>
     </view>
     <view class="empty-sub" wx:else>还没有去过任何门店~</view>
