@@ -176,6 +176,10 @@ docker compose up -d
 - [产品介绍](docs/product-intro.md) — 面向用户的产品说明
 - [v2 路线图](docs/v2-roadmap.md) — 未来规划
 
+## 联系方式
+
+- 邮箱：yongc20250401@gmail.com
+
 ## License
 
 Private
